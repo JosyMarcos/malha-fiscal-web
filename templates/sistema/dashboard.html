@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Malha Fiscal — Sistema</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
+.topbar{background:#0B1E3D;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:99}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:#00D4AA;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0B1E3D;font-size:11px}
+.logo-name{font-size:15px;font-weight:700;color:#fff}.logo-name span{color:#00D4AA}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-info{font-size:12px;color:rgba(255,255,255,.6)}
+.user-info strong{color:#fff;display:block;font-size:13px}
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)}
+.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
+.btn-admin{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
+.content{max-width:800px;margin:60px auto;padding:0 24px;text-align:center}
+.icon{font-size:56px;margin-bottom:24px}
+h1{font-size:28px;font-weight:800;color:#0B1E3D;margin-bottom:12px}
+p{color:#8898AA;font-size:16px;line-height:1.6;margin-bottom:32px}
+.card{background:#fff;border:1px solid #D6E0F0;border-radius:12px;padding:32px;margin-bottom:16px;text-align:left}
+.card h3{font-size:15px;font-weight:700;color:#0B1E3D;margin-bottom:8px}
+.card p{font-size:13px;color:#8898AA;margin-bottom:0}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#00D4AA;color:#0B1E3D;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo"><div class="logo-icon">MF</div><div class="logo-name">Malha <span>Fiscal</span></div></div>
+  <div class="topbar-right">
+    <span class="badge">{{ usuario.get_plano_display }}</span>
+    <div class="user-info"><strong>{{ usuario.get_full_name|default:usuario.username }}</strong>{{ usuario.empresa|default:usuario.email }}</div>
+    {% if usuario.is_staff %}<a href="{% url 'accounts:admin_dashboard' %}" class="btn-admin">⚙ Admin</a>{% endif %}
+    <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
+  </div>
+</div>
+<div class="content">
+  <div class="icon">⚙️</div>
+  <h1>Sistema em integração</h1>
+  <p>O login está funcionando corretamente. O sistema de auditoria SPED × XML será integrado aqui em breve.</p>
+  <div class="card">
+    <h3>✅ Infraestrutura funcionando</h3>
+    <p>Banco de dados conectado, autenticação ativa, painel admin disponível.</p>
+  </div>
+  {% if usuario.is_staff %}
+  <div class="card">
+    <h3>🔧 Painel administrativo</h3>
+    <p>Gerencie usuários, planos e acessos pelo painel admin.</p>
+  </div>
+  <a href="{% url 'accounts:admin_dashboard' %}" class="btn">Ir para o painel admin →</a>
+  {% endif %}
+</div>
+</body>
+</html>

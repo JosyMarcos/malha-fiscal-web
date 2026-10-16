@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acesso Negado — Malha Fiscal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Inter',sans-serif;background:#0B1E3D;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:16px;padding:48px 40px;max-width:440px;width:100%;text-align:center}
+.icon{font-size:56px;margin-bottom:20px}
+h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:8px}
+p{font-size:14px;color:#8898AA;line-height:1.6;margin-bottom:24px}
+.status{display:inline-block;background:#FEE2E2;color:#B91C1C;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:20px}
+.btn{display:inline-block;padding:11px 24px;background:#00D4AA;color:#0B1E3D;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🔒</div>
+  <h1>Acesso não autorizado</h1>
+  <div class="status">{{ usuario.status_display }}</div>
+  <p>Sua conta ainda não foi ativada ou o período de acesso expirou. Entre em contato com o administrador para regularizar.</p>
+  <a href="{% url 'accounts:logout' %}" class="btn">Sair</a>
+</div>
+</body>
+</html>

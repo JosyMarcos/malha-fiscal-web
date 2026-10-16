@@ -1,0 +1,17 @@
+{% extends "base_admin.html" %}
+{% block title %}Excluir usuário{% endblock %}
+{% block page_title %}Confirmar exclusão{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px">
+  <div style="padding:32px;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+    <h2 style="margin-bottom:8px">Excluir {{ usuario }}?</h2>
+    <p style="color:var(--muted);margin-bottom:24px">Esta ação não pode ser desfeita.</p>
+    <form method="post" style="display:flex;gap:10px;justify-content:center">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Sim, excluir</button>
+      <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

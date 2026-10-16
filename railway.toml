@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn malha_fiscal.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 60"
+healthcheckPath = "/login/"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"

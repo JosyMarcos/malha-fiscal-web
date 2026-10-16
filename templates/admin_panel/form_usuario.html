@@ -1,0 +1,84 @@
+{% extends "base_admin.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary">← Voltar</a>
+  {% if usuario %}
+  <a href="{% url 'accounts:deletar_usuario' usuario.pk %}" class="btn btn-danger">Excluir</a>
+  {% endif %}
+{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px">
+  <div class="card-header"><span class="card-title">Dados do cliente</span></div>
+  <div style="padding:24px">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nome</label>
+          {{ form.first_name }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sobrenome</label>
+          {{ form.last_name }}
+        </div>
+        {% if form.username %}
+        <div class="form-group">
+          <label class="form-label">Usuário</label>
+          {{ form.username }}
+        </div>
+        {% endif %}
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          {{ form.email }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa / Escritório</label>
+          {{ form.empresa }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone/WhatsApp</label>
+          {{ form.telefone }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plano</label>
+          {{ form.plano }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data de expiração</label>
+          {{ form.data_expiracao }}
+        </div>
+        {% if form.password %}
+        <div class="form-group">
+          <label class="form-label">Senha inicial</label>
+          {{ form.password }}
+        </div>
+        {% endif %}
+        {% if form.nova_senha %}
+        <div class="form-group">
+          <label class="form-label">Nova senha (opcional)</label>
+          {{ form.nova_senha }}
+        </div>
+        {% endif %}
+        <div class="form-group full" style="flex-direction:row;align-items:center;gap:10px">
+          {{ form.ativo }}
+          <label class="form-label" style="margin-bottom:0">Acesso ativo (liberar sistema)</label>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Observações internas</label>
+          {{ form.observacoes }}
+        </div>
+      </div>
+      <div style="margin-top:24px;display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary">Cancelar</a>
+      </div>
+      {% if form.errors %}
+        <div class="alert alert-error" style="margin-top:16px">
+          {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+        </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

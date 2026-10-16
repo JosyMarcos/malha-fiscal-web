@@ -1,0 +1,83 @@
+{% extends "base_admin.html" %}
+{% block title %}Visão Geral{% endblock %}
+{% block page_title %}Painel de Controle{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'accounts:criar_usuario' %}" class="btn btn-primary">+ Novo usuário</a>
+{% endblock %}
+{% block content %}
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-card-num">{{ total }}</div><div class="stat-card-label">Total de clientes</div></div>
+  <div class="stat-card"><div class="stat-card-num teal">{{ ativos }}</div><div class="stat-card-label">Com acesso ativo</div></div>
+  <div class="stat-card"><div class="stat-card-num">{{ total|add:"-"|add:ativos }}</div><div class="stat-card-label">Sem acesso</div></div>
+  <div class="stat-card"><div class="stat-card-num warning">{{ exp7 }}</div><div class="stat-card-label">Expiram em 7 dias</div></div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Clientes</span>
+  </div>
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <form method="get" class="filters">
+      <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, e-mail ou empresa...">
+      <a href="?filtro=todos{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filtro == 'todos' %}active{% endif %}">Todos</a>
+      <a href="?filtro=ativos{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filtro == 'ativos' %}active{% endif %}">Ativos</a>
+      <a href="?filtro=inativos{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filtro == 'inativos' %}active{% endif %}">Inativos</a>
+      <a href="?filtro=expirados{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filtro == 'expirados' %}active{% endif %}">Expirados</a>
+      <button type="submit" class="btn btn-secondary">Buscar</button>
+    </form>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Empresa</th>
+        <th>Plano</th>
+        <th>Status</th>
+        <th>Expira em</th>
+        <th>Último acesso</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td>
+          <div style="font-weight:600">{{ u.get_full_name|default:u.username }}</div>
+          <div class="text-muted text-sm">{{ u.email }}</div>
+        </td>
+        <td>{{ u.empresa|default:"—" }}</td>
+        <td><span class="badge badge-{{ u.plano }}">{{ u.get_plano_display }}</span></td>
+        <td>
+          {% if u.status_display == "Ativo" %}
+            <span class="badge badge-ativo">● Ativo</span>
+          {% elif u.status_display == "Expirado" %}
+            <span class="badge badge-expirado">⚠ Expirado</span>
+          {% else %}
+            <span class="badge badge-inativo">○ Inativo</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if u.data_expiracao %}
+            {{ u.data_expiracao|date:"d/m/Y" }}
+            {% if u.dias_restantes is not None %}
+              <div class="text-sm text-muted">{{ u.dias_restantes }} dias</div>
+            {% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td class="text-muted text-sm">{{ u.ultimo_acesso_em|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+        <td>
+          <div class="flex gap-2">
+            <a href="{% url 'accounts:editar_usuario' u.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+            <a href="{% url 'accounts:toggle_ativo' u.pk %}" class="btn btn-sm {% if u.ativo %}btn-danger{% else %}btn-primary{% endif %}">
+              {% if u.ativo %}Desativar{% else %}Ativar{% endif %}
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Nenhum cliente encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
