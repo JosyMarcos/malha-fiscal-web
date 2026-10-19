@@ -43,7 +43,7 @@
             {% if u.dias_restantes <= 0 %}
               <span class="badge badge-expirado">Expirado</span>
             {% else %}
-              <span class="badge badge-ativo">{{ u.dias_restantes }}d restante{{ u.dias_restantes|pluralize:"","s" }}</span>
+              <span class="badge badge-ativo">{{ u.dias_restantes }}d restante{{ u.dias_restantes|pluralize:",s" }}</span>
             {% endif %}
           {% else %}—{% endif %}
         </td>
