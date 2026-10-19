@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malha Fiscal — SPED × XML v9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg:#F0F2F5; --surface:#FFFFFF; --border:#E2E6EA; --border-dark:#C9D0D9;
-    --navy:#0F2340; --navy-light:#1A3558; --blue:#1D5FC4; --blue-light:#EBF1FB;
+    --bg:#F0F4FF; --surface:#FFFFFF; --border:#D6E0F0; --border-dark:#B8C8E0;
+    --navy:#0B1E3D; --navy-light:#112544; --blue:#1A56DB; --blue-light:#EBF1FB;
     --text:#111827; --text-2:#4B5563; --text-3:#9CA3AF;
     --success:#15803D; --success-bg:#DCFCE7;
     --danger:#B91C1C; --danger-bg:#FEE2E2;
@@ -25,7 +25,7 @@
     --r:10px; --rs:6px; --sh:0 1px 4px rgba(0,0,0,.06),0 2px 12px rgba(0,0,0,.04);
     --err:#B91C1C; --err-bg:#FEE2E2;
   }
-  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; line-height:1.5; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; line-height:1.5; }
 
   /* LICENSE GATE */
   #license-gate { position:fixed; inset:0; z-index:9999; background:linear-gradient(135deg,#0F2340 0%,#1a3a6e 100%); display:flex; align-items:center; justify-content:center; padding:1rem; }
@@ -38,7 +38,7 @@
   .gate-input:focus { border-color:var(--blue); }
   .gate-input.err-state { border-color:var(--danger); background:var(--danger-bg); }
   .gate-input.ok-state  { border-color:var(--success); background:var(--success-bg); }
-  .gate-btn { width:100%; background:var(--navy); color:#fff; border:none; border-radius:var(--radius-sm); padding:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .gate-btn { width:100%; background:var(--navy); color:#fff; border:none; border-radius:var(--radius-sm); padding:12px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; gap:7px; }
   .gate-btn:hover { background:var(--navy-light); }
   .gate-msg { font-size:12px; margin-top:10px; min-height:18px; }
   .gate-msg.err { color:var(--danger); } .gate-msg.ok { color:var(--success); }
@@ -74,7 +74,7 @@
   .period-row select { font-family:inherit; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:5px 10px; background:#fff; color:var(--text); cursor:pointer; outline:none; }
 
   /* BUTTONS */
-  button { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; border:none; border-radius:var(--radius-sm); padding:9px 18px; display:inline-flex; align-items:center; gap:6px; transition:all .15s; }
+  button { font-family:'Inter',sans-serif; font-size:13px; font-weight:500; cursor:pointer; border:none; border-radius:var(--radius-sm); padding:9px 18px; display:inline-flex; align-items:center; gap:6px; transition:all .15s; }
   .btn-p { background:var(--blue); color:#fff; width:100%; justify-content:center; font-size:14px; padding:11px; }
   .btn-p:hover { background:#1750a8; }
   .btn-p:disabled { background:var(--border-dark); color:var(--text-3); cursor:not-allowed; }
@@ -118,7 +118,7 @@
 
   /* MISC */
   .toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-  .search-in { font-family:'DM Sans',sans-serif; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:7px 12px; width:240px; color:var(--text); outline:none; background:var(--surface); }
+  .search-in { font-family:'Inter',sans-serif; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:7px 12px; width:240px; color:var(--text); outline:none; background:var(--surface); }
   .search-in:focus { border-color:var(--blue); }
   .page-title { font-size:20px; font-weight:600; letter-spacing:-.02em; margin-bottom:2px; }
   .page-sub { font-size:13px; color:var(--text-2); margin-bottom:1.5rem; }
