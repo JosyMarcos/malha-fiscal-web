@@ -205,6 +205,117 @@
   /* Dropdown select nativo */
   [data-theme="dark"] option{background:#1E293B;color:#F1F5F9}
 
+
+  /* ── PAINEL DE COMPARAÇÃO (drawer lateral) ────────────────────────────── */
+  #compare-backdrop {
+    display:none; position:fixed; inset:0; top:52px;
+    z-index:899; background:rgba(11,30,61,.35); backdrop-filter:blur(2px);
+    cursor:pointer;
+  }
+  #compare-overlay {
+    position:fixed; top:52px; right:0; bottom:0;
+    width:min(620px,100vw); z-index:900;
+    background:var(--surface);
+    border-left:1px solid var(--border);
+    box-shadow:-6px 0 40px rgba(0,0,0,.14);
+    overflow-y:auto; overflow-x:hidden;
+    display:none;
+  }
+  .cm-header {
+    background:var(--navy); padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:1; gap:10px;
+  }
+  .cm-header-left { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
+  .cm-close-btn {
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+    border-radius:6px; padding:5px 7px; color:#fff; cursor:pointer;
+    display:flex; align-items:center; font-size:15px; flex-shrink:0;
+    transition:background .15s;
+  }
+  .cm-close-btn:hover { background:rgba(255,255,255,.2); }
+  #cm-body { padding:0; display:flex; flex-direction:column; }
+  .cm-meta {
+    display:flex; flex-wrap:wrap; gap:6px; align-items:center;
+    padding:14px 16px; background:var(--bg);
+    border-bottom:1px solid var(--border);
+  }
+  .cm-pill {
+    display:inline-flex; align-items:center; gap:4px; font-size:12px;
+    color:var(--text-2); background:var(--surface);
+    border:1px solid var(--border); border-radius:20px; padding:4px 10px;
+    white-space:nowrap;
+  }
+  .cm-pill strong { color:var(--text); font-weight:600; }
+  .cm-btn-sefaz {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:700; color:#0B1E3D;
+    background:#00D4AA; border:none; border-radius:20px;
+    padding:5px 12px; cursor:pointer; text-decoration:none;
+    transition:background .15s; white-space:nowrap;
+  }
+  .cm-btn-sefaz:hover { background:#00bfa0; }
+  .cmp-section { padding:16px; }
+  .cmp-section-title {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.07em; color:var(--text-3); margin-bottom:10px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .cmp-table {
+    width:100%; border-collapse:collapse;
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    overflow:hidden; table-layout:fixed;
+  }
+  .cmp-table thead th {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--text-2);
+    padding:8px 12px; background:var(--bg);
+    border-bottom:2px solid var(--border); text-align:left;
+  }
+  .cmp-field {
+    font-size:12px; color:var(--text-2); font-weight:500;
+    padding:8px 12px; border-bottom:1px solid var(--border);
+    width:30%; background:var(--bg);
+  }
+  .cmp-ok, .cmp-divg {
+    font-size:13px; padding:8px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  .cmp-divg { color:var(--danger); font-weight:600; background:rgba(185,28,28,.04); }
+  .cmp-na { color:var(--text-3) !important; font-weight:400 !important; }
+  .diag-box {
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm); overflow:hidden;
+  }
+  .diag-box-title {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.07em; color:var(--text-2);
+    padding:9px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:6px;
+    background:var(--bg);
+  }
+  .diag-item {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:11px 14px; border-bottom:1px solid var(--border);
+  }
+  .diag-item:last-child { border-bottom:none; }
+  .diag-dot {
+    width:8px; height:8px; border-radius:50%;
+    flex-shrink:0; margin-top:5px;
+  }
+  /* dark mode do painel */
+  [data-theme="dark"] #compare-overlay { background:#111827; border-left-color:rgba(255,255,255,.09); }
+  [data-theme="dark"] .cm-meta { background:#0B1120; border-color:rgba(255,255,255,.08); }
+  [data-theme="dark"] .cm-pill { background:#1E293B; border-color:rgba(255,255,255,.1); }
+  [data-theme="dark"] .cmp-table { border-color:rgba(255,255,255,.08); }
+  [data-theme="dark"] .cmp-table thead th { background:#1E293B; border-color:rgba(255,255,255,.1); color:#94A3B8; }
+  [data-theme="dark"] .cmp-field { background:#1E293B; color:#94A3B8; border-color:rgba(255,255,255,.07); }
+  [data-theme="dark"] .cmp-ok, [data-theme="dark"] .cmp-divg { border-color:rgba(255,255,255,.06); }
+  [data-theme="dark"] .cmp-divg { background:rgba(248,113,113,.08); }
+  [data-theme="dark"] .diag-box { border-color:rgba(255,255,255,.08); }
+  [data-theme="dark"] .diag-box-title { background:#1E293B; border-color:rgba(255,255,255,.08); color:#94A3B8; }
+  [data-theme="dark"] .diag-item { border-color:rgba(255,255,255,.06); }
+  [data-theme="dark"] .cm-section-title { color:#64748B; }
 </style>
 </head>
 <body>
@@ -301,11 +412,7 @@
 
   </div>
 
-          
-      </div>
-      <div class="cm-body" id="cm-body"></div>
-    </div>
-  </div>
+
 
   <div id="results-screen">
     <div id="empresa-header" style="display:none;padding:6px 20px 6px;background:var(--blue-light);border-bottom:1px solid var(--border)">
@@ -417,15 +524,16 @@
 <div id="toast"><i class="ti ti-clipboard-check"></i> Chave copiada!</div>
 
 <!-- Painel comparação — fixo no topo, abaixo do navbar -->
-<div id="compare-overlay" style="display:none;position:fixed;top:56px;left:0;right:0;z-index:900;background:var(--surface);border-bottom:3px solid var(--navy);box-shadow:0 4px 24px rgba(0,0,0,.18);max-height:calc(100vh - 56px);overflow-y:auto">
-  <div style="background:var(--navy);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1">
-    <div style="display:flex;align-items:center;gap:8px">
-      <span id="cm-title" style="font-size:13px;font-weight:600;color:#fff"></span>
+<div id="compare-backdrop" onclick="fecharComparacao()"></div>
+<div id="compare-overlay">
+  <div class="cm-header">
+    <div class="cm-header-left">
+      <span id="cm-title" style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
       <span id="cm-sev"></span>
     </div>
-
+    <button class="cm-close-btn" onclick="fecharComparacao()" title="Fechar"><i class="ti ti-x"></i></button>
   </div>
-  <div id="cm-body" style="padding:18px"></div>
+  <div id="cm-body"></div>
 </div>
 
 <script>
@@ -1267,37 +1375,51 @@ function abrirComparacao(id){
 
   const diagHTML=issues.map(function(i){
     return '<div class="diag-item"><div class="diag-dot" style="background:'+i.dot+'"></div>'+
-      '<div style="font-size:12px;line-height:1.6">'+i.text+'</div></div>';
+      '<div style="font-size:12px;line-height:1.65;color:var(--text)">'+i.text+'</div></div>';
   }).join('');
 
   try{
   document.getElementById('cm-body').innerHTML=
-    '<div class="cm-info">'+
-      '<span class="cm-info-pill"><strong>Chave:</strong> '+(r.chave||'').slice(0,12)+'...'+(r.chave||'').slice(-8)+'</span>'+
-      (r.chave&&r.chave.length===44?'<a href="'+urlSefaz(r.chave)+'" target="_blank" onclick="event.stopPropagation();copiarChaveClipboard(\'' + (r.chave||'') + '\')" title="Consultar no portal SEFAZ" style="text-decoration:none"><span class="cm-info-pill" style="background:var(--navy);color:#fff;cursor:pointer"><i class="ti ti-external-link" style="font-size:11px"></i> Abrir no SEFAZ</span></a>':'')+
-      (r.emitNome?'<span class="cm-info-pill"><strong>Emitente:</strong> '+r.emitNome+(r.emitUF?' ('+r.emitUF+')':'')+'</span>':'')+
-      (r.destNome?'<span class="cm-info-pill"><strong>Destinatário:</strong> '+r.destNome+'</span>':'')+
-      (r.natOp?'<span class="cm-info-pill"><strong>Operação:</strong> '+r.natOp+'</span>':'')+
-      '<span class="cm-info-pill"><strong>Valor total:</strong> R$ '+f2(r.vlDoc||0)+'</span>'+
+    '<div class="cm-meta">'+
+      '<span class="cm-pill"><strong>Chave:</strong>&nbsp;'+(r.chave||'').slice(0,10)+'…'+(r.chave||'').slice(-8)+'</span>'+
+      (r.chave&&r.chave.length===44?'<a href="'+urlSefaz(r.chave)+'" target="_blank" onclick="event.stopPropagation();copiarChaveClipboard(\'+(r.chave||'')+'\')" title="Consultar no portal SEFAZ" class="cm-btn-sefaz"><i class="ti ti-external-link" style="font-size:11px"></i> Abrir no SEFAZ</a>':'')+
+      (r.emitNome?'<span class="cm-pill"><strong>Emit.:</strong>&nbsp;'+r.emitNome+(r.emitUF?' ('+r.emitUF+')':'')+'</span>':'')+
+      (r.destNome?'<span class="cm-pill"><strong>Dest.:</strong>&nbsp;'+r.destNome+'</span>':'')+
+      (r.natOp?'<span class="cm-pill"><strong>Op.:</strong>&nbsp;'+r.natOp+'</span>':'')+
+      '<span class="cm-pill" style="margin-left:auto"><strong>Total:&nbsp;</strong>R$&nbsp;'+f2(r.vlDoc||0)+'</span>'+
     '</div>'+
-    '<table class="cmp-table"><thead><tr>'+
-      '<th style="width:30%">Campo</th>'+
-      '<th style="width:35%">XML</th>'+
-      '<th style="width:35%">SPED</th>'+
-    '</tr></thead><tbody>'+tblRows+'</tbody></table>'+
+    '<div class="cmp-section">'+
+      '<div class="cmp-section-title"><i class="ti ti-table" style="font-size:12px"></i> Comparativo XML × SPED</div>'+
+      '<table class="cmp-table"><thead><tr>'+
+        '<th style="width:30%">Campo</th>'+
+        '<th style="width:35%">XML</th>'+
+        '<th style="width:35%">SPED</th>'+
+      '</tr></thead><tbody>'+tblRows+'</tbody></table>'+
+    '</div>'+
+    '<div class="cmp-section">'+
+      '<div class="diag-box">'+
+        '<div class="diag-box-title"><i class="ti ti-stethoscope" style="font-size:12px"></i> Diagnóstico Automático</div>'+
+        diagHTML+
+      '</div>'+
+    '</div>';
     '<div class="diag-box"><h4><i class="ti ti-stethoscope" style="font-size:13px;vertical-align:-1px"></i> Diagnóstico Automático</h4>'+diagHTML+'</div>';
   }catch(err){console.error('abrirComparacao erro:',err);document.getElementById('cm-body').innerHTML='<div style="padding:20px;color:red">Erro ao carregar detalhes: '+err.message+'</div>';}
 
 
   const ov=document.getElementById('compare-overlay');
+  const bd=document.getElementById('compare-backdrop');
   if(ov){
     ov.style.display='block';
-    ov.scrollTop=0; // voltar ao topo do painel
+    ov.scrollTop=0;
   }
+  if(bd) bd.style.display='block';
+  document.body.style.overflow='hidden';
 }
 
 function fecharComparacao(){
   const ov=document.getElementById('compare-overlay');if(ov)ov.style.display='none';
+  const bd=document.getElementById('compare-backdrop');if(bd)bd.style.display='none';
+  document.body.style.overflow='';
 }
 
 // overlay fecha ao clicar no fundo escuro (onclick no compare-overlay)
