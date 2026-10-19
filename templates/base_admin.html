@@ -11,11 +11,11 @@
 <body>
 <div class="layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">
+    <a href="/" class="sidebar-logo" style="text-decoration:none">
       <div class="sidebar-logo-icon">MF</div>
       <div class="sidebar-logo-name">Malha <span>Fiscal</span></div>
       <div class="sidebar-logo-role">Painel Admin</div>
-    </div>
+    </a>
     <nav class="sidebar-nav">
       <div class="nav-label">Menu</div>
       <a href="{% url 'accounts:admin_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
