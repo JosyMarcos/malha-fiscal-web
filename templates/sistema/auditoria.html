@@ -1625,6 +1625,7 @@ function imprimirRelatorio(){
 
     sTag+'window.onload=function(){window.print()}'+eTag,
     '
+<script>
 // ── Salvar auditoria no histórico (server-side) ───────────────────────────
 function salvarAuditoria(){
   var btn = document.getElementById('btn-salvar-hist');
@@ -1668,6 +1669,7 @@ function salvarAuditoria(){
   })
   .catch(() => { btn.textContent = 'Erro ao salvar'; btn.disabled = false; });
 }
+</script>
 </body></html>'
   ];
 
@@ -3507,6 +3509,7 @@ function exportarExcel(){
 }
 </script>
 
+<script>
 // ── Salvar auditoria no histórico (server-side) ───────────────────────────
 function salvarAuditoria(){
   var btn = document.getElementById('btn-salvar-hist');
@@ -3550,5 +3553,6 @@ function salvarAuditoria(){
   })
   .catch(() => { btn.textContent = 'Erro ao salvar'; btn.disabled = false; });
 }
+</script>
 </body>
 </html>
