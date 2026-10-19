@@ -71,3 +71,13 @@ def salvar_auditoria(request):
         resumo=payload.get("resumo", {}),
     )
     return JsonResponse({"ok": True})
+
+
+@login_required
+def calendario_fiscal(request):
+    user = request.user
+    if not user.is_staff and not user.acesso_valido:
+        return render(request, "sistema/acesso_negado.html", {"usuario": user})
+    ctx = {"usuario": user}
+    _trial_ctx(user, ctx)
+    return render(request, "sistema/calendario_fiscal.html", ctx)
