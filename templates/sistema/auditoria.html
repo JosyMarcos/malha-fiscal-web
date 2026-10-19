@@ -560,6 +560,9 @@
         {% else %}
         <button class="btn-s" onclick="exportarExcel()"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
         {% endif %}
+        <button class="btn-s" id="btn-salvar-hist" onclick="salvarAuditoria()" style="display:none;background:#0B1E3D;color:#fff;border-color:#0B1E3D" title="Salva um resumo desta auditoria no seu histórico">
+          <i class="ti ti-device-floppy"></i> Salvar no histórico
+        </button>
       </div>
     </div>
     <!-- Painel Análise de ICMS (colapsável, aparece só se há dados) -->
@@ -1621,7 +1624,51 @@ function imprimirRelatorio(){
     '<div class="footer">Relatório gerado pelo Malha Fiscal SPED × XML &nbsp;·&nbsp; '+today+'</div>',
 
     sTag+'window.onload=function(){window.print()}'+eTag,
-    '</body></html>'
+    '
+// ── Salvar auditoria no histórico (server-side) ───────────────────────────
+function salvarAuditoria(){
+  var btn = document.getElementById('btn-salvar-hist');
+  btn.disabled = true;
+  btn.textContent = 'Salvando…';
+
+  // Coleta resumo dos dados já processados
+  var totalNotas = (window.allRows || []).length;
+  var divergencias = totalNotas; // todas as linhas são divergências
+  var scoreRisco = totalNotas === 0 ? 'BAIXO' : totalNotas <= 10 ? 'BAIXO' : totalNotas <= 50 ? 'MEDIO' : 'ALTO';
+
+  var payload = {
+    empresa: (document.querySelector('#empresa-nome') || {}).textContent || '',
+    periodo: (document.querySelector('#periodo-txt') || {}).textContent || '',
+    total_notas: totalNotas,
+    divergencias: divergencias,
+    score_risco: scoreRisco,
+    resumo: {}
+  };
+
+  fetch("{% url 'sistema:salvar_auditoria' %}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.ok){
+      btn.textContent = '✓ Salvo!';
+      btn.style.background = '#00D4AA';
+      btn.style.borderColor = '#00D4AA';
+      btn.style.color = '#0B1E3D';
+      setTimeout(() => { btn.textContent = 'Salvar no histórico'; btn.disabled = false; }, 2500);
+    } else {
+      btn.textContent = 'Erro ao salvar';
+      btn.disabled = false;
+    }
+  })
+  .catch(() => { btn.textContent = 'Erro ao salvar'; btn.disabled = false; });
+}
+</body></html>'
   ];
 
   w.document.write(parts.join(''));
@@ -2979,6 +3026,9 @@ function renderTable(){
   const fmt=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const displayRows = TRIAL_LIMIT>0 ? rows.slice(0,TRIAL_LIMIT) : rows.slice(0,2000);
   const trialCapped = TRIAL_LIMIT>0 && rows.length>TRIAL_LIMIT;
+  // Mostrar botão de salvar quando há resultados
+  var btnSalvar = document.getElementById("btn-salvar-hist");
+  if(btnSalvar) btnSalvar.style.display = rows.length > 0 ? "inline-flex" : "none";
   document.getElementById('results-body').innerHTML=displayRows.map(n=>`
     <tr onclick="abrirComparacao(${n._id})" title="Clique para ver detalhes" style="cursor:pointer">
       <td class="mono">${(n.chave||'').slice(0,12)}&hellip;${(n.chave||'').slice(-8)}</td>
@@ -3456,5 +3506,49 @@ function exportarExcel(){
   }catch(err){alert('Erro ao gerar Excel: '+err.message);console.error(err);}
 }
 </script>
+
+// ── Salvar auditoria no histórico (server-side) ───────────────────────────
+function salvarAuditoria(){
+  var btn = document.getElementById('btn-salvar-hist');
+  btn.disabled = true;
+  btn.textContent = 'Salvando…';
+
+  // Coleta resumo dos dados já processados
+  var totalNotas = (window.allRows || []).length;
+  var divergencias = totalNotas; // todas as linhas são divergências
+  var scoreRisco = totalNotas === 0 ? 'BAIXO' : totalNotas <= 10 ? 'BAIXO' : totalNotas <= 50 ? 'MEDIO' : 'ALTO';
+
+  var payload = {
+    empresa: (document.querySelector('#empresa-nome') || {}).textContent || '',
+    periodo: (document.querySelector('#periodo-txt') || {}).textContent || '',
+    total_notas: totalNotas,
+    divergencias: divergencias,
+    score_risco: scoreRisco,
+    resumo: {}
+  };
+
+  fetch("{% url 'sistema:salvar_auditoria' %}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.ok){
+      btn.textContent = '✓ Salvo!';
+      btn.style.background = '#00D4AA';
+      btn.style.borderColor = '#00D4AA';
+      btn.style.color = '#0B1E3D';
+      setTimeout(() => { btn.textContent = 'Salvar no histórico'; btn.disabled = false; }, 2500);
+    } else {
+      btn.textContent = 'Erro ao salvar';
+      btn.disabled = false;
+    }
+  })
+  .catch(() => { btn.textContent = 'Erro ao salvar'; btn.disabled = false; });
+}
 </body>
 </html>

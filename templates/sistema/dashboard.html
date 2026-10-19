@@ -30,6 +30,20 @@ h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:6px}
 .card-main h3{color:#065F46}
 .tag-soon{font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:10px;font-weight:700;margin-left:6px}
 
+.hist-section{margin-top:40px}
+.hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.hist-header h2{font-size:17px;font-weight:700;color:#0B1E3D}
+.hist-table{width:100%;background:#fff;border-radius:12px;border:1px solid #D6E0F0;border-collapse:collapse;overflow:hidden}
+.hist-table th{font-size:11px;font-weight:700;color:#8898AA;text-transform:uppercase;letter-spacing:.5px;padding:12px 16px;text-align:left;background:#f8faff;border-bottom:1px solid #D6E0F0}
+.hist-table td{font-size:13px;color:#334155;padding:12px 16px;border-bottom:1px solid #F0F4FF;vertical-align:middle}
+.hist-table tr:last-child td{border-bottom:none}
+.hist-table tr:hover td{background:#f8faff}
+.risco-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block}
+.risco-BAIXO{background:#d1fae5;color:#065f46}
+.risco-MEDIO{background:#fef3c7;color:#92400e}
+.risco-ALTO{background:#fee2e2;color:#991b1b}
+.hist-empty{text-align:center;padding:40px 16px;color:#94a3b8;font-size:14px}
+
 .trial-banner{background:linear-gradient(90deg,#0B1E3D 0%,#1a3558 100%);border-bottom:2px solid #00D4AA;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:44px}
 .trial-banner-left{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.85)}
 .trial-banner-left strong{color:#00D4AA}
@@ -87,11 +101,48 @@ h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:6px}
       <p>Gerencie usuarios, planos de acesso e clientes cadastrados.</p>
     </a>
     {% endif %}
-    <div class="card">
+    <a href="{% url 'sistema:auditoria' %}" class="card">
       <div class="card-icon">📊</div>
-      <h3>Relatorios<span class="tag-soon">Em breve</span></h3>
-      <p>Historico de auditorias e exportacao em Excel com divergencias destacadas.</p>
+      <h3>Nova auditoria</h3>
+      <p>Cada processamento fica salvo no seu histórico com totais e score de risco.</p>
+    </a>
+  </div>
+
+  <!-- Histórico de auditorias -->
+  <div class="hist-section">
+    <div class="hist-header">
+      <h2>Histórico de auditorias</h2>
     </div>
+    {% if auditorias %}
+    <table class="hist-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Empresa</th>
+          <th>Período</th>
+          <th>Notas</th>
+          <th>Divergências</th>
+          <th>Risco</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in auditorias %}
+        <tr>
+          <td>{{ a.criado_em|date:"d/m/Y" }}</td>
+          <td>{{ a.empresa|default:"—" }}</td>
+          <td>{{ a.periodo|default:"—" }}</td>
+          <td>{{ a.total_notas }}</td>
+          <td>{{ a.divergencias }}</td>
+          <td><span class="risco-badge risco-{{ a.score_risco }}">{{ a.score_risco|default:"—" }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="hist-empty">
+      <p>Nenhuma auditoria salva ainda. Execute seu primeiro cruzamento e salve o resultado!</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 </body>
