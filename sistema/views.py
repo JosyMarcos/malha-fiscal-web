@@ -1,3 +1,5 @@
+import zipfile
+import io
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -26,17 +28,35 @@ def auditoria(request):
     if request.method == 'POST':
         erros = []
         sped_notas = {}
+
         for f in request.FILES.getlist('sped_files'):
             try:
-                sped_notas.update(parse_sped(f.read().decode('latin-1')))
+                content = f.read()
+                if f.name.lower().endswith('.zip'):
+                    with zipfile.ZipFile(io.BytesIO(content)) as zf:
+                        for name in zf.namelist():
+                            if name.lower().endswith('.txt'):
+                                txt = zf.read(name).decode('latin-1')
+                                sped_notas.update(parse_sped(txt))
+                else:
+                    sped_notas.update(parse_sped(content.decode('latin-1')))
             except Exception as e:
                 erros.append(f'SPED {f.name}: {e}')
+
         xml_data = []
         for f in request.FILES.getlist('xml_files'):
             try:
-                xml_data.append((f.name, f.read()))
+                content = f.read()
+                if f.name.lower().endswith('.zip'):
+                    with zipfile.ZipFile(io.BytesIO(content)) as zf:
+                        for name in zf.namelist():
+                            if name.lower().endswith('.xml'):
+                                xml_data.append((name, zf.read(name)))
+                else:
+                    xml_data.append((f.name, content))
             except Exception as e:
-                erros.append(f'XML {f.name}: {e}')
+                erros.append(f'XML/ZIP {f.name}: {e}')
+
         xml_notas, xml_erros = parse_xmls(xml_data)
         erros.extend(xml_erros)
         resultados = cruzar_dados(sped_notas, xml_notas)
