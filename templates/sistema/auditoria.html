@@ -240,22 +240,24 @@
       <div class="upload-grid">
         <div>
           <span class="up-label"><i class="ti ti-file-text" style="font-size:13px"></i> SPED Fiscal (.txt) — vários meses</span>
-          <div class="drop-zone" id="sped-drop" onclick="document.getElementById('sped-input').click()">
+          <label for="sped-input" style="display:block;cursor:pointer"><div class="drop-zone" id="sped-drop">
             <i class="ti ti-file-text dz-icon"></i>
             <p>Clique ou arraste os arquivos</p>
             <small>Um ou mais arquivos .txt — cada mês/período separado</small>
             <div id="sped-status"></div>
           </div>
+          </div></label>
           <input type="file" id="sped-input" accept=".txt" multiple>
         </div>
         <div>
           <span class="up-label"><i class="ti ti-file-code" style="font-size:13px"></i> XML de NF-e / NFC-e / CT-e ou ZIP</span>
-          <div class="drop-zone" id="xml-drop" onclick="document.getElementById('xml-input').click()">
+          <label for="xml-input" style="display:block;cursor:pointer"><div class="drop-zone" id="xml-drop">
             <i class="ti ti-file-code dz-icon"></i>
             <p>Clique ou arraste os arquivos</p>
             <small>Arquivos .xml (NF-e, NFC-e, CT-e) ou .zip com vários XMLs</small>
             <div id="xml-status"></div>
           </div>
+          </div></label>
           <input type="file" id="xml-input" accept=".xml,.zip" multiple>
         </div>
       </div>
