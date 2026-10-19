@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malha Fiscal — Auditoria SPED × XML para Contadores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0B1E3D;
+  --navy2:   #132C52;
+  --teal:    #00D4AA;
+  --teal2:   #00B890;
+  --light:   #F0F4FF;
+  --muted:   #8898AA;
+  --border:  #D6E0F0;
+  --white:   #FFFFFF;
+  --text:    #0B1E3D;
+  --radius:  12px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--white);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(11,30,61,.97);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 6%; height: 64px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-logo-icon {
+  width: 34px; height: 34px; background: var(--teal);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: var(--navy); letter-spacing: -.5px;
+}
+.nav-logo-text { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -.3px; }
+.nav-logo-text span { color: var(--teal); }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .15s; }
+.nav-links a:hover { color: #fff; }
+.nav-cta {
+  background: var(--teal); color: var(--navy);
+  padding: 8px 20px; border-radius: 8px;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  transition: background .15s;
+}
+.nav-cta:hover { background: var(--teal2); color: var(--navy) !important; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--navy);
+  padding: 140px 6% 100px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,212,170,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(0,212,170,.12); border: 1px solid rgba(0,212,170,.3);
+  color: var(--teal); padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  margin-bottom: 28px;
+}
+.hero-badge::before { content: '●'; font-size: 8px; }
+h1 {
+  font-size: clamp(32px, 5vw, 56px); font-weight: 800; color: #fff;
+  line-height: 1.1; letter-spacing: -.03em;
+  max-width: 760px; margin: 0 auto 20px;
+}
+h1 em { color: var(--teal); font-style: normal; }
+.hero-sub {
+  font-size: clamp(15px, 2vw, 18px); color: rgba(255,255,255,.6);
+  max-width: 560px; margin: 0 auto 40px; line-height: 1.7;
+}
+.hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--teal); color: var(--navy);
+  padding: 14px 32px; border-radius: 10px;
+  font-size: 15px; font-weight: 700; text-decoration: none;
+  transition: all .15s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: var(--teal2); transform: translateY(-1px); }
+.btn-secondary {
+  background: rgba(255,255,255,.08); color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+  padding: 14px 32px; border-radius: 10px;
+  font-size: 15px; font-weight: 600; text-decoration: none;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: rgba(255,255,255,.14); }
+
+/* ── NÚMEROS ── */
+.stats {
+  background: var(--light);
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.stat { padding: 40px 20px; text-align: center; border-right: 1px solid var(--border); }
+.stat:last-child { border-right: none; }
+.stat-num { font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
+.stat-num span { color: var(--teal); }
+.stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+/* ── PROBLEMA ── */
+.section { padding: 88px 6%; }
+.section-label { font-size: 12px; font-weight: 600; letter-spacing: .1em; color: var(--teal); margin-bottom: 12px; }
+h2 { font-size: clamp(24px, 3.5vw, 38px); font-weight: 800; color: var(--navy); letter-spacing: -.02em; line-height: 1.2; margin-bottom: 16px; max-width: 580px; }
+.section-sub { font-size: 16px; color: var(--muted); max-width: 500px; line-height: 1.7; margin-bottom: 48px; }
+
+.problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.problem-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 24px;
+  position: relative; overflow: hidden;
+}
+.problem-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: #FF4D4D;
+}
+.problem-icon { font-size: 28px; margin-bottom: 14px; }
+.problem-card h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.problem-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── SOLUÇÃO ── */
+.solution-bg { background: var(--navy); color: #fff; }
+.solution-bg h2 { color: #fff; }
+.solution-bg .section-sub { color: rgba(255,255,255,.6); }
+.solution-bg .section-label { color: var(--teal); }
+
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); overflow: hidden; }
+.feature {
+  background: rgba(255,255,255,.03);
+  padding: 32px 28px;
+  transition: background .15s;
+}
+.feature:hover { background: rgba(255,255,255,.06); }
+.feature-icon {
+  width: 42px; height: 42px; background: rgba(0,212,170,.15);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 16px;
+}
+.feature h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.feature p { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.6; }
+
+/* ── COMO FUNCIONA ── */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; position: relative; }
+.step { padding: 32px 28px; position: relative; }
+.step-num {
+  width: 44px; height: 44px; background: var(--teal);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: var(--navy);
+  margin-bottom: 16px;
+}
+.step h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.step p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.step-connector {
+  position: absolute; top: 54px; right: -20px;
+  font-size: 20px; color: var(--border); z-index: 1;
+}
+
+/* ── DIVERGÊNCIAS DETECTADAS ── */
+.checks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--light); padding: 16px; border-radius: 10px;
+}
+.check-icon { color: var(--teal); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.check-text { font-size: 13px; color: var(--navy); font-weight: 500; line-height: 1.4; }
+
+/* ── PRICING ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 960px; margin: 0 auto; }
+.plan {
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 36px 32px; position: relative; background: var(--white);
+  transition: box-shadow .2s, transform .2s;
+}
+.plan:hover { box-shadow: 0 16px 48px rgba(11,30,61,.12); transform: translateY(-3px); }
+.plan.featured {
+  border-color: var(--teal); border-width: 2px;
+  background: var(--navy);
+}
+.plan-badge {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--teal); color: var(--navy);
+  padding: 3px 16px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; white-space: nowrap; letter-spacing: .05em;
+}
+.plan-name { font-size: 13px; font-weight: 600; letter-spacing: .06em; color: var(--muted); margin-bottom: 12px; }
+.plan.featured .plan-name { color: rgba(255,255,255,.5); }
+.plan-price { font-size: 44px; font-weight: 800; color: var(--navy); letter-spacing: -.03em; line-height: 1; margin-bottom: 4px; }
+.plan.featured .plan-price { color: #fff; }
+.plan-price sub { font-size: 16px; font-weight: 600; vertical-align: baseline; position: relative; top: -4px; }
+.plan-period { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.plan.featured .plan-period { color: rgba(255,255,255,.4); }
+.plan-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
+.plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--navy); }
+.plan.featured .plan-features li { color: rgba(255,255,255,.8); }
+.plan-features li::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; }
+.plan-cta {
+  display: block; text-align: center;
+  padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: all .15s;
+  background: var(--light); color: var(--navy); border: 1px solid var(--border);
+}
+.plan.featured .plan-cta { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+.plan-cta:hover { filter: brightness(.95); transform: translateY(-1px); }
+
+/* ── DEPOIMENTO ── */
+.testimonial-section { background: var(--light); }
+.testimonial {
+  max-width: 680px; margin: 0 auto; text-align: center;
+}
+.testimonial-text {
+  font-size: clamp(18px, 2.5vw, 24px); font-weight: 600; color: var(--navy);
+  line-height: 1.5; margin-bottom: 28px; font-style: italic;
+}
+.testimonial-author { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.testimonial-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--teal); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; color: var(--navy);
+}
+.testimonial-name { font-size: 15px; font-weight: 700; color: var(--navy); }
+.testimonial-role { font-size: 13px; color: var(--muted); }
+
+/* ── CTA FINAL ── */
+.cta-final {
+  background: var(--navy); text-align: center;
+  padding: 100px 6%;
+}
+.cta-final h2 { color: #fff; max-width: 600px; margin: 0 auto 16px; }
+.cta-final p { color: rgba(255,255,255,.55); max-width: 480px; margin: 0 auto 40px; font-size: 16px; }
+.contact-options { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.contact-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 28px; border-radius: 10px;
+  font-size: 15px; font-weight: 700; text-decoration: none; transition: all .15s;
+}
+.contact-whatsapp { background: #25D366; color: #fff; }
+.contact-whatsapp:hover { background: #20bd5c; }
+.contact-email { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2); }
+.contact-email:hover { background: rgba(255,255,255,.18); }
+
+/* ── FOOTER ── */
+footer {
+  background: #060F1E; padding: 32px 6%;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.footer-logo { font-size: 15px; font-weight: 700; color: rgba(255,255,255,.5); }
+.footer-logo span { color: var(--teal); }
+.footer-copy { font-size: 12px; color: rgba(255,255,255,.3); }
+
+/* ── MOBILE ── */
+@media (max-width: 640px) {
+  nav { padding: 0 5%; }
+  .nav-links { display: none; }
+  .stats { grid-template-columns: 1fr; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:last-child { border-bottom: none; }
+  .step-connector { display: none; }
+  .steps { gap: 0; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">MF</div>
+    <span class="nav-logo-text">Malha <span>Fiscal</span></span>
+  </div>
+  <div class="nav-links">
+    <a href="#funciona">Como funciona</a>
+    <a href="#recursos">Recursos</a>
+    <a href="#planos">Planos</a>
+    <a href="#contato" class="nav-cta">Falar com vendas</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Sistema de Auditoria Fiscal</div>
+  <h1>Encontre divergências entre<br><em>SPED e XML</em> em menos de 1 minuto</h1>
+  <p class="hero-sub">O que levaria um contador 50 horas para conferir manualmente, o Malha Fiscal faz em segundos. ICMS, frete, desconto, IPI — tudo cruzado e sinalizado automaticamente.</p>
+  <div class="hero-btns">
+    <a href="#planos" class="btn-primary">Ver planos e preços →</a>
+    <a href="#funciona" class="btn-secondary">Como funciona</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">50<span>h</span></div>
+    <div class="stat-label">economizadas por empresa por mês</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">11<span>+</span></div>
+    <div class="stat-label">campos fiscais verificados automaticamente</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">1<span>min</span></div>
+    <div class="stat-label">para analisar milhares de notas fiscais</div>
+  </div>
+</div>
+
+<!-- PROBLEMA -->
+<section class="section" style="background: var(--white);">
+  <div class="section-label">O PROBLEMA</div>
+  <h2>Conferir SPED contra XML manualmente é impossível</h2>
+  <p class="section-sub">Com centenas ou milhares de notas por mês, qualquer erro passa despercebido — até a autuação chegar.</p>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-icon">⏳</div>
+      <h3>Tempo impossível</h3>
+      <p>Conferir 2.000 notas manualmente leva semanas. Na prática, ninguém faz.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">💸</div>
+      <h3>Autuações caras</h3>
+      <p>Uma divergência de ICMS não detectada pode gerar multas de R$10.000 a R$100.000.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📋</div>
+      <h3>SPED inconsistente</h3>
+      <p>Frete, seguro, desconto, IPI — qualquer campo divergente entre o XML e o SPED é risco fiscal.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🔍</div>
+      <h3>Denegadas invisíveis</h3>
+      <p>Notas denegadas pela SEFAZ aparecem como autorizadas nos sistemas convencionais.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUÇÃO -->
+<section class="section solution-bg" id="recursos">
+  <div class="section-label">A SOLUÇÃO</div>
+  <h2>Auditoria completa em um clique</h2>
+  <p class="section-sub">Carregue o SPED e os XMLs. Em segundos você tem um relatório completo com todas as divergências identificadas e priorizadas.</p>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Processamento instantâneo</h3>
+      <p>Analisa milhares de notas em segundos. Todo o processamento acontece no seu computador — nenhum dado sai da sua máquina.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔎</div>
+      <h3>11 campos comparados</h3>
+      <p>ICMS, Base de Cálculo, ICMS-ST, Frete, Seguro, Desconto, Outras Despesas, IPI, Total de Produtos e Total da Nota.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🚨</div>
+      <h3>Score de risco 0–100</h3>
+      <p>Cada empresa recebe um score de risco com classificação automática: Baixo, Médio, Alto ou Crítico.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📊</div>
+      <h3>Exportação profissional</h3>
+      <p>Relatório em Excel com abas separadas por tipo de divergência e coluna de "Flags de Auditoria" consolidada.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔐</div>
+      <h3>100% local e seguro</h3>
+      <p>Nenhum dado fiscal é enviado para servidores externos. Toda a análise acontece no navegador do cliente.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📅</div>
+      <h3>Múltiplos períodos</h3>
+      <p>Carregue vários SPEDs de meses diferentes de uma vez. O sistema acumula e analisa o período completo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="section" id="funciona">
+  <div class="section-label">COMO FUNCIONA</div>
+  <h2>Do arquivo ao relatório em 4 passos</h2>
+  <p class="section-sub">Sem instalação, sem configuração. Abre no navegador e funciona.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Carregue o SPED</h3>
+      <p>Arraste os arquivos .txt do SPED Fiscal. Pode ser de vários meses de uma vez.</p>
+      <span class="step-connector">→</span>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Adicione os XMLs</h3>
+      <p>Arraste os XMLs de NF-e, NFC-e e CT-e ou os ZIPs. O sistema detecta automaticamente.</p>
+      <span class="step-connector">→</span>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Clique em Processar</h3>
+      <p>Em segundos, o sistema cruza todos os dados e identifica cada divergência.</p>
+      <span class="step-connector">→</span>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Corrija e exporte</h3>
+      <p>Visualize o diagnóstico de cada nota e exporte o relatório completo em Excel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DIVERGÊNCIAS DETECTADAS -->
+<section class="section" style="background: var(--light); padding-top: 48px;">
+  <div class="section-label">O QUE É DETECTADO</div>
+  <h2>Tudo que pode gerar autuação</h2>
+  <p class="section-sub">O sistema detecta automaticamente todas estas irregularidades fiscais.</p>
+  <div class="checks-grid">
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">ICMS divergente entre XML e SPED</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Base de cálculo ICMS divergente</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">ICMS-ST e BC-ST divergentes</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Total de produtos divergente</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Valor de frete divergente</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Desconto e seguro divergentes</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">IPI e outras despesas divergentes</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Notas denegadas como autorizadas</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">XMLs faltando no SPED</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Lançamentos extras no SPED</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">CFOP incompatível com UF ou operação</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">CST incompatível com valor de ICMS</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Dígito verificador de chave inválido</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Data de emissão vs saída impossível</span></div>
+    <div class="check-item"><span class="check-icon">✓</span><span class="check-text">Numeração quebrada ou duplicada</span></div>
+  </div>
+</section>
+
+<!-- DEPOIMENTO -->
+<section class="section testimonial-section">
+  <div class="testimonial">
+    <p class="testimonial-text">"O sistema analisou 2.861 notas e encontrou 76 com ICMS divergente que nunca teriam sido detectadas manualmente. Em um mês de uso já se pagou várias vezes."</p>
+    <div class="testimonial-author">
+      <div class="testimonial-avatar">L</div>
+      <div>
+        <div class="testimonial-name">Luis Alves</div>
+        <div class="testimonial-role">Contador — DS Auto Peças Ltda</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="planos" style="background: var(--white); text-align: center;">
+  <div class="section-label" style="text-align:center">PLANOS</div>
+  <h2 style="margin: 0 auto 12px; text-align:center">Escolha seu plano</h2>
+  <p class="section-sub" style="margin: 0 auto 48px; text-align:center">Sem fidelidade. Cancele quando quiser.</p>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">ESSENCIAL</div>
+      <div class="plan-price"><sub>R$</sub>157</div>
+      <div class="plan-period">por mês</div>
+      <ul class="plan-features">
+        <li>1 empresa (CNPJ)</li>
+        <li>Análise mensal ilimitada de notas</li>
+        <li>Exportação em Excel</li>
+        <li>Relatório de impressão</li>
+        <li>Suporte por e-mail</li>
+      </ul>
+      <a href="#contato" class="plan-cta">Começar agora</a>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-badge">MAIS POPULAR</div>
+      <div class="plan-name">PROFISSIONAL</div>
+      <div class="plan-price"><sub>R$</sub>397</div>
+      <div class="plan-period">por mês</div>
+      <ul class="plan-features">
+        <li>Até 5 empresas (CNPJs)</li>
+        <li>Análise ilimitada de notas</li>
+        <li>Todos os recursos do Essencial</li>
+        <li>Histórico de confrontos</li>
+        <li>Suporte prioritário via WhatsApp</li>
+      </ul>
+      <a href="#contato" class="plan-cta">Começar agora</a>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">ENTERPRISE</div>
+      <div class="plan-price"><sub>R$</sub>697</div>
+      <div class="plan-period">por mês</div>
+      <ul class="plan-features">
+        <li>Empresas ilimitadas</li>
+        <li>Análise ilimitada de notas</li>
+        <li>Todos os recursos anteriores</li>
+        <li>Onboarding personalizado</li>
+        <li>Suporte dedicado com SLA</li>
+      </ul>
+      <a href="#contato" class="plan-cta">Falar com vendas</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final" id="contato">
+  <div class="section-label" style="text-align:center; color: var(--teal);">FALE CONOSCO</div>
+  <h2>Pronto para auditar sem complicação?</h2>
+  <p>Entre em contato, tiramos suas dúvidas e ativamos seu acesso em minutos.</p>
+  <div class="contact-options">
+    <a href="https://wa.me/SEUNUMEROAQUI" class="contact-btn contact-whatsapp" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </a>
+    <a href="mailto:SEUEMAIL@gmail.com" class="contact-btn contact-email">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+      Enviar e-mail
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Malha <span>Fiscal</span></div>
+  <div class="footer-copy">© 2026 Malha Fiscal. Todos os direitos reservados.</div>
+</footer>
+
+</body>
+</html>
