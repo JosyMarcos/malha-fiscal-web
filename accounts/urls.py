@@ -12,4 +12,5 @@ urlpatterns = [
     path('admin-painel/<int:pk>/',    views.editar_usuario,   name='editar_usuario'),
     path('admin-painel/<int:pk>/toggle/', views.toggle_ativo, name='toggle_ativo'),
     path('admin-painel/<int:pk>/deletar/', views.deletar_usuario, name='deletar_usuario'),
+    path('admin-painel/minha-senha/', views.minha_senha, name='minha_senha'),
 ]

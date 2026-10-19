@@ -5,8 +5,8 @@ from django.utils import timezone
 
 class Plano(models.TextChoices):
     ESSENCIAL     = 'essencial',     'Essencial — R$157/mês'
-    PROFISSIONAL  = 'profissional',  'Profissional — R$277/mês'
-    ENTERPRISE    = 'enterprise',    'Enterprise — R$477/mês'
+    PROFISSIONAL  = 'profissional',  'Profissional — R$397/mês'
+    ENTERPRISE    = 'enterprise',    'Enterprise — R$697/mês'
 
 
 class Usuario(AbstractUser):

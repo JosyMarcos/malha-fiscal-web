@@ -113,3 +113,24 @@ def deletar_usuario(request, pk):
         messages.success(request, f'Usuário {nome} removido.')
         return redirect('accounts:admin_dashboard')
     return render(request, 'admin_panel/confirmar_delete.html', {'usuario': usuario})
+
+
+# ── MINHA SENHA ──────────────────────────────────────────────────────
+
+@login_required
+@user_passes_test(is_admin)
+def minha_senha(request):
+    if request.method == 'POST':
+        nova = request.POST.get('nova_senha', '').strip()
+        confirma = request.POST.get('confirma_senha', '').strip()
+        if not nova or len(nova) < 6:
+            messages.error(request, 'A senha precisa ter pelo menos 6 caracteres.')
+        elif nova != confirma:
+            messages.error(request, 'As senhas não coincidem.')
+        else:
+            request.user.set_password(nova)
+            request.user.save()
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Senha alterada com sucesso!')
+    return render(request, 'admin_panel/minha_senha.html')
