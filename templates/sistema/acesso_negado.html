@@ -2,25 +2,68 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Acesso Negado — Malha Fiscal</title>
+<title>{% if usuario.is_trial %}Período de teste encerrado{% else %}Acesso não autorizado{% endif %} — Malha Fiscal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#0B1E3D;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#fff;border-radius:16px;padding:48px 40px;max-width:440px;width:100%;text-align:center}
-.icon{font-size:56px;margin-bottom:20px}
-h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:8px}
-p{font-size:14px;color:#8898AA;line-height:1.6;margin-bottom:24px}
-.status{display:inline-block;background:#FEE2E2;color:#B91C1C;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:20px}
-.btn{display:inline-block;padding:11px 24px;background:#00D4AA;color:#0B1E3D;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none}
+.card{background:#fff;border-radius:20px;padding:48px 40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.icon{font-size:52px;margin-bottom:20px}
+h1{font-size:23px;font-weight:800;color:#0B1E3D;margin-bottom:10px}
+.badge{display:inline-block;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:18px}
+.badge-trial{background:#FEF3C7;color:#92400E}
+.badge-negado{background:#FEE2E2;color:#B91C1C}
+p{font-size:14px;color:#64748B;line-height:1.7;margin-bottom:28px}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btn-primary{display:block;padding:13px 24px;background:#00D4AA;color:#0B1E3D;border-radius:9px;font-size:14px;font-weight:700;text-decoration:none}
+.btn-secondary{display:block;padding:12px 24px;background:#F1F5F9;color:#475569;border-radius:9px;font-size:14px;font-weight:600;text-decoration:none}
+.divider{border:none;border-top:1px solid #E2E8F0;margin:24px 0}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:left}
+.plan{background:#F8FAFF;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px}
+.plan-name{font-size:11px;font-weight:700;color:#0B1E3D}
+.plan-price{font-size:13px;font-weight:800;color:#00D4AA;margin:2px 0}
+.plan-desc{font-size:10px;color:#94A3B8}
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="icon">🔒</div>
-  <h1>Acesso não autorizado</h1>
-  <div class="status">{{ usuario.status_display }}</div>
-  <p>Sua conta ainda não foi ativada ou o período de acesso expirou. Entre em contato com o administrador para regularizar.</p>
-  <a href="{% url 'accounts:logout' %}" class="btn">Sair</a>
+  {% if usuario.is_trial %}
+    <div class="icon">⏰</div>
+    <h1>Seu período de teste encerrou</h1>
+    <div class="badge badge-trial">Trial de 48h expirado</div>
+    <p>Esperamos que você tenha aprovado o sistema! Assine um plano e continue encontrando divergências fiscais sem limites.</p>
+    <div class="btns">
+      <a href="https://wa.me/5583999924562?text=Olá!%20Meu%20trial%20expirou%20e%20quero%20assinar%20um%20plano%20da%20Malha%20Fiscal." target="_blank" class="btn-primary">💬 Falar no WhatsApp e assinar</a>
+      <a href="{% url 'accounts:logout' %}" class="btn-secondary">Sair da conta</a>
+    </div>
+    <div class="divider"></div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Essencial</div>
+        <div class="plan-price">R$157<span style="font-size:10px;font-weight:500;color:#64748B">/mês</span></div>
+        <div class="plan-desc">Ideal para iniciar</div>
+      </div>
+      <div class="plan" style="border-color:#00D4AA">
+        <div class="plan-name">Profissional</div>
+        <div class="plan-price">R$397<span style="font-size:10px;font-weight:500;color:#64748B">/mês</span></div>
+        <div class="plan-desc">Mais popular</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">R$697<span style="font-size:10px;font-weight:500;color:#64748B">/mês</span></div>
+        <div class="plan-desc">Sem restrições</div>
+      </div>
+    </div>
+  {% else %}
+    <div class="icon">🔒</div>
+    <h1>Acesso não autorizado</h1>
+    <div class="badge badge-negado">{{ usuario.status_display }}</div>
+    <p>Sua conta ainda não foi ativada ou o período de acesso expirou. Entre em contato com o administrador para regularizar.</p>
+    <div class="btns">
+      <a href="https://wa.me/5583999924562" target="_blank" class="btn-primary">Falar com o suporte</a>
+      <a href="{% url 'accounts:logout' %}" class="btn-secondary">Sair</a>
+    </div>
+  {% endif %}
 </div>
 </body>
 </html>

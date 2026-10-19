@@ -61,9 +61,11 @@ def admin_dashboard(request):
                                      data_expiracao__gte=hoje,
                                      data_expiracao__lte=hoje + timezone.timedelta(days=7)).count()
 
+    trials = Usuario.objects.filter(plano='trial', ativo=True).order_by('criado_em')
     return render(request, 'admin_panel/dashboard.html', {
         'usuarios': usuarios, 'q': q, 'filtro': filtro,
         'total': total, 'ativos': ativos, 'exp7': exp7,
+        'trials': trials,
     })
 
 
@@ -184,6 +186,28 @@ def registro(request):
                 data_expiracao=(timezone.now() + timedelta(hours=48)).date(),
             )
             from django.contrib.auth import authenticate, login as auth_login
+            # Notificação ao admin
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings as djsettings
+                admin_email = getattr(djsettings, 'ADMIN_EMAIL', 'marcosnobrega2299@gmail.com')
+                send_mail(
+                    subject=f'🆕 Novo Trial — {first} {last} ({empresa})',
+                    message=(
+                        f'Novo cadastro no Trial da Malha Fiscal:\n\n'
+                        f'Nome: {first} {last}\n'
+                        f'Empresa: {empresa}\n'
+                        f'E-mail: {email}\n\n'
+                        f'Acesse o painel para converter em cliente:\n'
+                        f'https://malha-fiscal-web-liart.vercel.app/admin-painel/'
+                    ),
+                    from_email=None,
+                    recipient_list=[admin_email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             user = authenticate(request, username=username, password=senha)
             if user:
                 auth_login(request, user)

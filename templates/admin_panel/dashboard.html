@@ -12,6 +12,52 @@
   <div class="stat-card"><div class="stat-card-num warning">{{ exp7 }}</div><div class="stat-card-label">Expiram em 7 dias</div></div>
 </div>
 
+
+{% if trials %}
+<div class="card" style="border-left:3px solid #F59E0B;margin-bottom:20px">
+  <div class="card-header" style="background:#FFFBEB">
+    <span class="card-title" style="color:#92400E">⏱ Trials ativos — {{ trials|length }} conta{{ trials|length|pluralize:",s" }}</span>
+    <span style="font-size:12px;color:#B45309">Leads quentinhos — faça o followup!</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Empresa</th>
+        <th>Cadastro</th>
+        <th>Expira em</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in trials %}
+      <tr>
+        <td>
+          <div style="font-weight:600">{{ u.get_full_name|default:u.username }}</div>
+          <div class="text-muted text-sm">{{ u.email }}</div>
+        </td>
+        <td>{{ u.empresa|default:"—" }}</td>
+        <td style="font-size:12px;color:#6B7280">{{ u.criado_em|date:"d/m H:i" }}</td>
+        <td>
+          {% if u.dias_restantes is not None %}
+            {% if u.dias_restantes <= 0 %}
+              <span class="badge badge-expirado">Expirado</span>
+            {% else %}
+              <span class="badge badge-ativo">{{ u.dias_restantes }}d restante{{ u.dias_restantes|pluralize:"","s" }}</span>
+            {% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          <a href="{% url 'accounts:editar_usuario' u.pk %}" class="btn btn-secondary" style="font-size:12px;padding:4px 12px">Converter em cliente</a>
+          <a href="https://wa.me/55{{ u.telefone|default:'' }}" target="_blank" class="btn btn-primary" style="font-size:12px;padding:4px 12px;margin-left:4px" title="WhatsApp">💬</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 <div class="card">
   <div class="card-header">
     <span class="card-title">Clientes</span>
