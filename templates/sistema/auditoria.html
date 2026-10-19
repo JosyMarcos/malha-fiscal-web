@@ -1,283 +1,3232 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Auditoria SPED x XML — Malha Fiscal</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malha Fiscal — SPED × XML v9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
-.topbar{background:#0B1E3D;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:99}
-.logo{display:flex;align-items:center;gap:8px}
-.logo-icon{width:28px;height:28px;background:#00D4AA;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0B1E3D;font-size:11px}
-.logo-name{font-size:15px;font-weight:700;color:#fff}.logo-name span{color:#00D4AA}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.user-info{font-size:12px;color:rgba(255,255,255,.6)}
-.user-info strong{color:#fff;display:block;font-size:13px}
-.badge-plan{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)}
-.btn-nav{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
-.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
-.main{max-width:1200px;margin:0 auto;padding:32px 24px}
-.page-title{font-size:22px;font-weight:800;color:#0B1E3D;margin-bottom:4px}
-.page-sub{font-size:13px;color:#8898AA;margin-bottom:28px}
-.upload-card{background:#fff;border:1px solid #D6E0F0;border-radius:12px;padding:28px;margin-bottom:24px}
-.upload-card h3{font-size:15px;font-weight:700;color:#0B1E3D;margin-bottom:16px}
-.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.file-area{border:2px dashed #D6E0F0;border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:.2s}
-.file-area:hover{border-color:#00D4AA;background:#f0fdf9}
-.fi{font-size:30px;margin-bottom:8px}
-.fl{font-size:13px;font-weight:600;color:#0B1E3D;margin-bottom:4px}
-.fs{font-size:11px;color:#8898AA}
-.fc{font-size:12px;color:#00D4AA;font-weight:600;margin-top:6px;min-height:18px}
-input[type=file]{display:none}
-.btn-analisar{background:#00D4AA;color:#0B1E3D;border:none;padding:13px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
-.btn-analisar:hover{background:#00bfa0}
-.loading{display:none;text-align:center;padding:40px;color:#0B1E3D;font-weight:600}
-.spinner{width:36px;height:36px;border:3px solid #D6E0F0;border-top-color:#00D4AA;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
-.stat{background:#fff;border:1px solid #D6E0F0;border-radius:10px;padding:16px;text-align:center}
-.sn{font-size:30px;font-weight:800;line-height:1}
-.sl{font-size:11px;color:#8898AA;margin-top:4px;font-weight:500}
-.s-total .sn{color:#0B1E3D}.s-div .sn{color:#EF4444}.s-sx .sn{color:#F59E0B}.s-ss .sn{color:#3B82F6}.s-ok .sn{color:#10B981}
-.erros-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:#B91C1C}
-.erros-box ul{margin:6px 0 0 16px}
-.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.fbtn{border:1px solid #D6E0F0;background:#fff;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;color:#8898AA}
-.fbtn.active{background:#0B1E3D;color:#fff;border-color:#0B1E3D}
-.fbtn.fd.active{background:#EF4444;border-color:#EF4444;color:#fff}
-.fbtn.fsx.active{background:#F59E0B;border-color:#F59E0B;color:#fff}
-.fbtn.fss.active{background:#3B82F6;border-color:#3B82F6;color:#fff}
-.fbtn.fok.active{background:#10B981;border-color:#10B981;color:#fff}
-.table-wrap{background:#fff;border:1px solid #D6E0F0;border-radius:12px;overflow:hidden;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:800px}
-th{background:#F8FAFD;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#8898AA;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #E8EEF5}
-td{padding:10px 12px;border-bottom:1px solid #F0F4FF;color:#0B1E3D;vertical-align:top}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#FAFBFF}
-.bok{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#D1FAE5;color:#065F46}
-.bdiv{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEE2E2;color:#991B1B}
-.bsx{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEF3C7;color:#92400E}
-.bss{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#DBEAFE;color:#1E40AF}
-.chave{font-family:monospace;font-size:10px;color:#8898AA;display:block;margin-top:2px}
-.dlist{margin-top:4px;color:#DC2626;font-size:11px;list-style:none}
-.dlist li::before{content:'• '}
-.empty{text-align:center;padding:48px;color:#8898AA;font-size:13px}
-@media(max-width:768px){.upload-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#F0F2F5; --surface:#FFFFFF; --border:#E2E6EA; --border-dark:#C9D0D9;
+    --navy:#0F2340; --navy-light:#1A3558; --blue:#1D5FC4; --blue-light:#EBF1FB;
+    --text:#111827; --text-2:#4B5563; --text-3:#9CA3AF;
+    --success:#15803D; --success-bg:#DCFCE7;
+    --danger:#B91C1C; --danger-bg:#FEE2E2;
+    --warning:#92400E; --warning-bg:#FEF3C7;
+    --radius:10px; --radius-sm:6px;
+    --shadow:0 1px 4px rgba(0,0,0,.06),0 2px 12px rgba(0,0,0,.04);
+    --shadow-md:0 4px 20px rgba(0,0,0,.1);
+    --r:10px; --rs:6px; --sh:0 1px 4px rgba(0,0,0,.06),0 2px 12px rgba(0,0,0,.04);
+    --err:#B91C1C; --err-bg:#FEE2E2;
+  }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; line-height:1.5; }
+
+  /* LICENSE GATE */
+  #license-gate { position:fixed; inset:0; z-index:9999; background:linear-gradient(135deg,#0F2340 0%,#1a3a6e 100%); display:flex; align-items:center; justify-content:center; padding:1rem; }
+  .gate-card { background:#fff; border-radius:16px; padding:2.5rem 2rem; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,.3); text-align:center; }
+  .gate-logo { width:52px; height:52px; background:var(--navy); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:22px; color:#fff; }
+  .gate-title { font-size:20px; font-weight:600; color:var(--text); margin-bottom:4px; letter-spacing:-.02em; }
+  .gate-sub { font-size:13px; color:var(--text-2); margin-bottom:1.75rem; }
+  .gate-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-2); text-align:left; display:block; margin-bottom:6px; }
+  .gate-input { width:100%; font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:500; letter-spacing:.12em; text-align:center; text-transform:uppercase; border:1.5px solid var(--border-dark); border-radius:var(--radius-sm); padding:11px 14px; color:var(--text); outline:none; transition:border-color .15s; margin-bottom:10px; }
+  .gate-input:focus { border-color:var(--blue); }
+  .gate-input.err-state { border-color:var(--danger); background:var(--danger-bg); }
+  .gate-input.ok-state  { border-color:var(--success); background:var(--success-bg); }
+  .gate-btn { width:100%; background:var(--navy); color:#fff; border:none; border-radius:var(--radius-sm); padding:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .gate-btn:hover { background:var(--navy-light); }
+  .gate-msg { font-size:12px; margin-top:10px; min-height:18px; }
+  .gate-msg.err { color:var(--danger); } .gate-msg.ok { color:var(--success); }
+  .gate-footer { font-size:11px; color:var(--text-3); margin-top:1.5rem; }
+
+  /* HEADER */
+  header { background:var(--navy); padding:0 2rem; height:56px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; }
+  .logo { display:flex; align-items:center; gap:10px; color:#fff; }
+  .logo-icon { width:32px; height:32px; background:var(--blue); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .logo-text { font-size:15px; font-weight:600; letter-spacing:-.01em; }
+  .logo-sep { width:1px; height:20px; background:rgba(255,255,255,.15); margin:0 4px; }
+  .logo-sub { font-size:12px; color:rgba(255,255,255,.45); }
+  .lic-badge { margin-left:auto; font-size:11px; color:rgba(255,255,255,.6); background:rgba(255,255,255,.08); padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; }
+  .lic-badge.exp { color:#FCD34D; background:rgba(252,211,77,.12); }
+
+  /* LAYOUT */
+  main { max-width:960px; margin:0 auto; padding:2rem 1.5rem; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); }
+  .card-body { padding:1.5rem; }
+
+  /* UPLOAD */
+  .upload-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; }
+  @media(max-width:600px){ .upload-grid{grid-template-columns:1fr} }
+  .up-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-2); margin-bottom:8px; }
+  .drop-zone { border:1.5px dashed var(--border-dark); border-radius:var(--radius); padding:2rem 1rem; text-align:center; cursor:pointer; transition:border-color .15s,background .15s; }
+  .drop-zone:hover,.drop-zone.drag-over { border-color:var(--blue); background:var(--blue-light); }
+  .dz-icon { font-size:32px; color:var(--text-3); display:block; margin-bottom:8px; }
+  .drop-zone:hover .dz-icon { color:var(--blue); }
+  .drop-zone p { font-size:13px; color:var(--text-2); margin-bottom:2px; }
+  .drop-zone small { font-size:11px; color:var(--text-3); }
+  .period-row { display:flex; align-items:center; gap:10px; padding:12px 16px; background:#F7F9FB; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:1.25rem; }
+  .period-row label { font-size:13px; color:var(--text-2); font-weight:500; }
+  .period-row select { font-family:inherit; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:5px 10px; background:#fff; color:var(--text); cursor:pointer; outline:none; }
+
+  /* BUTTONS */
+  button { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; border:none; border-radius:var(--radius-sm); padding:9px 18px; display:inline-flex; align-items:center; gap:6px; transition:all .15s; }
+  .btn-p { background:var(--blue); color:#fff; width:100%; justify-content:center; font-size:14px; padding:11px; }
+  .btn-p:hover { background:#1750a8; }
+  .btn-p:disabled { background:var(--border-dark); color:var(--text-3); cursor:not-allowed; }
+  .btn-s { background:var(--surface); color:var(--text-2); border:1px solid var(--border-dark); }
+  .btn-s:hover { background:var(--bg); }
+
+  /* STATS */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.5rem; }
+  @media(max-width:700px){ .stats-grid{grid-template-columns:repeat(2,1fr)} }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow); }
+  .stat-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:5px; margin-bottom:6px; }
+  .stat-value { font-size:28px; font-weight:600; letter-spacing:-.02em; line-height:1; }
+  .c-total .stat-label{color:var(--text-2)} .c-total .stat-value{color:var(--text)}
+  .c-ok    .stat-label{color:var(--success)} .c-ok    .stat-value{color:var(--success)}
+  .c-miss  .stat-label{color:var(--danger)}  .c-miss  .stat-value{color:var(--danger)}
+  .c-extra .stat-label{color:var(--warning)} .c-extra .stat-value{color:var(--warning)}
+
+  /* TABS & TABLE */
+  .tabs { display:flex; gap:4px; margin-bottom:1rem; flex-wrap:wrap; }
+  .tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid var(--border-dark); background:var(--surface); color:var(--text-2); transition:all .15s; }
+  .tab:hover { background:var(--bg); }
+  .tab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .table-wrap { overflow-x:auto; border-radius:var(--radius); border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; table-layout:fixed; }
+  thead tr { background:#F7F9FB; }
+  thead th { padding:10px 12px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-2); text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .right { text-align:right; }
+  tbody tr { transition:background .1s; cursor:pointer; }
+  tbody tr:hover td { background:#F0F7FF; }
+  tbody td { padding:9px 12px; font-size:13px; border-bottom:1px solid var(--border); color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  tbody tr:last-child td { border-bottom:none; }
+  .mono { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-2); }
+
+  /* BADGES */
+  .badge { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+  .b-ok    { background:var(--success-bg); color:var(--success); }
+  .b-miss  { background:var(--danger-bg);  color:var(--danger); }
+  .b-extra { background:var(--warning-bg); color:var(--warning); }
+  .b-sped  { background:#EEF2FF; color:#3730A3; }
+  .b-xml   { background:#FDF2F8; color:#86198F; }
+
+  /* MISC */
+  .toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
+  .search-in { font-family:'DM Sans',sans-serif; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:7px 12px; width:240px; color:var(--text); outline:none; background:var(--surface); }
+  .search-in:focus { border-color:var(--blue); }
+  .page-title { font-size:20px; font-weight:600; letter-spacing:-.02em; margin-bottom:2px; }
+  .page-sub { font-size:13px; color:var(--text-2); margin-bottom:1.5rem; }
+  .dz-st { margin-top:8px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .dz-st.ok { color:var(--success); } .dz-st.err { color:var(--danger); }
+  .info-note { background:var(--blue-light); border:1px solid #BFDBFE; border-radius:var(--radius-sm); padding:10px 14px; font-size:12px; color:#1E40AF; display:flex; align-items:flex-start; gap:8px; margin-top:1rem; }
+  #toast { position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:10px 18px; border-radius:var(--radius); font-size:13px; font-weight:500; display:none; align-items:center; gap:8px; box-shadow:var(--shadow-md); z-index:9998; }
+  input[type="file"] { display:none; }
+  #results-screen { display:none; }
+  /* ── DARK MODE ──────────────────────────────────────── */
+  [data-theme="dark"]{
+    --bg:#0B1120;--surface:#111827;--border:rgba(255,255,255,.09);
+    --border-dark:rgba(255,255,255,.18);--navy:#0B1120;--navy-light:#1D4ED8;
+    --blue:#3B82F6;--blue-light:rgba(59,130,246,.15);
+    --text:#F1F5F9;--text-2:#94A3B8;--text-3:#475569;
+    --success:#4ADE80;--success-bg:rgba(74,222,128,.12);
+    --danger:#F87171;--danger-bg:rgba(248,113,113,.12);
+    --warning:#FCD34D;--warning-bg:rgba(252,211,77,.12);
+    --shadow:0 1px 6px rgba(0,0,0,.4),0 2px 16px rgba(0,0,0,.3);
+    --shadow-md:0 4px 24px rgba(0,0,0,.5);
+  }
+  /* Base */
+  [data-theme="dark"] body{background:#0B1120!important;color:#F1F5F9}
+  [data-theme="dark"] main{background:#0B1120}
+  /* Cards e superfícies */
+  [data-theme="dark"] .card{background:#111827!important;border-color:rgba(255,255,255,.09)!important}
+  [data-theme="dark"] .stat-card{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.09)!important}
+  [data-theme="dark"] .rc,.apur-card,[data-theme="dark"] .icms-card,[data-theme="dark"] .apur-card,[data-theme="dark"] .diag-box{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.09)!important}
+  [data-theme="dark"] #detail-panel>div{background:rgba(255,255,255,.03)!important;border-color:rgba(255,255,255,.09)!important}
+  /* Filtros */
+  [data-theme="dark"] .filter-btn{background:rgba(255,255,255,.05)!important;color:#94A3B8!important;border-color:rgba(255,255,255,.09)!important}
+  [data-theme="dark"] .filter-btn.active{background:#1D4ED8!important;color:#fff!important;border-color:#1D4ED8!important}
+  /* Inputs e selects */
+  [data-theme="dark"] input:not([type=file]):not([type=checkbox]),[data-theme="dark"] select{background:#1E293B!important;color:#F1F5F9!important;border-color:rgba(255,255,255,.15)!important}
+  [data-theme="dark"] input::placeholder{color:#475569!important}
+  /* Upload areas */
+  [data-theme="dark"] .drop-zone{background:rgba(255,255,255,.03)!important;border-color:rgba(255,255,255,.12)!important}
+  [data-theme="dark"] .drop-zone p{color:#94A3B8}
+  [data-theme="dark"] .drop-zone small{color:#475569}
+  /* Info note */
+  [data-theme="dark"] .info-note{background:rgba(59,130,246,.1)!important;border-color:rgba(59,130,246,.2)!important;color:#93C5FD!important}
+  /* Period row */
+  [data-theme="dark"] .period-row{background:rgba(255,255,255,.03)!important;border-color:rgba(255,255,255,.09)!important}
+  /* Tabela */
+  [data-theme="dark"] .results-table{background:#111827!important}
+  [data-theme="dark"] .results-table thead tr{background:rgba(255,255,255,.05)!important}
+  [data-theme="dark"] .results-table tbody tr:hover td{background:rgba(255,255,255,.03)!important}
+  [data-theme="dark"] .results-table td,[data-theme="dark"] .results-table th{border-color:rgba(255,255,255,.06)!important}
+  [data-theme="dark"] table td,[data-theme="dark"] table th{color:var(--text)}
+  /* Resultados - toolbar e área de resultados */
+  [data-theme="dark"] .toolbar{background:transparent}
+  [data-theme="dark"] .stats-grid .stat-card{background:#1E293B!important;border-color:rgba(255,255,255,.1)!important}
+  [data-theme="dark"] .stat-label{color:#94A3B8!important}
+  [data-theme="dark"] .stat-card .stat-value{color:#F1F5F9!important}
+  [data-theme="dark"] #detail-panel{background:#1E293B!important;border-color:rgba(255,255,255,.1)!important}
+  [data-theme="dark"] #detail-panel *{border-color:rgba(255,255,255,.07)!important}
+  [data-theme="dark"] .filter-section{background:transparent!important;border-color:rgba(255,255,255,.08)!important}
+  [data-theme="dark"] .results-table thead tr{background:#1E293B!important}
+  [data-theme="dark"] .results-table tbody tr{background:#111827!important}
+  [data-theme="dark"] .results-table tbody tr td{background:transparent!important}
+  [data-theme="dark"] #detail-panel [style*="background:#"]{background:rgba(255,255,255,.05)!important}
+  [data-theme="dark"] #detail-panel [style*="background: #"]{background:rgba(255,255,255,.05)!important}
+  [data-theme="dark"] .results-table tbody tr:nth-child(even){background:#161F2E}
+  [data-theme="dark"] .results-table td{color:#CBD5E1!important;border-color:rgba(255,255,255,.05)!important}
+  [data-theme="dark"] .results-table th{color:#94A3B8!important;border-color:rgba(255,255,255,.08)!important}
+  [data-theme="dark"] #results-count{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important}
+  [data-theme="dark"] .btn-s{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.12)!important;color:#CBD5E1!important}
+  [data-theme="dark"] .btn-s:hover{background:rgba(255,255,255,.1)!important}
+  [data-theme="dark"] .search-in{background:#1E293B!important;border-color:rgba(255,255,255,.12)!important;color:#F1F5F9!important}
+  [data-theme="dark"] .sev{opacity:.9}
+  [data-theme="dark"] #results-screen>div{background:transparent}
+  /* Modal comparação */
+  [data-theme="dark"] #compare-modal .cm-box{background:#1E293B!important}
+  [data-theme="dark"] .cmp-table th{background:rgba(255,255,255,.06)!important}
+  [data-theme="dark"] .cmp-table td{border-color:rgba(255,255,255,.06)!important}
+  /* Histórico */
+  [data-theme="dark"] .hist-item{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.09)!important}
+  /* Painéis */
+  [data-theme="dark"] #risk-dashboard,[data-theme="dark"] #icms-panel,[data-theme="dark"] #apuracao-panel,[data-theme="dark"] .rank-section{background:#111827!important;border-color:rgba(255,255,255,.09)!important}
+  [data-theme="dark"] .diag-box{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.09)!important}
+  [data-theme="dark"] .apur-row{border-color:rgba(255,255,255,.07)!important}
+  /* Resultado count */
+  [data-theme="dark"] #results-count{color:#94A3B8}
+  /* Dropdown select nativo */
+  [data-theme="dark"] option{background:#1E293B;color:#F1F5F9}
+
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="logo"><div class="logo-icon">MF</div><div class="logo-name">Malha <span>Fiscal</span></div></div>
-  <div class="topbar-right">
-    <span class="badge-plan">{{ usuario.get_plano_display }}</span>
-    <div class="user-info"><strong>{{ usuario.get_full_name|default:usuario.username }}</strong>{{ usuario.empresa|default:usuario.email }}</div>
-    <a href="{% url 'sistema:dashboard' %}" class="btn-nav">Sistema</a>
-    <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
+
+<!-- APP PRINCIPAL -->
+<header>
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-report-search"></i></div>
+    <span class="logo-text">Malha Fiscal</span>
+    <div class="logo-sep"></div>
+    <span class="logo-sub">SPED × XML · Confronto de Notas Fiscais</span>
+    <span style="margin-left:8px;font-size:10px;color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);padding:2px 7px;border-radius:10px">v9</span>
   </div>
-</div>
-<div class="main">
-  <div class="page-title">Auditoria SPED x XML</div>
-  <div class="page-sub">Os arquivos s\u00e3o processados direto no seu navegador — nada \u00e9 enviado ao servidor</div>
-  <div class="upload-card">
-    <h3>Carregar arquivos</h3>
-    <div class="upload-grid">
-      <div class="file-area" onclick="document.getElementById('sped-inp').click()">
-        <div class="fi">📄</div>
-        <div class="fl">SPED Fiscal (.txt ou .zip)</div>
-        <div class="fs">Um ou mais arquivos SPED</div>
-        <div class="fc" id="sped-ct"></div>
-        <input type="file" id="sped-inp" multiple accept=".txt,.zip">
+  <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
+    <div style="font-size:12px;color:rgba(255,255,255,.6);text-align:right">
+      <strong style="color:#fff;display:block;font-size:13px">{{ usuario.get_full_name|default:usuario.username }}</strong>
+      {{ usuario.empresa|default:usuario.email }}
+    </div>
+    <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)">{{ usuario.get_plano_display }}</span>
+    <a href="{% url 'sistema:dashboard' %}" style="background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">Sistema</a>
+    <a href="{% url 'accounts:logout' %}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">Sair</a>
+  </div>
+</header>
+
+<main>
+  <div id="upload-screen">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <p class="page-title" style="margin-bottom:0">Novo confronto</p>
+      <button id="limpar-btn" onclick="limparArquivos()" style="display:none;background:#FEE2E2;border:1px solid #FECACA;color:#B91C1C;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer"><i class="ti ti-trash"></i> Limpar tudo</button>
+    </div>
+    <p class="page-sub">Arraste quantos arquivos quiser — acumula sem apagar. Use "Limpar tudo" para começar do zero.</p>
+    <div class="card"><div class="card-body">
+      <div class="upload-grid">
+        <div>
+          <span class="up-label"><i class="ti ti-file-text" style="font-size:13px"></i> SPED Fiscal (.txt) — vários meses</span>
+          <div class="drop-zone" id="sped-drop" onclick="document.getElementById('sped-input').click()">
+            <i class="ti ti-file-text dz-icon"></i>
+            <p>Clique ou arraste os arquivos</p>
+            <small>Um ou mais arquivos .txt — cada mês/período separado</small>
+            <div id="sped-status"></div>
+          </div>
+          <input type="file" id="sped-input" accept=".txt" multiple>
+        </div>
+        <div>
+          <span class="up-label"><i class="ti ti-file-code" style="font-size:13px"></i> XML de NF-e / NFC-e / CT-e ou ZIP</span>
+          <div class="drop-zone" id="xml-drop" onclick="document.getElementById('xml-input').click()">
+            <i class="ti ti-file-code dz-icon"></i>
+            <p>Clique ou arraste os arquivos</p>
+            <small>Arquivos .xml (NF-e, NFC-e, CT-e) ou .zip com vários XMLs</small>
+            <div id="xml-status"></div>
+          </div>
+          <input type="file" id="xml-input" accept=".xml,.zip" multiple>
+        </div>
       </div>
-      <div class="file-area" onclick="document.getElementById('xml-inp').click()">
-        <div class="fi">🗂️</div>
-        <div class="fl">NF-e / CT-e (.xml ou .zip)</div>
-        <div class="fs">Arquivos XML ou ZIP com as notas</div>
-        <div class="fc" id="xml-ct"></div>
-        <input type="file" id="xml-inp" multiple accept=".xml,.zip">
+      <div class="period-row">
+        <i class="ti ti-calendar" style="color:var(--text-2);font-size:16px"></i>
+        <label for="months-filter">Período:</label>
+        <select id="months-filter">
+          <option value="0">Todos os períodos</option>
+          <option value="60" selected>Últimos 60 meses (5 anos)</option>
+          <option value="36">Últimos 36 meses (3 anos)</option>
+          <option value="24">Últimos 24 meses (2 anos)</option>
+          <option value="12">Últimos 12 meses (1 ano)</option>
+        </select>
+      </div>
+      <button class="btn-p" id="process-btn" onclick="processar()" disabled>
+        <i class="ti ti-arrows-exchange-2"></i> Iniciar Confronto
+      </button>
+      <div class="info-note">
+        <i class="ti ti-shield-lock" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
+        <span>Todos os arquivos são processados <strong>localmente no seu computador</strong> — nenhum dado é enviado para servidores externos.</span>
+      </div>
+    </div></div>
+
+    <!-- HISTÓRICO DE CONFRONTOS -->
+    <div id="hist-section" style="display:none;margin-top:1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">
+          <i class="ti ti-history" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Histórico de confrontos
+        </span>
+        <span onclick="limparHistoricoConfronto()" style="cursor:pointer;font-size:11px;color:var(--text-3);text-decoration:underline">Limpar tudo</span>
+      </div>
+      <div id="hist-list"></div>
+    </div>
+
+  </div>
+
+          
+      </div>
+      <div class="cm-body" id="cm-body"></div>
+    </div>
+  </div>
+
+  <div id="results-screen">
+    <div id="empresa-header" style="display:none;padding:6px 20px 6px;background:var(--blue-light);border-bottom:1px solid var(--border)">
+      <span id="empresa-nome" style="font-size:13px;font-weight:700;color:var(--navy)"></span>
+      <span id="empresa-cnpj" style="font-size:12px;color:var(--text-3);margin-left:8px"></span>
+    </div>
+    <!-- Painel Apuração ICMS -->
+    <div id="apuracao-panel" style="display:none;margin-bottom:1rem"></div>
+    <!-- Dashboard de Risco Fiscal -->
+    <div id="risk-dashboard" style="display:none !important;margin-bottom:1rem" data-open="0">
+      <div class="risk-header">
+        <div class="risk-score-wrap">
+          <div class="risk-score-circle" id="risk-circle">
+            <span class="sc" id="risk-score-num">--</span>
+            <span class="lb">score</span>
+          </div>
+          <div>
+            <div class="risk-title">Dashboard de Risco Fiscal</div>
+            <div class="risk-sub">
+              <span id="risk-label-badge" style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px"></span>
+              <span id="risk-sub-text" style="margin-left:8px;font-size:12px;color:var(--text-2)"></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="risk-cards" id="risk-cards"></div>
+    </div>
+
+    <!-- Painel Comparação XML vs SPED (dialog nativo) -->
+
+    <!-- Rankings (colapsável) -->
+    <div id="rankings-section" style="display:none;margin-bottom:1rem"></div>
+
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn-s" onclick="voltarUpload()"><i class="ti ti-arrow-left"></i> Novo confronto</button>
+        <span id="empresa-label" style="font-size:13px;font-weight:600;color:var(--text);margin-right:6px"></span><span id="results-title" style="font-size:14px;font-weight:500;color:var(--text-2)"></span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="search-in" id="search-input" type="text" placeholder="Buscar chave, nº, CNPJ, fornecedor, NCM..." oninput="renderTable()" style="width:260px">
+        <select id="sev-filter" onchange="renderTable()" style="height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:12px;background:var(--surface);color:var(--text);cursor:pointer">
+          <option value="">Todas as severidades</option>
+          <option value="critica">Crítica</option>
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
+          <option value="ok">Sem divergência</option>
+        </select>
+        <select id="month-filter" onchange="renderTable()" style="height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:12px;background:var(--surface);color:var(--text);cursor:pointer;display:none">
+          <option value="">Todos os meses</option>
+        </select>
+
+        <button class="btn-s" id="dashboard-btn" onclick="toggleDashboard()" style="display:none">
+          <i class="ti ti-shield-check"></i>
+          <span id="dashboard-btn-label">Risco Fiscal</span>
+        </button>
+        <button class="btn-s" id="icms-detail-btn" onclick="toggleIcmsPanel()" style="display:none">
+          <i class="ti ti-calculator"></i> Detalhes ICMS
+        </button>
+        <button class="btn-s" id="apuracao-btn" onclick="toggleApuracao()" style="display:none">
+          <i class="ti ti-receipt-tax"></i> Apuração ICMS
+        </button>
+        <button class="btn-s" onclick="imprimirRelatorio()" style="padding:7px 14px">
+          <i class="ti ti-printer"></i> Imprimir
+        </button>
+        <button class="btn-s" onclick="exportarExcel()"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
       </div>
     </div>
-    <button type="button" onclick="analisar()" class="btn-analisar">🔍 Analisar divergencias</button>
+    <!-- Painel Análise de ICMS (colapsável, aparece só se há dados) -->
+    <div id="icms-panel" style="display:none !important;margin-bottom:1rem">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:14px;font-weight:600;color:var(--text)"><i class="ti ti-calculator" style="font-size:15px;vertical-align:-2px;color:var(--blue)"></i> Análise de ICMS</span>
+            <span id="icms-risk-badge" style="font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px"></span>
+          </div>
+          <button class="btn-s" onclick="toggleIcmsPanel()" style="padding:4px 10px;font-size:12px"><i class="ti ti-x"></i></button>
+        </div>
+        <div id="icms-panel-body" style="padding:16px"></div>
+      </div>
+    </div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="tabs" id="filter-tabs"></div>
+    <div id="detail-panel" style="margin-bottom:.75rem"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:22%">Chave de acesso</th>
+          <th style="width:7%">Nº doc</th>
+          <th style="width:4%">Série</th>
+          <th style="width:8%">Data</th>
+          <th style="width:9%" class="right">Valor (R$)</th>
+          <th style="width:6%">Modelo</th>
+          <th style="width:5%">Tipo</th>
+          <th style="width:6%">CFOP</th>
+          <th style="width:7%">Situação</th>
+          <th style="width:4%">Orig.</th>
+          <th style="width:9%">Status</th>
+          <th style="width:10%">Severidade</th>
+        </tr></thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+    <p id="results-count" style="font-size:12px;color:var(--text-2);margin-top:10px"></p>
   </div>
-  <div id="loading" class="loading"><div class="spinner"></div>Processando arquivos, aguarde...</div>
-  <div id="resultados"></div>
-</div>
-<script>
-document.getElementById('sped-inp').onchange=function(){document.getElementById('sped-ct').textContent=this.files.length?this.files.length+' arquivo(s)':''};
-document.getElementById('xml-inp').onchange=function(){document.getElementById('xml-ct').textContent=this.files.length?this.files.length+' arquivo(s)':''};
+</main>
 
-function pNum(s){if(!s)return 0;return parseFloat(String(s).trim().replace(',','.'))||0;}
+<div id="toast"><i class="ti ti-clipboard-check"></i> Chave copiada!</div>
+
+<!-- Painel comparação — fixo no topo, abaixo do navbar -->
+<div id="compare-overlay" style="display:none;position:fixed;top:56px;left:0;right:0;z-index:900;background:var(--surface);border-bottom:3px solid var(--navy);box-shadow:0 4px 24px rgba(0,0,0,.18);max-height:calc(100vh - 56px);overflow-y:auto">
+  <div style="background:var(--navy);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="cm-title" style="font-size:13px;font-weight:600;color:#fff"></span>
+      <span id="cm-sev"></span>
+    </div>
+
+  </div>
+  <div id="cm-body" style="padding:18px"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  ⚠️  ALTERE ESTA PALAVRA-CHAVE SECRETA
+//  Use a MESMA nos dois arquivos (app + gerador)
+//  Não compartilhe com ninguém!
+// ═══════════════════════════════════════════════════════════
+const SECRET = 'MINHACHAVE2025';
+
+// Lista de chaves revogadas (gerada automaticamente pelo gerador_licencas.html)
+const REVOKED = [/*REVOKED_LIST*/];
+
+// ══════════════════════════════════════════════════════════════
+// Funções de severidade — declaradas no topo para garantir
+// disponibilidade em qualquer ordem de execução (Safari)
+// ══════════════════════════════════════════════════════════════
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function dm(light,dark){return isDark()?dark:light;}
+
+// ══════════════════════════════════════════════════════════════════
+//  VERIFICAÇÃO DO DÍGITO VERIFICADOR DA CHAVE (Módulo 11 SEFAZ)
+// ══════════════════════════════════════════════════════════════════
+function verificarDV(chave){
+  if(!chave||chave.length!==44||!/^\d{44}$/.test(chave)) return null; // null = não verificável
+  let soma=0, p=2;
+  for(let i=42;i>=0;i--){
+    soma+=parseInt(chave[i])*p;
+    p=p<9?p+1:2;
+  }
+  const resto=soma%11;
+  const dv=resto<2?0:11-resto;
+  return dv===parseInt(chave[43]); // true=válida, false=inválida
+}
+
+// ── URL correta por tipo de documento ────────────────────────────────
+function urlSefaz(chave){
+  if(!chave||chave.length!==44) return null;
+  const mod=chave.substring(20,22);
+  const cuf=chave.substring(0,2);
+  // CT-e → portal CT-e nacional
+  if(mod==='57') return 'https://www.cte.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&chave='+chave;
+  // NF-e → portal NF-e nacional
+  if(mod==='55') return 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&chave='+chave;
+  // NFC-e → portal do estado (cada UF tem o seu)
+  const nfcePortais={
+    '11':'https://www.sefin.ro.gov.br/nfce/qrcode?p='+chave,
+    '12':'https://www.sefaz.ac.gov.br/nfce/consulta',
+    '13':'https://sistemas.sefaz.am.gov.br/nfceweb/consultarNFCe.html',
+    '14':'https://www.sefaz.rr.gov.br/nfce/consulta',
+    '15':'https://www.sefa.pa.gov.br/nfce/consulta',
+    '16':'https://www.sefaz.ap.gov.br/nfce/consulta',
+    '17':'https://www.sefaz.to.gov.br/nfce/consulta',
+    '21':'https://www.sefaz.ma.gov.br/portalnfce',
+    '22':'https://www.sefaz.pi.gov.br/nfce/consulta',
+    '23':'https://nfce.sefaz.ce.gov.br/pages/consultarNFCe.jsf',
+    '24':'https://nfce.set.rn.gov.br/portalDFe/NFCe/QRCode.aspx',
+    '25':'https://www.sefaz.pb.gov.br/nfce/consulta',
+    '26':'https://nfce.sefaz.pe.gov.br/nfce/consulta',
+    '27':'https://nfce.sefaz.al.gov.br/QRCode/consultarNFCe.jsp',
+    '28':'https://www.sefaz.se.gov.br/nfce/consulta',
+    '29':'https://www.sefaz.ba.gov.br/portalsped/nfce',
+    '31':'https://nfce.fazenda.mg.gov.br/portalnfce',
+    '32':'https://app.sefaz.es.gov.br/ConsultaNFCe',
+    '33':'https://nfce.fazenda.rj.gov.br/consulta',
+    '35':'https://www.nfce.fazenda.sp.gov.br/consulta',
+    '41':'https://www.fazenda.pr.gov.br/nfce/consulta',
+    '42':'https://sat.sef.sc.gov.br/nfce/consulta',
+    '43':'https://www.sefaz.rs.gov.br/NFCe/NfceConsultaPublica.aspx',
+    '50':'https://www.dfe.ms.gov.br/nfce/qrcode',
+    '51':'https://www.sefaz.mt.gov.br/nfce/consultarNFCe',
+    '52':'https://www.sefaz.go.gov.br/nfce/consulta',
+    '53':'https://dec.fazenda.df.gov.br/ConsultarNFCe.aspx',
+  };
+  return nfcePortais[cuf]||'https://www.nfe.fazenda.gov.br/portal/listarConteudo.aspx?tipoConteudo=WaBniSBVGgE=';
+}
+
+function calcSeverity(r){
+  if(!r) return null;
+  // Crítica: erros que geram recolhimento incorreto ou multa
+  if(r.icmsOk===false)                 return{cls:'sev-c',label:'Crítica',order:0};
+  if(r.stOk===false)                   return{cls:'sev-c',label:'Crítica',order:0}; // ICMS-ST divergente
+  if(r.freteOk===false||r.segOk===false||r.descOk===false||r.outroOk===false)
+                                       return{cls:'sev-a',label:'Alta',order:1};   // Campos financeiros div.
+  if(r.ipiOk===false)                  return{cls:'sev-a',label:'Alta',order:1};   // IPI divergente
+  if(r.prodOk===false)                 return{cls:'sev-c',label:'Crítica',order:0}; // Total produtos div.
+  if(r.bcStOk===false)                 return{cls:'sev-a',label:'Alta',order:1};   // BC ST divergente
+  if(r.vlOk===false)                   return{cls:'sev-c',label:'Crítica',order:0}; // Valor total divergente
+  if(r.bcOk===false)                   return{cls:'sev-c',label:'Crítica',order:0}; // BC divergente
+  // Alta: impacto na apuração
+  if(r.status==='miss')                return{cls:'sev-a',label:'Alta',order:1};
+  if(r.cstIcmsOk===false)              return{cls:'sev-a',label:'Alta',order:1}; // CST x ICMS incompatível
+  if(r.dateImpossivel)                 return{cls:'sev-a',label:'Alta',order:1}; // Data impossível
+  if(r.cfopOk===false)                 return{cls:'sev-a',label:'Alta',order:1}; // CFOP entrada/saída errado
+  // Média: inconsistências documentais
+  if(r.status==='extra')               return{cls:'sev-m',label:'Média',order:2};
+  if(r.cfopUFOk===false)              return{cls:'sev-m',label:'Média',order:2}; // CFOP UF inconsistente
+  if(r.dateOk===false)                return{cls:'sev-m',label:'Média',order:2}; // Gap de data > 30 dias
+  if(r.sit==='04')                     return{cls:'sev-m',label:'Média',order:2}; // Denegada
+  if(r.isDuplicate)                    return{cls:'sev-m',label:'Média',order:2};
+  if(r.hasNumGap)                      return{cls:'sev-m',label:'Média',order:2}; // Numeração quebrada
+  // Baixa: informativo
+  if(r.dvInvalido)                      return{cls:'sev-m',label:'Média',order:2}; // DV inválido
+  if(r.dvInvalido)                     return{cls:'sev-m',label:'Média',order:2}; // DV inválido
+  if(r.sit==='02')                     return{cls:'sev-b',label:'Baixa',order:3}; // Cancelada
+  if(r.sit==='05')                     return{cls:'sev-b',label:'Baixa',order:3}; // Inutilizada
+  return null;
+}
+function calcRiskScore(){
+  const total=allResults.length;
+  if(!total) return{score:100,label:'SEM DADOS',color:'#9CA3AF',bg:'#F3F4F6',miss:0,extra:0,icmsDivg:0,bcDivg:0,criticos:0,altos:0,medios:0,total:0};
+  const miss      =allResults.filter(r=>r.status==='miss').length;
+  const extra     =allResults.filter(r=>r.status==='extra').length;
+  const icmsDivg  =allResults.filter(r=>r.icmsOk===false).length;
+  const bcDivg    =allResults.filter(r=>r.bcOk===false).length;
+  const stDivg    =allResults.filter(r=>r.stOk===false).length;
+  const vlDivg    =allResults.filter(r=>r.vlOk===false).length;
+  const cfopInc   =allResults.filter(r=>r.cfopOk===false||r.cfopUFOk===false).length;
+  const cstInc    =allResults.filter(r=>r.cstIcmsOk===false).length;
+  const dateInc   =allResults.filter(r=>r.dateImpossivel).length;
+  const denegadas =allResults.filter(r=>r.sit==='04').length;
+  const criticos  =allResults.filter(r=>{const s=calcSeverity(r);return s&&s.order===0;}).length;
+  const altos     =allResults.filter(r=>{const s=calcSeverity(r);return s&&s.order===1;}).length;
+  const medios    =allResults.filter(r=>{const s=calcSeverity(r);return s&&s.order===2;}).length;
+  let penalty=0;
+  // Críticos: maior peso
+  penalty+=(icmsDivg/total)*35;
+  penalty+=(stDivg/total)*20;
+  penalty+=(vlDivg/total)*20;
+  penalty+=(bcDivg/total)*15;
+  penalty+=(cstInc/total)*15;
+  // Altos
+  penalty+=(miss/total)*25;
+  penalty+=(cfopInc/total)*10;
+  penalty+=(dateInc/total)*10;
+  // Médios
+  penalty+=(extra/total)*12;
+  penalty+=(denegadas/total)*5;
+  // Penalidades base
+  if(icmsDivg>0) penalty+=8;
+  if(miss>0)     penalty+=5;
+  if(cstInc>0)   penalty+=5;
+  const score=Math.max(0,Math.min(100,Math.round(100-penalty)));
+  let label,color,bg;
+  if(score>=80)      {label='BAIXO';   color='#15803D';bg='#DCFCE7';}
+  else if(score>=60) {label='MÉDIO';   color='#B45309';bg='#FEF3C7';}
+  else if(score>=40) {label='ALTO';    color='#B91C1C';bg='#FEE2E2';}
+  else               {label='CRÍTICO'; color='#7F1D1D';bg='#FEE2E2';}
+  return{score,label,color,bg,miss,extra,icmsDivg,bcDivg,stDivg,vlDivg,cfopInc,cstInc,criticos,altos,medios,total};
+}
+
+function fnv32(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return h.toString(16).toUpperCase().padStart(8,'0');
+}
+
+function validarChave(chave) {
+  const raw = (chave||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+
+  // ── Aceitar qualquer comprimento razoável ─────────────────────
+  if (raw.length < 12) return { ok:false, msg:'Chave muito curta. Formato: 2027-12-31-XXXX-XXXX' };
+  if (REVOKED.includes((chave||'').toUpperCase())) return { ok:false, revoked:true, msg:'Esta licença foi cancelada.' };
+
+  // ── Tentar formato de 16 chars (YYYYMMDD + 8 hash) ───────────
+  if (raw.length >= 16) {
+    const dataPart = raw.slice(0,8);
+    const hashInfo = raw.slice(8,16);
+    const esperado = fnv32(dataPart + SECRET);
+    if (hashInfo === esperado) {
+      const ano=parseInt(dataPart.slice(0,4)), mes=parseInt(dataPart.slice(4,6)), dia=parseInt(dataPart.slice(6,8));
+      if (ano>2000 && mes>=1 && mes<=12 && dia>=1 && dia<=31) {
+        const expDate = new Date(ano, mes-1, dia, 23, 59, 59);
+        if (new Date() > expDate) return { ok:false, expired:true, msg:`Licença expirada em ${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}.` };
+        const dias = Math.ceil((expDate - new Date()) / 86400000);
+        return { ok:true, expiry:`${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}`, dias };
+      }
+    }
+  }
+
+  // ── Tentar formato de 14 chars (YYYYMM + 8 hash) ─────────────
+  if (raw.length >= 14) {
+    const anoMes = raw.slice(0,6);
+    const hashInfo = raw.slice(6,14);
+    const esperado = fnv32(anoMes + SECRET);
+    if (hashInfo === esperado) {
+      const ano=parseInt(anoMes.slice(0,4)), mes=parseInt(anoMes.slice(4,6));
+      const expDate = new Date(ano, mes, 0, 23, 59, 59);
+      if (new Date() > expDate) return { ok:false, expired:true, msg:`Licença expirada em ${String(mes).padStart(2,'0')}/${ano}.` };
+      const dias = Math.ceil((expDate - new Date()) / 86400000);
+      return { ok:true, expiry:`${String(mes).padStart(2,'0')}/${ano}`, dias };
+    }
+  }
+
+  // ── Nenhum formato funcionou ──────────────────────────────────
+  return { ok:false, msg:'Chave não reconhecida. Confirme que usou o Gerador de Licenças correto.' };
+}
+
+document.getElementById('key-input').addEventListener('input', function() {
+  // Mantém o valor como o usuário digitou, só remove espaços extras e passa pra maiúsculo
+  // Não reformata automaticamente para não quebrar colas de outros formatos
+  const cur = this.value.toUpperCase().trim();
+  this.value = cur;
+  this.classList.remove('err-state','ok-state');
+  const msg = document.getElementById('gate-msg');
+  msg.textContent=''; msg.className='gate-msg';
+});
+document.getElementById('key-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); ativar(); }
+});
+
+function ativar() {
+  try {
+    const chave = (document.getElementById('key-input').value || '').trim();
+    const r = validarChave(chave);
+    const input = document.getElementById('key-input');
+    const msg   = document.getElementById('gate-msg');
+    if (!r.ok) {
+      input.classList.add('err-state');
+      msg.textContent = r.msg;
+      msg.className = 'gate-msg err';
+      input.focus();
+      return;
+    }
+    input.classList.add('ok-state');
+    msg.textContent = '✓ Licença válida até ' + r.expiry;
+    msg.className = 'gate-msg ok';
+    // localStorage pode falhar em mobile/file:// — ignorar silenciosamente
+    try { localStorage.setItem('mf_lic', chave); } catch(e) {}
+    setTimeout(function() {
+      document.getElementById('license-gate').style.display = 'none';
+      showLicBadge(r);
+    }, 600);
+  } catch(e) {
+    const msg = document.getElementById('gate-msg');
+    if (msg) { msg.textContent = 'Erro: ' + e.message; msg.className = 'gate-msg err'; }
+  }
+}
+
+function limparCacheERecarregar(){
+  if(confirm('Isso vai limpar o cache de licença e recarregar a página. Continuar?')){
+    try { localStorage.removeItem('mf_lic'); } catch(e) {}
+    location.reload();
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO ANÁLISE DE ICMS
+// ═══════════════════════════════════════════════════════════════
+function toggleDashboard(){
+  const d=document.getElementById('risk-dashboard');
+  if(!d) return;
+  const isOpen=d.getAttribute('data-open')==='1';
+  if(isOpen){
+    d.style.setProperty('display','none','important');
+    d.setAttribute('data-open','0');
+  } else {
+    d.style.removeProperty('display');
+    d.style.display='block';
+    d.setAttribute('data-open','1');
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  MÓDULO APURAÇÃO DO ICMS (Bloco E × Bloco C)
+// ═══════════════════════════════════════════════════════════════════
+function toggleApuracao(){
+  const p=document.getElementById('apuracao-panel');
+  if(!p) return;
+  if(p.style.display==='none'){ renderApuracao(); p.style.display='block'; }
+  else p.style.display='none';
+}
+
+
+
+
+function limparArquivos(){
+  spedData=[]; xmlData=[]; _spedFileList=[]; _xmlFileList=[];
+  window._e110=null; window._c190Deb=0; window._c190Cred=0;
+  document.getElementById('sped-status').innerHTML='';
+  const ehL=document.getElementById('empresa-header');if(ehL)ehL.style.display='none';
+  document.getElementById('xml-status').innerHTML='';
+  document.getElementById('sped-input').value='';
+  document.getElementById('xml-input').value='';
+  document.getElementById('process-btn').disabled=true;
+  document.getElementById('limpar-btn').style.display='none';
+}
+
+function adicionarMaisArquivos(tipo){
+  const inp=document.createElement('input');
+  inp.type='file';
+  inp.multiple=true;
+  inp.accept=tipo==='sped'?'.txt':'.xml,.zip';
+  inp.onchange=async function(e){
+    e._isAdd=true;
+    if(tipo==='sped'){
+      document.getElementById('sped-input').dispatchEvent(Object.assign(new Event('change'),{target:{files:e.target.files},_isAdd:true}));
+      // processar manualmente com flag de acumular
+      const files=Array.from(e.target.files);
+      document.getElementById('sped-status').innerHTML='<div class="dz-st ok"><i class="ti ti-loader"></i> Adicionando SPEDs...</div>';
+      for(const file of files){
+        const txt=await new Promise(res=>{
+          const reader=new FileReader();
+          reader.onload=ev=>res(ev.target.result);
+          reader.readAsText(file,'UTF-8');
+        });
+        const result=parseSped(txt);
+        spedData.push(...result.records);
+        if(result.e110){
+          if(!window._e110){ window._e110=JSON.parse(JSON.stringify(result.e110)); }
+          else { window._e110.debitos+=result.e110.debitos; window._e110.creditos+=result.e110.creditos; }
+        }
+        window._c190Deb=(window._c190Deb||0)+result.c190Deb;
+        window._c190Cred=(window._c190Cred||0)+result.c190Cred;
+        _spedFileList.push(file.name);
+      }
+      const saiC=spedData.filter(r=>r.oper==='1').length;
+      const entC=spedData.filter(r=>r.oper==='0').length;
+      const cteC=spedData.filter(r=>r.tipo==='cte').length;
+      document.getElementById('sped-status').innerHTML=
+        '<div class="dz-st ok"><i class="ti ti-circle-check"></i> '+
+        spedData.length.toLocaleString('pt-BR')+' registros ('+saiC+' saídas, '+entC+' entradas) · '+_spedFileList.length+' arquivo(s)</div>';
+      checkReady();
+    } else {
+      // XML
+      const files=Array.from(e.target.files);
+      document.getElementById('xml-status').innerHTML='<div class="dz-st ok"><i class="ti ti-loader"></i> Adicionando XMLs...</div>';
+      for(const file of files){
+        if(file.name.endsWith('.zip')){
+          const buf=await file.arrayBuffer();
+          const zip=await JSZip.loadAsync(buf);
+          for(const [name,entry] of Object.entries(zip.files)){
+            if(!name.toLowerCase().endsWith('.xml')) continue;
+            const txt=await entry.async('text');
+            try{ const parsed=parseXML(txt, name); if(parsed) xmlData.push(parsed); }catch(e){}
+          }
+        } else {
+          const txt=await new Promise(res=>{const r=new FileReader();r.onload=ev=>res(ev.target.result);r.readAsText(file,'UTF-8');});
+          try{ const parsed=parseXML(txt, name); if(parsed) xmlData.push(parsed); }catch(e){}
+        }
+        _xmlFileList.push(file.name);
+      }
+      document.getElementById('xml-status').innerHTML=
+        '<div class="dz-st ok"><i class="ti ti-circle-check"></i> '+
+        xmlData.length.toLocaleString('pt-BR')+' documentos XML · '+_xmlFileList.length+' arquivo(s)</div>';
+      const lba=document.getElementById('limpar-btn');if(lba)lba.style.display='inline-flex';
+      checkReady();
+    }
+  };
+  inp.click();
+}
+
+function copiarChaveClipboard(chave){
+  const msg='Chave copiada! Cole no campo da SEFAZ (Ctrl+V / Cmd+V)';
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(chave).then(()=>mostrarToast(msg)).catch(()=>{copiarFallback(chave);mostrarToast(msg);});
+    }else{copiarFallback(chave);mostrarToast(msg);}
+  }catch(e){copiarFallback(chave);mostrarToast(msg);}
+}
+
+function abrirSefaz(chave, e){
+  if(!chave||chave.length!==44) return;
+  e.stopPropagation();
+  // Abrir PRIMEIRO — Safari bloqueia window.open em setTimeout
+  const url=urlSefaz(chave);
+  window.open(url,'_blank');
+  // Copiar chave depois de abrir
+  const msg='Chave copiada! Cole no campo da SEFAZ (Ctrl+V / Cmd+V)';
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(chave).then(()=>mostrarToast(msg)).catch(()=>{copiarFallback(chave);mostrarToast(msg);});
+    }else{copiarFallback(chave);mostrarToast(msg);}
+  }catch(err){copiarFallback(chave);mostrarToast(msg);}
+}
+
+
+function mostrarToast(msg){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=msg;
+  t.style.opacity='1';
+  t.style.transform='translateY(0)';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{
+    t.style.opacity='0';
+    t.style.transform='translateY(10px)';
+  }, 3000);
+}
+
+function getDataDoc(r){
+  return r.dtSaida||r.dtEntrada||r.dtDoc||'—';
+}
+
+function renderApuracao(){
+  const e=window._e110;
+  const f2=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const c190Deb=parseFloat((window._c190Deb||0).toFixed(2));
+  const c190Cred=parseFloat((window._c190Cred||0).toFixed(2));
+
+  if(!e){
+    document.getElementById('apuracao-panel').innerHTML=
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:13px;color:var(--text-2)">'+
+      '<i class="ti ti-info-circle"></i> Registro E110 não encontrado no SPED. Verifique se o arquivo contém o Bloco E (Apuração do ICMS).</div>';
+    return;
+  }
+
+  const difDeb  = parseFloat(Math.abs(c190Deb  - e.debitos).toFixed(2));
+  const difCred = parseFloat(Math.abs(c190Cred - e.creditos).toFixed(2));
+  const debOk   = difDeb  <= 0.02;
+  const credOk  = difCred <= 0.02;
+
+  // Recalcular apuração com base no E110
+  const calcRecolher = parseFloat(Math.max(0, e.debitos + e.ajDeb - e.estCred - e.creditos - e.ajCred + e.estDeb - e.sldAnt - e.totDed).toFixed(2));
+  const calcCredor   = parseFloat(Math.max(0, e.sldAnt + e.creditos + e.ajCred - e.estDeb - e.debitos - e.ajDeb + e.totDed).toFixed(2));
+  const apurOk = Math.abs(calcCredor - e.sldCredor) <= 0.05 && Math.abs(calcRecolher - e.recolher) <= 0.05;
+  const tudo_ok = debOk && credOk && apurOk;
+
+  const row=(lbl,c190,e110,ok)=>`
+    <div class="apur-row">
+      <span class="apur-lbl">${lbl}</span>
+      <span class="apur-val">R$ ${f2(c190)}</span>
+      <span class="apur-val">R$ ${f2(e110)}</span>
+      <span class="apur-dif" style="color:${ok?'var(--ok)':'var(--danger)'}">
+        ${ok?'✓ OK':'⚠ R$ '+f2(Math.abs(c190-e110))}
+      </span>
+    </div>`;
+
+  document.getElementById('apuracao-panel').innerHTML=`
+    <div style="background:var(--surface);border:1px solid ${tudo_ok?'#86EFAC':'var(--danger)'};border-radius:var(--r);box-shadow:var(--sh);overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:14px;font-weight:600">
+          <i class="ti ti-receipt-tax" style="font-size:15px;vertical-align:-2px;color:var(--blue)"></i>
+          Apuração do ICMS — Bloco E × Bloco C
+        </span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;background:${tudo_ok?'#DCFCE7':'#FEE2E2'};color:${tudo_ok?'#15803D':'#B91C1C'}">
+            ${tudo_ok?'✓ APURAÇÃO CORRETA':'⚠ APURAÇÃO COM DIVERGÊNCIA'}
+          </span>
+          <button class="btn-s" onclick="toggleApuracao()" style="padding:4px 10px;font-size:12px"><i class="ti ti-x"></i></button>
+        </div>
+      </div>
+      <div style="padding:16px">
+        <!-- Cards resumo -->
+        <div class="apur-grid">
+          <div class="apur-card ${debOk?'ok':'err'}">
+            <div class="al">ICMS Débitos (Saídas)</div>
+            <div class="av" style="color:${debOk?'var(--text)':'var(--danger)'}">R$ ${f2(e.debitos)}</div>
+            <div class="as">${debOk?'✓ C190 bate com E110':'⚠ Dif. R$ '+f2(difDeb)}</div>
+          </div>
+          <div class="apur-card ${credOk?'ok':'err'}">
+            <div class="al">ICMS Créditos (Entradas)</div>
+            <div class="av" style="color:${credOk?'var(--text)':'var(--danger)'}">R$ ${f2(e.creditos)}</div>
+            <div class="as">${credOk?'✓ C190 bate com E110':'⚠ Dif. R$ '+f2(difCred)}</div>
+          </div>
+          <div class="apur-card">
+            <div class="al">Saldo Credor Anterior</div>
+            <div class="av">R$ ${f2(e.sldAnt)}</div>
+            <div class="as">Transportado do período anterior</div>
+          </div>
+          <div class="apur-card ${apurOk?'ok':'err'}">
+            <div class="al">ICMS a Recolher</div>
+            <div class="av" style="color:${e.recolher>0?'var(--danger)':'var(--text)'}">R$ ${f2(e.recolher)}</div>
+            <div class="as">${e.sldCredor>0?'Saldo credor: R$ '+f2(e.sldCredor):'Apuração do período'}</div>
+          </div>
+        </div>
+
+        <!-- Tabela comparativa C190 × E110 -->
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-2);margin-bottom:8px">
+          Comparativo C190 × E110
+        </div>
+        <div style="border:1px solid var(--border);border-radius:var(--rs);padding:0 14px">
+          <div class="apur-row" style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-2)">
+            <span class="apur-lbl">Campo</span>
+            <span class="apur-val">Soma C190</span>
+            <span class="apur-val">E110 SPED</span>
+            <span class="apur-dif">Status</span>
+          </div>
+          ${row('Total ICMS Débitos (Saídas)',c190Deb,e.debitos,debOk)}
+          ${row('Total ICMS Créditos (Entradas)',c190Cred,e.creditos,credOk)}
+        </div>
+
+        <!-- Explicação -->
+        <div style="margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;font-size:12px;color:var(--text-2);line-height:1.7">
+          <strong style="color:var(--text)">O que este módulo verifica:</strong><br>
+          Soma todos os valores de ICMS dos registros C190 (por operação) e compara com o que foi declarado no E110 (apuração mensal).
+          Se os totais não baterem, significa que alguma nota foi lançada no C100/C190 mas não foi incluída na apuração, ou vice-versa —
+          o que pode gerar recolhimento incorreto do imposto.<br><br>
+          ${!debOk?'<strong style="color:var(--danger)">⚠ DÉBITOS DIVERGENTES:</strong> A soma dos C190 de saídas (R$ '+f2(c190Deb)+') difere do E110 (R$ '+f2(e.debitos)+'). Verifique se todos os C190 do período foram incluídos na apuração.<br>':''}
+          ${!credOk?'<strong style="color:var(--danger)">⚠ CRÉDITOS DIVERGENTES:</strong> A soma dos C190 de entradas (R$ '+f2(c190Cred)+') difere do E110 (R$ '+f2(e.creditos)+'). Verifique os lançamentos de entradas no período.<br>':''}
+          ${tudo_ok?'<strong style="color:var(--ok)">✓ Apuração correta:</strong> Os totais de C190 batem com o E110 e o cálculo do ICMS a recolher está consistente.':''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleIcmsPanel(){
+  const panel=document.getElementById('icms-panel');
+  if(panel.style.display==='none'){
+    renderIcmsPanel();
+    panel.style.display='block';
+  } else {
+    panel.style.display='none';
+  }
+}
+
+function renderIcmsPanel(){
+  const comIcms=allResults.filter(r=>r.status==='ok'&&(r.icmsSped!==null||r.icmsXml!==null));
+  const divg=allResults.filter(r=>r.icmsOk===false);
+  const bcDivg=allResults.filter(r=>r.bcOk===false);
+  const f2=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const totalIcmsXml=allResults.reduce((s,r)=>s+(r.icmsXml||0),0);
+  const totalIcmsSped=allResults.reduce((s,r)=>s+(r.icmsSped||0),0);
+  const totalDiff=Math.abs(totalIcmsXml-totalIcmsSped);
+  const riskPct=comIcms.length>0?(divg.length/comIcms.length)*100:0;
+  let riskLabel,riskColor,riskBg;
+  if(divg.length===0)               {riskLabel='RISCO BAIXO'; riskColor='#15803D';riskBg='#DCFCE7';}
+  else if(riskPct<5||totalDiff<100) {riskLabel='RISCO BAIXO'; riskColor='#B45309';riskBg='#FEF3C7';}
+  else if(riskPct<20||totalDiff<1000){riskLabel='RISCO MÉDIO';riskColor='#92400E';riskBg='#FEF3C7';}
+  else                              {riskLabel='RISCO ALTO'; riskColor='#B91C1C';riskBg='#FEE2E2';}
+
+  document.getElementById('icms-risk-badge').textContent=riskLabel;
+  document.getElementById('icms-risk-badge').style.cssText=
+    'font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:'+riskBg+';color:'+riskColor;
+
+  // Cards de resumo
+  const card=(lbl,val,sub,alert)=>
+    '<div style="background:#F9FAFB;border:1px solid '+(alert?'#FECACA':'#E5E7EB')+
+    ';border-radius:8px;padding:10px 14px;flex:1;min-width:130px">'+
+    '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:'+(alert?'#B91C1C':'#6B7280')+
+    ';margin-bottom:4px">'+lbl+'</div>'+
+    '<div style="font-size:18px;font-weight:700;color:'+(alert?'#B91C1C':'#111827')+'">'+val+'</div>'+
+    '<div style="font-size:10px;color:#9CA3AF;margin-top:2px">'+sub+'</div></div>';
+
+  let html='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">'+
+    card('ICMS Total XML','R$ '+f2(totalIcmsXml),'declarado nos XMLs',false)+
+    card('ICMS Total SPED','R$ '+f2(totalIcmsSped),'declarado no SPED',false)+
+    card('Diferença Total','R$ '+f2(totalDiff),'entre XML e SPED',totalDiff>0.02)+
+    card('Notas analisadas',comIcms.length.toLocaleString('pt-BR'),'com dados de ICMS',false)+
+    card('ICMS Divergente',divg.length,'nota(s) com diferença',divg.length>0)+
+    card('BC Divergente',bcDivg.length,'base de cálculo diferente',bcDivg.length>0)+
+  '</div>';
+
+  // Tabela de divergências
+  if(divg.length>0){
+    html+='<div style="font-size:12px;font-weight:600;color:#B91C1C;margin-bottom:8px">'+
+      divg.length+' nota(s) com ICMS divergente entre XML e SPED:</div>'+
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">'+
+      '<thead><tr style="background:#F3F4F6">'+
+      '<th style="padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">CHAVE</th>'+
+      '<th style="padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">Nº DOC</th>'+
+      '<th style="padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">DATA</th>'+
+      '<th style="padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">TIPO</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">ICMS XML (R$)</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">ICMS SPED (R$)</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">DIFERENÇA (R$)</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">BC XML</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">BC SPED</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">ALÍQ. XML</th>'+
+      '<th style="padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">ALÍQ. SPED</th>'+
+      '<th style="padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #E5E7EB;font-size:10px;color:#374151">CST/SPED</th>'+
+      '</tr></thead><tbody>';
+
+    divg.slice(0,100).forEach(r=>{
+      html+='<tr style="border-bottom:1px solid #F3F4F6">'+
+        '<td style="padding:7px 10px;font-family:monospace;font-size:10px;color:#6B7280">'+
+          (r.chave||'').slice(0,12)+'…'+(r.chave||'').slice(-6)+'</td>'+
+        '<td style="padding:7px 10px">'+(r.numDoc||'—')+'</td>'+
+        '<td style="padding:7px 10px;color:#6B7280">'+getDataDoc(r)+'</td>'+
+        '<td style="padding:7px 10px">'+(r.mod==='65'?'NFC-e':r.tipo==='cte'?'CT-e':'NF-e')+' '+(r.oper==='0'?'Ent.':'Saí.')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right;color:#B91C1C;font-weight:600">'+(r.icmsXml!==null?f2(r.icmsXml):'—')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right;color:#B91C1C;font-weight:600">'+(r.icmsSped!==null?f2(r.icmsSped):'—')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right;color:#B91C1C;font-weight:700">⚠ '+(r.icmsDiff!==null?f2(r.icmsDiff):'?')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right">'+(r.bcIcmsXml!==null?f2(r.bcIcmsXml):'—')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right">'+(r.bcIcmsSped!==null?f2(r.bcIcmsSped):'—')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right">'+(r.aliqXml>0?r.aliqXml+'%':'—')+'</td>'+
+        '<td style="padding:7px 10px;text-align:right">'+(r.aliqSped!==null?r.aliqSped+'%':'—')+'</td>'+
+        '<td style="padding:7px 10px">'+(r.cstsSped||'—')+'</td>'+
+      '</tr>';
+    });
+
+    if(divg.length>100)
+      html+='<tr><td colspan="10" style="padding:10px;text-align:center;color:#9CA3AF;font-style:italic">'+
+        '... e mais '+(divg.length-100)+' notas. Exporte o Excel para ver todas.</td></tr>'.replace('colspan="10"','colspan="13"');
+
+    html+='</tbody></table></div>';
+
+  } else if(comIcms.length>0){
+    html+='<div style="font-size:13px;color:#15803D;font-weight:500;padding:12px 0">'+
+      '✓ Nenhuma divergência de ICMS encontrada.</div>';
+  } else {
+    html+='<div style="font-size:13px;color:#9CA3AF;padding:12px 0">'+
+      'Dados de ICMS não encontrados. Verifique se os XMLs e SPED foram carregados.</div>';
+  }
+
+  document.getElementById('icms-panel-body').innerHTML=html;
+}
+
+function renderRiskDashboard(){
+  const rs=calcRiskScore();
+  const div=document.getElementById('risk-dashboard');
+  if(!div||!allResults.length) return;
+  // Não abrir automaticamente — só atualizar conteúdo
+
+  // Círculo do score
+  const circ=document.getElementById('risk-circle');
+  circ.style.background=rs.bg;
+  circ.style.color=rs.color;
+  circ.style.border=`3px solid ${rs.color}`;
+  document.getElementById('risk-score-num').textContent=rs.score;
+
+  // Badge de risco
+  const badge=document.getElementById('risk-label-badge');
+  badge.textContent=rs.label;
+  badge.style.background=rs.bg;
+  badge.style.color=rs.color;
+
+  // Texto auxiliar
+  const divgTotal=allResults.filter(r=>calcSeverity(r)!==null).length;
+  const pct=rs.total>0?((divgTotal/rs.total)*100).toFixed(1):'0';
+  document.getElementById('risk-sub-text').textContent=
+    `${divgTotal} inconsistência(s) em ${rs.total} documentos — ${pct}% com irregularidade`;
+
+  // 4 cards essenciais
+  const vlDivg=allResults.filter(r=>r.icmsOk===false).reduce((s,r)=>s+(r.icmsDiff||0),0);
+  const f2=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const cards=[
+    {icon:'ti-files',        lbl:'Total de documentos', val:rs.total.toLocaleString('pt-BR'), sub:'analisados no confronto'},
+    {icon:'ti-alert-circle', lbl:'Divergências Críticas',val:rs.criticos,                      sub:'precisam ação imediata', color:rs.criticos>0?'#7F1D1D':undefined},
+    {icon:'ti-files-off',    lbl:'Falta no SPED',        val:rs.miss,                          sub:'XMLs não declarados',    color:rs.miss>0?'#B91C1C':undefined},
+    {icon:'ti-calculator',   lbl:'ICMS em Risco',        val:'R$ '+f2(vlDivg),                 sub:rs.icmsDivg+' nota(s) com divergência', color:rs.icmsDivg>0?'#B91C1C':undefined},
+  ];
+  document.getElementById('risk-cards').innerHTML=cards.map(c=>`
+    <div class="rc">
+      <div class="rc-l" style="${c.color?'color:'+c.color:''}">
+        <i class="ti ${c.icon}" style="font-size:12px"></i> ${c.lbl}
+      </div>
+      <div class="rc-v" style="${c.color?'color:'+c.color:''}">
+        ${typeof c.val==='number'?c.val.toLocaleString('pt-BR'):c.val}
+      </div>
+      <div class="rc-s">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  FASE 3 — RANKINGS
+// ═══════════════════════════════════════════════════════════════════
+function toggleRankings(){
+  const sec=document.getElementById('rankings-section');
+  if(sec.style.display==='none'){ renderRankings(); sec.style.display='block'; }
+  else sec.style.display='none';
+}
+
+function renderRankings(){
+  const f2=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const makeRank=(title,icon,items,labelFn,countFn,color)=>{
+    const max=Math.max(...items.map(countFn),1);
+    return`<div class="rank-section">
+      <div class="rank-head">
+        <h3><i class="ti ${icon}" style="font-size:14px;vertical-align:-2px;color:${color||'var(--blue)'}"></i> ${title}</h3>
+      </div>
+      <div class="rank-body">
+        ${items.length===0?'<p style="font-size:12px;color:var(--text-3)">Nenhum dado</p>':
+          items.slice(0,8).map((item,i)=>`
+          <div class="rank-row">
+            <span class="rank-pos">${i+1}</span>
+            <span class="rank-label">${labelFn(item)}</span>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(countFn(item)/max*100).toFixed(0)}%;background:${color||'var(--blue)'}"></div></div>
+            <span class="rank-count">${countFn(item)}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  };
+
+  // Rank fornecedores (emitCNPJ de notas com divergência)
+  const divgNotes=allResults.filter(r=>calcSeverity(r)!==null);
+  const emitMap={};
+  divgNotes.forEach(r=>{
+    const k=(r.emitNome||r.emitCNPJ||'Desconhecido');
+    emitMap[k]=(emitMap[k]||0)+1;
+  });
+  const emitRank=Object.entries(emitMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({k,v}));
+
+  // Rank CFOP problemáticos
+  const cfopMap={};
+  divgNotes.forEach(r=>{
+    const cfops=(r.cfopsSped||r.cfopXml||'').split(',').filter(Boolean);
+    cfops.forEach(c=>{cfopMap[c]=(cfopMap[c]||0)+1;});
+  });
+  const cfopRank=Object.entries(cfopMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({k,v}));
+
+  // Rank CST problemáticos
+  const cstMap={};
+  divgNotes.forEach(r=>{
+    const csts=(r.cstsSped||r.cstXml||'').split(',').filter(Boolean);
+    csts.forEach(c=>{cstMap[c]=(cstMap[c]||0)+1;});
+  });
+  const cstRank=Object.entries(cstMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({k,v}));
+
+  // Rank severidade
+  const sevMap={Crítica:0,Alta:0,Média:0,Baixa:0};
+  allResults.forEach(r=>{const s=calcSeverity(r);if(s)sevMap[s.label]++;});
+  const sevRank=Object.entries(sevMap).filter(([,v])=>v>0).map(([k,v])=>({k,v}));
+
+  const grid=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+    ${makeRank('Fornecedores com divergências','ti-building',emitRank,i=>i.k,i=>i.v,'#1D5FC4')}
+    ${makeRank('CFOP mais problemáticos','ti-numbers',cfopRank,i=>i.k,i=>i.v,'#B45309')}
+    ${makeRank('CST recorrentes','ti-hash',cstRank,i=>i.k,i=>i.v,'#7E22CE')}
+    ${makeRank('Distribuição por Severidade','ti-shield',sevRank,i=>i.k,i=>i.v,'#B91C1C')}
+  </div>`;
+
+  document.getElementById('rankings-section').innerHTML=
+    `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:14px;font-weight:600"><i class="ti ti-chart-bar" style="font-size:15px;vertical-align:-2px;color:var(--blue)"></i> Rankings de Inconsistências</span>
+        <button class="btn-s" onclick="toggleRankings()" style="padding:4px 10px;font-size:12px"><i class="ti ti-x"></i></button>
+      </div>
+      <div style="padding:14px">${grid}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  FASE 2 — PAINEL COMPARATIVO XML vs SPED
+// ═══════════════════════════════════════════════════════════════════
+function abrirComparacao(id){
+  const r=allResults.find(x=>x._id===id);
+  if(!r) return;
+  const f2=v=>typeof v==='number'?v.toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
+  const sev=calcSeverity(r);
+
+  document.getElementById('cm-title').textContent=
+    (r.mod==='65'?'NFC-e':r.tipo==='cte'?'CT-e':'NF-e')+' '+
+    (r.numDoc||'')+' — '+(r.dtDoc||'');
+  document.getElementById('cm-sev').innerHTML=sev
+    ?'<span class="sev '+sev.cls+'">'+sev.label+'</span>':'';
+
+  const icmsDivg=r.icmsOk===false;
+  const bcDivg=r.bcOk===false;
+
+  const row=(lbl,xmlVal,spedVal,isDivg)=>{
+    const cls=isDivg?'cmp-divg':'cmp-ok';
+    const xD=xmlVal!=null&&xmlVal!==''?xmlVal:'<span class="cmp-na">—</span>';
+    const sD=spedVal!=null&&spedVal!==''?spedVal:'<span class="cmp-na">—</span>';
+    return '<tr><td class="cmp-field">'+lbl+'</td>'+
+      '<td class="'+cls+'">'+xD+(isDivg?' ⚠':'')+' </td>'+
+      '<td class="'+cls+'">'+sD+(isDivg?' ⚠':'')+' </td></tr>';
+  };
+
+  const sitMap={'00':'Autorizada','02':'Cancelada','04':'Denegada','05':'Inutilizada'};
+
+  const tblRows=[
+    row('Valor ICMS',
+      r.icmsXml!=null?'R$ '+f2(r.icmsXml):null,
+      r.icmsSped!=null?'R$ '+f2(r.icmsSped):null, icmsDivg),
+    row('Base de Cálculo',
+      r.bcIcmsXml!=null?'R$ '+f2(r.bcIcmsXml):null,
+      r.bcIcmsSped!=null?'R$ '+f2(r.bcIcmsSped):null, bcDivg),
+    row('Alíquota ICMS', null,
+      r.aliqSped!=null?r.aliqSped+'%':null, false),
+    row('CST/CSOSN', r.cstXml||null, r.cstsSped||null, false),
+    row('CFOP', r.cfopXml||null, r.cfopsSped||null, false),
+    row('NCM', r.ncmXml||null, null, false),
+    row('ICMS-ST',
+      r.stXml!=null?'R$ '+f2(r.stXml):null,
+      r.icmsStSped!=null?'R$ '+f2(r.icmsStSped):null, r.stOk===false),
+    row('B. Cálc. ICMS-ST',
+      r.bcStXml?'R$ '+f2(r.bcStXml):null,
+      r.bcStSped?'R$ '+f2(r.bcStSped):null, r.bcStOk===false),
+    row('Total Produtos',
+      r.prodXml?'R$ '+f2(r.prodXml):null,
+      r.prodSped?'R$ '+f2(r.prodSped):null, r.prodOk===false),
+    row('Valor Frete',
+      r.freteXml?'R$ '+f2(r.freteXml):null,
+      r.freteSped?'R$ '+f2(r.freteSped):null, r.freteOk===false),
+    row('Valor Seguro',
+      r.segXml?'R$ '+f2(r.segXml):null,
+      r.segSped?'R$ '+f2(r.segSped):null, r.segOk===false),
+    row('Valor Desconto',
+      r.descXml?'R$ '+f2(r.descXml):null,
+      r.descSped?'R$ '+f2(r.descSped):null, r.descOk===false),
+    row('Outras Despesas',
+      r.outroXml?'R$ '+f2(r.outroXml):null,
+      r.outroSped?'R$ '+f2(r.outroSped):null, r.outroOk===false),
+    row('Valor IPI',
+      r.ipiXml?'R$ '+f2(r.ipiXml):null,
+      r.ipiSped?'R$ '+f2(r.ipiSped):null, r.ipiOk===false),
+    row('Total da Nota',
+      r.vlXml?'R$ '+f2(r.vlXml):null,
+      r.vlSped?'R$ '+f2(r.vlSped):null, r.vlOk===false),
+    r.vFCPXml?row('FCP','R$ '+f2(r.vFCPXml),null,false):'',
+    row('Situação', null, sitMap[r.sit]||r.sit||'—', false),
+    row('Origem', r.fonte||null,
+      r.status==='extra'?'Só SPED':r.status==='ok'?'SPED + XML':'Só XML', false),
+  ].join('');
+
+  // Diagnóstico automático
+  const issues=[];
+  if(r.status==='miss') issues.push({dot:'#B91C1C',
+    text:'<strong>Falta no SPED (Alta):</strong> Nota no XML mas não declarada no SPED. Pode indicar omissão de receita ou entrada. Ação: retificar o SPED incluindo o registro C100 e C190 correspondente.'});
+  if(r.status==='extra') issues.push({dot:'#B45309',
+    text:'<strong>Extra no SPED (Média):</strong> Nota declarada no SPED sem XML correspondente. Pode ser lançamento manual indevido. Ação: localizar o XML na SEFAZ ou verificar se o lançamento deve ser excluído.'});
+  if(icmsDivg) issues.push({dot:'#7F1D1D',
+    text:'<strong>ICMS Divergente (Crítico):</strong> XML declara R$ '+f2(r.icmsXml)+' e SPED R$ '+f2(r.icmsSped)+' — diferença de R$ '+f2(r.icmsDiff)+'. Pode gerar recolhimento incorreto e multa. Ação: revisar registro C190 (VL_ICMS) e retificar o SPED.'});
+  if(bcDivg) issues.push({dot:'#B91C1C',
+    text:'<strong>Base de Cálculo Divergente (Alta):</strong> BC no XML R$ '+f2(r.bcIcmsXml)+' vs SPED R$ '+f2(r.bcIcmsSped)+'. Impacta diretamente o cálculo do ICMS. Ação: verificar VL_BC_ICMS no registro C190.'});
+  if(r.prodOk===false)  issues.push({dot:'#7F1D1D',text:'<strong>Total dos Produtos Divergente (Crítico):</strong> XML R$ '+f2(r.prodXml||0)+' vs SPED R$ '+f2(r.prodSped||0)+' — diferença R$ '+f2(r.difProd||0)+'. Verificar VL_MERC no C100.'});
+  if(r.freteOk===false) issues.push({dot:'#B91C1C',text:'<strong>Frete Divergente (Alta):</strong> XML R$ '+f2(r.freteXml||0)+' vs SPED R$ '+f2(r.freteSped||0)+'. Verificar VL_FRT no C100.'});
+  if(r.segOk===false)   issues.push({dot:'#B91C1C',text:'<strong>Seguro Divergente (Alta):</strong> XML R$ '+f2(r.segXml||0)+' vs SPED R$ '+f2(r.segSped||0)+'. Verificar VL_SEG no C100.'});
+  if(r.descOk===false)  issues.push({dot:'#B91C1C',text:'<strong>Desconto Divergente (Alta):</strong> XML R$ '+f2(r.descXml||0)+' vs SPED R$ '+f2(r.descSped||0)+'. Verificar VL_DESC no C100.'});
+  if(r.outroOk===false) issues.push({dot:'#B91C1C',text:'<strong>Outras Despesas Divergentes (Alta):</strong> XML R$ '+f2(r.outroXml||0)+' vs SPED R$ '+f2(r.outroSped||0)+'. Verificar VL_OUT_DA no C100.'});
+  if(r.ipiOk===false)   issues.push({dot:'#B91C1C',text:'<strong>IPI Divergente (Alta):</strong> XML R$ '+f2(r.ipiXml||0)+' vs SPED R$ '+f2(r.ipiSped||0)+'. Verificar VL_IPI no C100.'});
+  if(r.bcStOk===false)  issues.push({dot:'#92400E',text:'<strong>B. Cálculo ICMS-ST Divergente (Alta):</strong> XML R$ '+f2(r.bcStXml||0)+' vs SPED R$ '+f2(r.bcStSped||0)+'. Verificar VL_BC_ICMS_ST no C100.'});
+  if(r.stOk===false) issues.push({dot:'#7F1D1D',
+    text:'<strong>ICMS-ST Divergente (Crítico):</strong> O ICMS de Substituição Tributária no XML é R$ '+f2(r.stXml||0)+' enquanto o SPED declara R$ '+f2(r.icmsStSped||0)+' — diferença de R$ '+f2(r.stDiff||0)+'. Impacto direto no recolhimento do ICMS-ST. Ação: revisar VL_ICMS_ST no registro C190.'});
+  if(r.vlOk===false) issues.push({dot:'#7F1D1D',
+    text:'<strong>Valor Total Divergente (Crítico):</strong> O valor da nota no XML é R$ '+f2(r.vlXml||0)+' enquanto o SPED declara R$ '+f2(r.vlSped||0)+' — diferença de R$ '+f2(r.vlDiff||0)+'. Pode indicar subfaturamento declarado. Ação: verificar VL_DOC no registro C100 do SPED.'});
+  if(r.cfopUFOk===false) issues.push({dot:'#92400E',
+    text:'<strong>CFOP Inconsistente com UF (Média):</strong> Emitente UF '+r.emitUF+' e Destinatário UF '+r.destUF+'. '+(r.emitUF===r.destUF?'Operação dentro do mesmo estado deveria usar CFOP 5xxx (intraestadual)':'Operação entre estados deveria usar CFOP 6xxx (interestadual)')+'. CFOP declarado: '+(r.cfopsSped||r.cfopXml||'—')+'. Ação: corrigir o CFOP no lançamento.'});
+  if(r.cstIcmsOk===false) issues.push({dot:'#B91C1C',
+    text:'<strong>CST Incompatível com ICMS (Alta):</strong> CST '+r.cstsSped+' indica que a operação é isenta, não tributada ou com ICMS-ST já retido anteriormente — portanto o ICMS próprio deve ser R$ 0,00. Porém o sistema encontrou ICMS de R$ '+(r.icmsSped!==null?r.icmsSped.toLocaleString('pt-BR',{minimumFractionDigits:2}):r.icmsXml!==null?r.icmsXml.toLocaleString('pt-BR',{minimumFractionDigits:2}):'?')+'. Ação: verificar o CST no XML e no registro C190 do SPED.'});
+  if(r.dateImpossivel) issues.push({dot:'#B91C1C',
+    text:'<strong>Data Impossível (Alta):</strong> A data de saída/entrada no SPED é anterior à data de emissão da nota. Isso é fisicamente impossível — a nota não pode sair antes de ser emitida. Ação: corrigir a DT_E_S no registro C100 do SPED.'});
+  else if(r.dateOk===false) issues.push({dot:'#B45309',
+    text:'<strong>Gap de Data (Média):</strong> A diferença entre a data de emissão e a data de entrada/saída no SPED é superior a 30 dias. Isso pode indicar lançamento extemporâneo. Ação: verificar se a data DT_E_S no registro C100 está correta.'});
+  if(r.cfopOk===false) issues.push({dot:'#B91C1C',
+    text:'<strong>CFOP Incompatível (Alta):</strong> O CFOP '+r.cfopsSped+' é incompatível com a direção da nota ('+( r.oper==='0'?'Entrada requer CFOP 1xxx/2xxx/3xxx':'Saída requer CFOP 5xxx/6xxx/7xxx')+'. Ação: verificar o CFOP no lançamento do SPED e no XML.'});
+  if(r.dvInvalido) issues.push({dot:'#B91C1C',
+    text:'<strong>Chave de Acesso Inválida (Média):</strong> O dígito verificador da chave não confere com o cálculo Módulo 11 da SEFAZ. Isso indica digitação incorreta ou chave corrompida. Uma chave inválida não pode ser validada na SEFAZ e impede a comprovação do documento fiscal. Ação: verificar a chave de acesso no documento original e corrigir no SPED.'});
+  if(r.hasNumGap) issues.push({dot:'#B45309',
+    text:'<strong>Numeração Quebrada (Média):</strong> Existe um gap na sequência numérica em torno desta nota. Isso pode indicar notas canceladas, inutilizadas ou não declaradas. Ação: verificar sequência de numeração no SPED e confrontar com registros de inutilização.'});
+  if(r.isDuplicate) issues.push({dot:'#B45309',
+    text:'<strong>Numeração Duplicada (Média):</strong> Este documento possui o mesmo número e série de outro lançamento. Pode indicar lançamento duplo no SPED ou erro de importação. Ação: verificar registros C100 e comparar as chaves de acesso — se forem notas diferentes com mesmo número, verificar série; se for a mesma nota, excluir o lançamento duplicado.'});
+  if(r.sit==='02') issues.push({dot:'#1D4ED8',
+    text:'<strong>Nota Cancelada (Baixa):</strong> Documento cancelado — não deve gerar obrigações fiscais. Verificar se ainda aparece na apuração.'});
+  if(!issues.length) issues.push({dot:'#15803D',
+    text:'<strong>Sem divergências detectadas:</strong> ICMS, BC e status batem entre XML e SPED para este documento.'});
+
+  const diagHTML=issues.map(function(i){
+    return '<div class="diag-item"><div class="diag-dot" style="background:'+i.dot+'"></div>'+
+      '<div style="font-size:12px;line-height:1.6">'+i.text+'</div></div>';
+  }).join('');
+
+  try{
+  document.getElementById('cm-body').innerHTML=
+    '<div class="cm-info">'+
+      '<span class="cm-info-pill"><strong>Chave:</strong> '+(r.chave||'').slice(0,12)+'...'+(r.chave||'').slice(-8)+'</span>'+
+      (r.chave&&r.chave.length===44?'<a href="'+urlSefaz(r.chave)+'" target="_blank" onclick="event.stopPropagation();copiarChaveClipboard(\'' + (r.chave||'') + '\')" title="Consultar no portal SEFAZ" style="text-decoration:none"><span class="cm-info-pill" style="background:var(--navy);color:#fff;cursor:pointer"><i class="ti ti-external-link" style="font-size:11px"></i> Abrir no SEFAZ</span></a>':'')+
+      (r.emitNome?'<span class="cm-info-pill"><strong>Emitente:</strong> '+r.emitNome+(r.emitUF?' ('+r.emitUF+')':'')+'</span>':'')+
+      (r.destNome?'<span class="cm-info-pill"><strong>Destinatário:</strong> '+r.destNome+'</span>':'')+
+      (r.natOp?'<span class="cm-info-pill"><strong>Operação:</strong> '+r.natOp+'</span>':'')+
+      '<span class="cm-info-pill"><strong>Valor total:</strong> R$ '+f2(r.vlDoc||0)+'</span>'+
+    '</div>'+
+    '<table class="cmp-table"><thead><tr>'+
+      '<th style="width:30%">Campo</th>'+
+      '<th style="width:35%">XML</th>'+
+      '<th style="width:35%">SPED</th>'+
+    '</tr></thead><tbody>'+tblRows+'</tbody></table>'+
+    '<div class="diag-box"><h4><i class="ti ti-stethoscope" style="font-size:13px;vertical-align:-1px"></i> Diagnóstico Automático</h4>'+diagHTML+'</div>';
+  }catch(err){console.error('abrirComparacao erro:',err);document.getElementById('cm-body').innerHTML='<div style="padding:20px;color:red">Erro ao carregar detalhes: '+err.message+'</div>';}
+
+
+  const ov=document.getElementById('compare-overlay');
+  if(ov){
+    ov.style.display='block';
+    ov.scrollTop=0; // voltar ao topo do painel
+  }
+}
+
+function fecharComparacao(){
+  const ov=document.getElementById('compare-overlay');if(ov)ov.style.display='none';
+}
+
+// overlay fecha ao clicar no fundo escuro (onclick no compare-overlay)
+document.addEventListener('keydown',function(e){if(e.key==='Escape')fecharComparacao();});
+// Fechar painel ao clicar fora dele
+document.addEventListener('click',function(e){
+  const ov=document.getElementById('compare-overlay');
+  if(ov&&ov.style.display!=='none'&&!ov.contains(e.target))fecharComparacao();
+});
+// Fechar modal clicando fora
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  FEATURE 3 — RELATÓRIO PARA IMPRESSÃO
+// ═══════════════════════════════════════════════════════════════════
+function imprimirRelatorio(){
+  const rs=calcRiskScore();
+  const f2=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const nu=v=>(v||0).toLocaleString('pt-BR');
+  const today=new Date().toLocaleDateString('pt-BR');
+  const divgList=allResults.filter(r=>calcSeverity(r)!==null);
+  const vlDivg=allResults.filter(r=>r.icmsOk===false).reduce((s,r)=>s+(r.icmsDiff||0),0);
+  const totalIcmsXml=allResults.reduce((s,r)=>s+(r.icmsXml||0),0);
+  const totalIcmsSped=allResults.reduce((s,r)=>s+(r.icmsSped||0),0);
+  const pct=allResults.length>0?((divgList.length/allResults.length)*100).toFixed(1):'0';
+  const sevColor={Crítica:'#7F1D1D',Alta:'#B91C1C',Média:'#B45309',Baixa:'#1D4ED8'};
+
+  const rowsHtml=divgList.slice(0,200).map(function(r){
+    const sv=calcSeverity(r);
+    const pds=[];
+    if(r.icmsOk===false)    pds.push('ICMS R$'+f2(r.icmsDiff||0));
+    if(r.stOk===false)      pds.push('ST div.');
+    if(r.vlOk===false)      pds.push('Valor div.');
+    if(r.cfopOk===false||r.cfopUFOk===false) pds.push('CFOP');
+    if(r.cstIcmsOk===false) pds.push('CST');
+    if(r.dateImpossivel)    pds.push('Data imp.');
+    if(r.isDuplicate)       pds.push('Dup.');
+    return '<tr>'+
+      '<td>'+(r.numDoc||'—')+'</td>'+
+      '<td style="font-size:9px">'+(r.emitNome||'—').slice(0,22)+'</td>'+
+      '<td>'+(getDataDoc(r)||'—')+'</td>'+
+      '<td style="text-align:right">R$ '+f2(r.vlDoc)+'</td>'+
+      '<td>'+(r.mod==='65'?'NFC-e':r.tipo==='cte'?'CT-e':'NF-e')+' '+(r.oper==='0'?'Ent':'Saí')+'</td>'+
+      '<td>'+(sitLabel(r.sit||'00'))+'</td>'+
+      '<td style="color:'+(sevColor[sv&&sv.label]||'#000')+';font-weight:600">'+(sv?sv.label:'—')+'</td>'+
+      '<td>'+({ok:'Coincidência',miss:'Falta SPED',extra:'Extra SPED'}[r.status]||r.status)+'</td>'+
+      '<td style="font-size:9px;color:#B91C1C">'+(pds.join(' | ')||'—')+'</td>'+
+    '</tr>';
+  }).join('');
+
+  const cnpjFmt=companyCNPJ?companyCNPJ.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'N/D';
+  const saidas=allResults.filter(r=>r.oper==='1').length;
+  const entradas=allResults.filter(r=>r.oper==='0').length;
+
+  const w=window.open('','_blank');
+  if(!w){alert('Permita pop-ups para imprimir o relatório.');return;}
+
+  const sTag='<'+'script'+'>';
+  const eTag='<'+'/script'+'>';
+  const parts=[
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">',
+    '<title>Relatório de Auditoria Fiscal</title>',
+    '<style>*{margin:0;padding:0;box-sizing:border-box}',
+    'body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:24px}',
+    'h1{font-size:18px;margin-bottom:4px}',
+    'h2{font-size:13px;margin:20px 0 8px;border-bottom:2px solid #333;padding-bottom:4px}',
+    '.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:12px;border-bottom:3px solid #111}',
+    '.logo{font-size:22px;font-weight:900;letter-spacing:-1px}',
+    '.logo span{color:#1D4ED8}',
+    '.score-box{text-align:center;border:2px solid '+rs.color+';border-radius:8px;padding:10px 20px}',
+    '.score-num{font-size:36px;font-weight:900;color:'+rs.color+';line-height:1}',
+    '.score-lbl{font-size:11px;color:'+rs.color+';font-weight:700}',
+    '.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}',
+    '.card{border:1px solid #ddd;border-radius:6px;padding:10px 12px}',
+    '.card .lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:3px}',
+    '.card .val{font-size:18px;font-weight:700}',
+    '.card .sub{font-size:9px;color:#666;margin-top:2px}',
+    'table{width:100%;border-collapse:collapse;font-size:10px;margin-top:8px}',
+    'th{background:#111;color:#fff;padding:6px 8px;text-align:left;font-size:9px;text-transform:uppercase}',
+    'td{padding:5px 8px;border-bottom:1px solid #eee}',
+    'tr:nth-child(even) td{background:#f9f9f9}',
+    '.footer{margin-top:20px;padding-top:10px;border-top:1px solid #ddd;font-size:9px;color:#666;text-align:center}',
+    '@media print{@page{margin:15mm}}</style></head><body>',
+
+    '<div class="header">',
+    '<div>',
+    '<div class="logo">Malha <span>Fiscal</span></div>',
+    '<div style="font-size:12px;color:#666;margin-top:4px">SPED × XML — Relatório de Auditoria Fiscal</div>',
+    '<div style="font-size:10px;margin-top:8px"><strong>CNPJ:</strong> '+cnpjFmt+
+      ' &nbsp;&nbsp; <strong>Gerado em:</strong> '+today+
+      ' &nbsp;&nbsp; <strong>Documentos:</strong> '+nu(allResults.length)+'</div>',
+    '</div>',
+    '<div class="score-box"><div class="score-num">'+rs.score+'</div>',
+    '<div class="score-lbl">RISCO '+rs.label+'</div></div>',
+    '</div>',
+
+    '<h2>Resumo Executivo</h2>',
+    '<div class="grid">',
+    '<div class="card"><div class="lbl">Total de documentos</div><div class="val">'+nu(allResults.length)+'</div><div class="sub">no confronto SPED × XML</div></div>',
+    '<div class="card"><div class="lbl">Inconsistências</div><div class="val" style="color:#B91C1C">'+nu(divgList.length)+'</div><div class="sub">'+pct+'% dos documentos</div></div>',
+    '<div class="card"><div class="lbl">Falta no SPED</div><div class="val" style="color:#B91C1C">'+nu(rs.miss)+'</div><div class="sub">XMLs não declarados</div></div>',
+    '<div class="card"><div class="lbl">ICMS em Risco</div><div class="val" style="color:#B91C1C">R$ '+f2(vlDivg)+'</div><div class="sub">'+nu(rs.icmsDivg)+' nota(s)</div></div>',
+    '<div class="card"><div class="lbl">Denegadas</div><div class="val" style="color:'+(allResults.filter(r=>r.sit==='04').length>0?'#92400E':'#111')+'">'+nu(allResults.filter(r=>r.sit==='04').length)+'</div><div class="sub">no período</div></div>',
+    '<div class="card"><div class="lbl">CST×ICMS</div><div class="val" style="color:'+(rs.cstInc>0?'#B91C1C':'#111')+'">'+nu(rs.cstInc||0)+'</div><div class="sub">incompatibilidades</div></div>',
+    '<div class="card"><div class="lbl">CFOP Incompatível</div><div class="val" style="color:'+(rs.cfopInc>0?'#B91C1C':'#111')+'">'+nu(rs.cfopInc||0)+'</div><div class="sub">notas com erro de CFOP</div></div>',
+    '<div class="card"><div class="lbl">ICMS Total XML</div><div class="val">R$ '+f2(totalIcmsXml)+'</div><div class="sub">declarado nos XMLs</div></div>',
+    '</div>',
+
+    divgList.length>0?
+      '<h2>Inconsistências Encontradas ('+nu(divgList.length)+')</h2>'+
+      '<table><thead><tr>'+
+      '<th>Nº Doc</th><th>Emitente</th><th>Data</th><th>Valor</th>'+
+      '<th>Tipo</th><th>Situação</th><th>Severidade</th><th>Status</th><th>Pendências</th>'+
+      '</tr></thead><tbody>'+rowsHtml+'</tbody></table>'+
+      (divgList.length>200?'<p style="font-size:9px;color:#666;margin-top:6px;font-style:italic">Exibindo 200 de '+nu(divgList.length)+' inconsistências.</p>':'')
+    :'<p style="color:#15803D;font-weight:600;margin-top:8px">&#10003; Nenhuma inconsistência encontrada neste período.</p>',
+
+    '<div class="footer">Relatório gerado pelo Malha Fiscal SPED × XML &nbsp;·&nbsp; '+today+'</div>',
+
+    sTag+'window.onload=function(){window.print()}'+eTag,
+    '</body></html>'
+  ];
+
+  w.document.write(parts.join(''));
+  w.document.close();
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  FEATURE 5 — HISTÓRICO DE CONFRONTOS
+// ══════════════════════════════════════════════════════════
+function salvarHistoricoConfronto(){
+  if(!allResults.length) return;
+  const rs=calcRiskScore();
+  const entry={
+    id: Date.now(),
+    data: new Date().toLocaleDateString('pt-BR'),
+    hora: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+    nome: companyNome||'Empresa',
+    cnpj: companyCNPJ||'',
+    total: allResults.length,
+    score: rs.score,
+    e110: window._e110||null,
+    c190Deb: window._c190Deb||0,
+    c190Cred: window._c190Cred||0,
+    label: rs.label,
+    color: rs.color,
+    bg: rs.bg,
+    miss: rs.miss,
+    extra: rs.extra,
+    icmsDivg: rs.icmsDivg,
+    resultados: JSON.stringify(allResults),
+  };
+  try{
+    let hist=JSON.parse(localStorage.getItem('mf_confrontos')||'[]');
+    hist.unshift(entry);
+    if(hist.length>5) hist=hist.slice(0,5);
+    localStorage.setItem('mf_confrontos',JSON.stringify(hist));
+  }catch(e){}
+}
+
+function carregarHistoricoConfronto(){
+  try{
+    const hist=JSON.parse(localStorage.getItem('mf_confrontos')||'[]');
+    const sec=document.getElementById('hist-section');
+    const lst=document.getElementById('hist-list');
+    if(!sec||!lst) return;
+    if(!hist.length){ sec.style.display='none'; return; }
+    sec.style.display='block';
+    lst.innerHTML=hist.map(h=>{
+      const cnpjFmt=h.cnpj?h.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'';
+      return `<div onclick="reabrirConfronto(${h.id})" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        <!-- Linha 1: empresa em destaque -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px">${h.nome||'Empresa'}</div>
+            ${cnpjFmt?`<div style="font-size:11px;color:var(--text-3)">CNPJ: ${cnpjFmt}</div>`:''}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="background:${h.bg};color:${h.color};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">
+              Score ${h.score} · ${h.label}
+            </div>
+            <div onclick="event.stopPropagation();excluirConfronto(${h.id})" title="Excluir" style="cursor:pointer;color:var(--text-3);font-size:18px;line-height:1;padding:2px 6px;border-radius:4px" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-3)'">×</div>
+          </div>
+        </div>
+        <!-- Linha 2: dados em cards compactos -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:11px">
+            <span style="color:var(--text-3)">Total</span>
+            <span style="font-weight:600;color:var(--text);margin-left:6px">${(h.total||0).toLocaleString('pt-BR')} docs</span>
+          </div>
+          ${h.miss>0?`<div style="background:var(--danger-bg);border:1px solid rgba(185,28,28,.2);border-radius:6px;padding:6px 12px;font-size:11px">
+            <span style="color:var(--danger)">Falta SPED</span>
+            <span style="font-weight:600;color:var(--danger);margin-left:6px">${h.miss}</span>
+          </div>`:''}
+          ${h.extra>0?`<div style="background:var(--warning-bg);border:1px solid rgba(146,64,14,.2);border-radius:6px;padding:6px 12px;font-size:11px">
+            <span style="color:var(--warning)">Extra SPED</span>
+            <span style="font-weight:600;color:var(--warning);margin-left:6px">${h.extra}</span>
+          </div>`:''}
+          ${h.icmsDivg>0?`<div style="background:var(--danger-bg);border:1px solid rgba(185,28,28,.2);border-radius:6px;padding:6px 12px;font-size:11px">
+            <span style="color:var(--danger)">ICMS Divergente</span>
+            <span style="font-weight:600;color:var(--danger);margin-left:6px">${h.icmsDivg}</span>
+          </div>`:''}
+          ${h.miss===0&&h.extra===0&&h.icmsDivg===0?`<div style="background:var(--success-bg);border:1px solid rgba(21,128,61,.2);border-radius:6px;padding:6px 12px;font-size:11px;color:var(--success)">✓ Sem divergências</div>`:''}
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:11px;color:var(--text-3);margin-left:auto">
+            ${h.data} ${h.hora}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){}
+}
+
+function reabrirConfronto(id){
+  try{
+    const hist=JSON.parse(localStorage.getItem('mf_confrontos')||'[]');
+    const entry=hist.find(h=>h.id===id);
+    if(!entry) return;
+    allResults=JSON.parse(entry.resultados||'[]');
+    companyNome=entry.nome||'';
+    companyCNPJ=entry.cnpj||'';
+    const cnpjFmt=companyCNPJ?companyCNPJ.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'';
+    const empEl=document.getElementById('empresa-label');
+    if(empEl) empEl.textContent=companyNome+(cnpjFmt?' · '+cnpjFmt:'');
+    const ehR=document.getElementById('empresa-header');
+    const enR=document.getElementById('empresa-nome');
+    const ecR=document.getElementById('empresa-cnpj');
+    if(ehR&&companyNome){ehR.style.display='block';if(enR)enR.textContent=companyNome;if(ecR)ecR.textContent=cnpjFmt?'CNPJ: '+cnpjFmt:'';}
+    const titleEl=document.getElementById('results-title');
+    if(titleEl) titleEl.textContent=allResults.length.toLocaleString('pt-BR')+' docs · '+entry.data;
+    document.getElementById('upload-screen').style.display='none';
+    document.getElementById('results-screen').style.display='block';
+    renderStats();setFilter('all');renderRiskDashboard();
+    // Popular filtro de mes
+    const mthSel=document.getElementById('month-filter');
+    if(mthSel){
+      const mthSet=new Set();
+      allResults.forEach(r=>{
+        if(r.dtDoc&&r.dtDoc.length>=7){
+          const parts=r.dtDoc.split('/');
+          if(parts.length===3) mthSet.add(parts[2]+'/'+parts[1]);
+        }
+      });
+      const sorted=[...mthSet].sort().reverse();
+      const mNames=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      mthSel.innerHTML='<option value="">Todos os meses</option>'+
+        sorted.map(m2=>{const [y,mo]=m2.split('/');return '<option value="'+m2+'">'+(mNames[parseInt(mo)]||mo)+'/'+y+'</option>';}).join('');
+      mthSel.style.display=sorted.length>1?'block':'none';
+    }
+    // Botao ICMS
+    const icmsDetailBtn=document.getElementById('icms-detail-btn');
+    if(icmsDetailBtn){
+      const hasIcms=allResults.some(r=>r.icmsSped!==null||r.icmsXml!==null);
+      icmsDetailBtn.style.display=hasIcms?'inline-flex':'none';
+      const dc=allResults.filter(r=>r.icmsOk===false).length;
+      icmsDetailBtn.innerHTML='<i class="ti ti-calculator"></i> '+(dc>0?'ICMS · '+dc+' div.':'Detalhes ICMS');
+      if(dc>0){icmsDetailBtn.style.background='#FEE2E2';icmsDetailBtn.style.color='#B91C1C';}
+      else{icmsDetailBtn.style.background='';icmsDetailBtn.style.color='';}
+    }
+    // Restaurar E110 do historico
+    if(entry.e110){
+      window._e110=entry.e110;
+      window._c190Deb=entry.c190Deb||0;
+      window._c190Cred=entry.c190Cred||0;
+      const apurBtn=document.getElementById('apuracao-btn');
+      if(apurBtn) apurBtn.style.display='inline-flex';
+    }
+  }catch(e){alert('Nao foi possivel reabrir. O historico pode ter expirado.');}
+}
+
+function excluirConfronto(id){
+  try{
+    let hist=JSON.parse(localStorage.getItem('mf_confrontos')||'[]');
+    hist=hist.filter(h=>h.id!==id);
+    localStorage.setItem('mf_confrontos',JSON.stringify(hist));
+    carregarHistoricoConfronto();
+  }catch(e){}
+}
+
+function limparHistoricoConfronto(){
+  if(!confirm('Limpar todo o histórico de confrontos?')) return;
+  try{ localStorage.removeItem('mf_confrontos'); }catch(e){}
+  const sec=document.getElementById('hist-section');
+  if(sec) sec.style.display='none';
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  FEATURE 6 — DARK MODE / LIGHT MODE
+// ══════════════════════════════════════════════════════════
+function applyTheme(dark){
+  document.documentElement.setAttribute('data-theme', dark?'dark':'');
+  const icon=document.getElementById('theme-icon');
+  if(icon) icon.className='ti '+(dark?'ti-moon':'ti-sun');
+  const sw=document.getElementById('theme-switch');
+  const kn=document.getElementById('theme-knob');
+  if(sw) sw.style.background=dark?'#3B82F6':'rgba(255,255,255,.2)';
+  if(kn) kn.style.transform=dark?'translateX(18px)':'translateX(0)';
+}
+
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  applyTheme(!isDark);
+  try{ localStorage.setItem('mf_theme', isDark?'light':'dark'); }catch(e){}
+}
+
+function initTheme(){
+  // Sempre modo claro — dark mode removido
+  applyTheme(false);
+  try{ localStorage.removeItem('mf_theme'); }catch(e){}
+}
+initTheme();
+
+function verificarSalva() {
+  try {
+    const salva = localStorage.getItem('mf_lic');
+    if (!salva) return;
+    const r = validarChave(salva);
+    if (r.ok) {
+      document.getElementById('license-gate').style.display = 'none';
+      showLicBadge(r);
+    } else {
+      try { localStorage.removeItem('mf_lic'); } catch(e) {}
+    }
+  } catch(e) { /* localStorage indisponível em mobile/file:// — ignorar */ }
+}
+
+function showLicBadge(r) {
+  const b = (document.getElementById('lic-info')||{});
+  if (r.dias <= 0) { b.className='lic-badge exp'; b.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:13px"></i> Vence hoje!`; }
+  else if (r.dias <= 10) { b.className='lic-badge exp'; b.innerHTML=`<i class="ti ti-alert-triangle" style="font-size:13px"></i> Vence em ${r.dias} dia(s)`; }
+  else { b.className='lic-badge'; b.innerHTML=`<i class="ti ti-license" style="font-size:13px"></i> Licença válida até ${r.expiry}`; }
+}
+verificarSalva();
+carregarHistoricoConfronto();
+
+// APP
+let spedData=[], xmlData=[], allResults=[], currentFilter='all', companyCNPJ='', companyNome='';
+let _spedFileList=[], _xmlFileList=[];
+
+document.getElementById('sped-input').addEventListener('change', async function(e) {
+  const files=Array.from(e.target.files); if(!files.length) return;
+  // ACUMULAR: só limpa se o usuário arrastar para a dropzone principal (não adicionar)
+  _spedFileList=[..._spedFileList,...files.map(f=>f.name)];
+  document.getElementById('sped-status').innerHTML='<div class="dz-st ok"><i class="ti ti-loader"></i> Lendo SPEDs...</div>';
+  for(const f of files){
+    await new Promise(res=>{
+      // Tentar UTF-8 primeiro; se gerar caracteres inválidos, usar ISO-8859-1
+      const tryEnc=(enc)=>new Promise(r2=>{
+        const fr=new FileReader();
+        fr.onload=ev=>r2(ev.target.result);
+        fr.readAsText(f,enc);
+      });
+      tryEnc('UTF-8').then(txt=>{
+        // Verificar se é UTF-8 válido checando presença de replacement chars
+        if(txt.includes('�')){
+          return tryEnc('ISO-8859-1');
+        }
+        return txt;
+      }).then(txt=>{
+        const result=parseSped(txt); spedData.push(...result.records);
+        if(result.e110){
+        if(!window._e110){ window._e110=JSON.parse(JSON.stringify(result.e110)); }
+        else {
+          // Acumular múltiplos períodos
+          window._e110.debitos  +=result.e110.debitos;
+          window._e110.creditos +=result.e110.creditos;
+          window._e110.sldAnt   +=result.e110.sldAnt;
+          window._e110.recolher +=result.e110.recolher;
+          window._e110.sldCredor+=result.e110.sldCredor;
+          window._e110.ajDeb    +=result.e110.ajDeb;
+          window._e110.ajCred   +=result.e110.ajCred;
+          window._e110.totDed   +=result.e110.totDed;
+        }
+      }
+        window._c190Deb=(window._c190Deb||0)+result.c190Deb;
+        window._c190Cred=(window._c190Cred||0)+result.c190Cred; res();
+      }).catch(()=>res()); // falha silenciosa — continuar
+    });
+  }
+  const c100=spedData.filter(n=>n.tipo!=='cte').length;
+  const d100=spedData.filter(n=>n.tipo==='cte').length;
+  const entrada=spedData.filter(n=>n.oper==='0').length;
+  const saida=spedData.filter(n=>n.oper==='1').length;
+  let info=`<strong>${files.length}</strong> SPED(s) carregado(s) · <strong>${spedData.length}</strong> registros`;
+  if(entrada>0||saida>0) info+=` (${saida} saída(s), ${entrada} entrada(s))`;
+  if(d100>0) info+=` · ${d100} CT-e`;
+  document.getElementById('sped-status').innerHTML=`<div class="dz-st ok"><i class="ti ti-check"></i> ${info}</div>`;
+  checkReady();
+});
+
+document.getElementById('xml-input').addEventListener('change', async function(e) {
+  const files=Array.from(e.target.files); if(!files.length) return;
+  _xmlFileList=[..._xmlFileList,...files.map(f=>f.name)];
+  let totalArqs=0, totalEventos=0, totalCancelEvts=0;
+  const cancelledChaves=new Set(); // chaves detectadas em eventos de cancelamento
+
+  document.getElementById('xml-status').innerHTML='<div class="dz-st ok"><i class="ti ti-loader"></i> Processando arquivos...</div>';
+
+  // ── Passo único: processar cada arquivo uma só vez ────────────────
+  // Separar eventos de cancelamento dos documentos em um único loop
+  const rawDocs=[]; // {txt, nome}
+
+  for(const f of files){
+    if(f.name.toLowerCase().endsWith('.zip')){
+      try{
+        const buf=await f.arrayBuffer();
+        const zip=await JSZip.loadAsync(buf);
+        const xmlFiles=Object.values(zip.files).filter(zf=>!zf.dir&&zf.name.toLowerCase().endsWith('.xml'));
+        for(const zf of xmlFiles){
+          totalArqs++;
+          const txt=await zf.async('text');
+          // Tentar como evento de cancelamento primeiro (rápido)
+          const cancelChave=extractCancelChave(txt);
+          if(cancelChave){ cancelledChaves.add(cancelChave); totalCancelEvts++; }
+          else { rawDocs.push({txt, name:zf.name}); } // guardar para parsear como doc
+        }
+      }catch(err){console.error('ZIP error',err)}
+    }else{
+      totalArqs++;
+      await new Promise(res=>{
+        const r=new FileReader();
+        r.onload=ev=>{
+          const txt=ev.target.result;
+          const cancelChave=extractCancelChave(txt);
+          if(cancelChave){ cancelledChaves.add(cancelChave); totalCancelEvts++; }
+          else { rawDocs.push({txt, name:f.name}); }
+          res();
+        };
+        r.readAsText(f,'UTF-8');
+      });
+    }
+  }
+
+  // ── Parsear documentos ────────────────────────────────────────────
+  for(const {txt,name} of rawDocs){
+    const n=parseXML(txt, name);
+    if(n) xmlData.push(n); else totalEventos++;
+  }
+
+  // ── Passo 3: marcar canceladas pelo set de eventos ──────────────────
+  xmlData.forEach(n=>{
+    if(cancelledChaves.has(n.chave)) n.sit='02';
+  });
+
+  const nfce   =xmlData.filter(x=>x.mod==='65').length;
+  const cte    =xmlData.filter(x=>x.tipo==='cte').length;
+  const nfe    =xmlData.filter(x=>x.mod!=='65'&&x.tipo!=='cte').length;
+  const canc   =xmlData.filter(x=>x.sit==='02').length;
+  const partes=[];
+  if(nfe>0)  partes.push(`${nfe} NF-e`);
+  if(nfce>0) partes.push(`${nfce} NFC-e`);
+  if(cte>0)  partes.push(`${cte} CT-e`);
+  let info=`<strong>${xmlData.length}</strong> documentos (${partes.join(' + ')})`;
+  if(canc>0)         info+=` · <span style="color:var(--err)"><i class="ti ti-ban"></i> ${canc} cancelada(s)</span>`;
+  if(totalEventos>0) info+=` · <span style="color:var(--text-3)"><i class="ti ti-info-circle"></i> ${totalEventos} evento(s) ignorado(s)</span>`;
+  const xmlFileNames=_xmlFileList.length>1?' · '+_xmlFileList.length+' arquivos':'';
+        const lb2=document.getElementById('limpar-btn');if(lb2)lb2.style.display='inline-flex';
+        document.getElementById('xml-status').innerHTML=`<div class="dz-st ok"><i class="ti ti-check"></i> ${info}</div>
+          <button onclick="adicionarMaisArquivos('xml')" class="btn-s" style="margin-left:8px;padding:3px 10px;font-size:11px">+ Adicionar XMLs</button>`;
+  checkReady();
+});
+
+function checkReady(){ document.getElementById('process-btn').disabled=!(spedData.length&&xmlData.length); }
+
+[['sped-drop','sped-input'],['xml-drop','xml-input']].forEach(([zid,iid])=>{
+  const z=document.getElementById(zid), inp=document.getElementById(iid);
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over')});
+  z.addEventListener('dragleave',()=>z.classList.remove('drag-over'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');const dt=new DataTransfer();Array.from(e.dataTransfer.files).forEach(f=>dt.items.add(f));inp.files=dt.files;inp.dispatchEvent(new Event('change'))});
+});
 
 function parseSped(txt){
-  const notas={};
-  for(const line of txt.split('\n')){
-    const t=line.trim();
-    if(!t.startsWith('|C100|'))continue;
-    const p=t.split('|');
-    if(p.length<13)continue;
-    try{
-      const nota={
-        chave:p[9].trim(),numDoc:p[8].trim(),serie:p[7].trim(),dtDoc:p[10].trim(),
-        valorSped:pNum(p[12]),icmsSped:pNum(p[19]||0),pisSped:pNum(p[23]||0),cofinsSped:pNum(p[24]||0),
-        tipo:p[2].trim()==='0'?'Entrada':'Sa\u00edda',
-        modelo:({'55':'NF-e','65':'NFC-e','57':'CT-e'})[p[5].trim()]||p[5].trim(),
-        cancelada:p[6].trim()==='02'
-      };
-      const k=(nota.chave&&nota.chave.length===44)?nota.chave:`SEM_CHAVE_${nota.numDoc}_${nota.serie}`;
-      notas[k]=nota;
-    }catch(e){}
-  }
-  return notas;
-}
+  const out=[];
 
-function parseXmlDoc(filename,content){
-  const parser=new DOMParser();
-  const doc=parser.parseFromString(content,'application/xml');
-  if(doc.querySelector('parsererror'))return{erro:`${filename}: XML inv\u00e1lido`};
-  const data={arquivo:filename};
-  const seen=new Set();
-  const all=doc.getElementsByTagName('*');
-  for(let i=0;i<all.length;i++){
-    const el=all[i];
-    const ch=el.childNodes;
-    if(ch.length!==1||ch[0].nodeType!==3)continue;
-    const ln=el.localName||el.tagName.split(':').pop();
-    if(seen.has(ln))continue;
-    seen.add(ln);
-    const txt=ch[0].nodeValue.trim();
-    if(!txt)continue;
-    switch(ln){
-      case 'chNFe':case 'chCTe':data.chave=txt;break;
-      case 'nNF':case 'nCT':data.numDoc=txt;break;
-      case 'serie':data.serie=txt;break;
-      case 'dhEmi':case 'dEmi':data.dtDoc=txt.substring(0,10);break;
-      case 'xNome':data.emitente=txt;break;
-      case 'tpNF':data.tipo=txt==='0'?'Entrada':'Sa\u00edda';break;
-      case 'vNF':case 'vCT':data.valorXml=pNum(txt);break;
-      case 'vICMS':data.icmsXml=pNum(txt);break;
-      case 'vPIS':data.pisXml=pNum(txt);break;
-      case 'vCOFINS':data.cofinsXml=pNum(txt);break;
+  // ── Localiza dinamicamente a chave de 44 dígitos na linha ─────────
+  // Diferentes geradores de SPED incluem ou omitem o campo SUB (subsérie),
+  // deslocando a posição da chave de p[9] para p[10] ou p[11].
+  // Em vez de fixar a posição, buscamos o primeiro campo com exatamente 44 dígitos.
+  function findChave(p, startIdx=6){
+    for(let i=startIdx; i<Math.min(p.length, 15); i++){
+      if(/^\d{44}$/.test((p[i]||'').trim())) return i;
     }
+    return -1;
   }
-  if(!data.chave)return{erro:`${filename}: chave n\u00e3o encontrada`};
-  data.valorXml=data.valorXml||0;data.icmsXml=data.icmsXml||0;
-  data.pisXml=data.pisXml||0;data.cofinsXml=data.cofinsXml||0;
-  data.emitente=data.emitente||'N/D';data.tipo=data.tipo||'N/D';
-  return data;
-}
 
-function cruzar(S,X){
-  const TOL=0.01,res=[];
-  for(const chave of new Set([...Object.keys(S),...Object.keys(X)])){
-    const s=S[chave],x=X[chave];
-    if(s&&x){
-      const divs=[];
-      const dv=Math.abs(s.valorSped-x.valorXml),di=Math.abs(s.icmsSped-x.icmsXml);
-      const dp=Math.abs(s.pisSped-x.pisXml),dc=Math.abs(s.cofinsSped-x.cofinsXml);
-      if(dv>TOL)divs.push(`Valor: SPED R$${s.valorSped.toFixed(2)} x XML R$${x.valorXml.toFixed(2)} (dif R$${dv.toFixed(2)})`);
-      if(di>TOL)divs.push(`ICMS: R$${s.icmsSped.toFixed(2)} x R$${x.icmsXml.toFixed(2)} (dif R$${di.toFixed(2)})`);
-      if(dp>TOL)divs.push(`PIS: R$${s.pisSped.toFixed(2)} x R$${x.pisXml.toFixed(2)} (dif R$${dp.toFixed(2)})`);
-      if(dc>TOL)divs.push(`COFINS: R$${s.cofinsSped.toFixed(2)} x R$${x.cofinsXml.toFixed(2)} (dif R$${dc.toFixed(2)})`);
-      res.push({chave,numDoc:s.numDoc||x.numDoc,serie:s.serie||x.serie,dtDoc:s.dtDoc||x.dtDoc,
-        tipo:s.tipo||x.tipo,modelo:s.modelo||'NF-e',emitente:x.emitente,
-        valorSped:s.valorSped.toFixed(2),valorXml:x.valorXml.toFixed(2),
-        status:divs.length?'divergente':'ok',divergencias:divs});
-    }else if(s){
-      res.push({chave,numDoc:s.numDoc,serie:s.serie,dtDoc:s.dtDoc,tipo:s.tipo,modelo:s.modelo||'NF-e',
-        emitente:'N/D',valorSped:s.valorSped.toFixed(2),valorXml:'-',
-        status:'sem_xml',divergencias:['NF no SPED sem XML correspondente']});
-    }else{
-      res.push({chave,numDoc:x.numDoc,serie:x.serie,dtDoc:x.dtDoc,tipo:x.tipo,modelo:'NF-e',
-        emitente:x.emitente,valorSped:'-',valorXml:x.valorXml.toFixed(2),
-        status:'sem_sped',divergencias:['XML sem registro no SPED']});
+  function parseDate(s){
+    s=(s||'').trim();
+    if(s.length!==8) return{df:'',dtObj:null};
+    return{
+      df:`${s.slice(0,2)}/${s.slice(2,4)}/${s.slice(4,8)}`,
+      dtObj:new Date(+s.slice(4,8),+s.slice(2,4)-1,+s.slice(0,2))
+    };
+  }
+
+  // Divide por qualquer tipo de quebra de linha (\r\n, \n, \r)
+  // Registro 0000 — dados da empresa (CNPJ em p[7])
+  txt.split(/\r\n|\r|\n/).some(line=>{
+    const p=line.split('|');
+    if(p[1]==='0000'&&(p[7]||'').trim().length===14){
+      companyCNPJ=(p[7]||'').trim();
+      companyNome=(p[6]||'').trim();
+      return true;
     }
-  }
-  const ord={divergente:0,sem_xml:1,sem_sped:2,ok:3};
-  res.sort((a,b)=>(ord[a.status]-ord[b.status])||((a.numDoc||'').localeCompare(b.numDoc||'')));
-  return res;
+    return false;
+  });
+
+  // ── Mapear ICMS por chave+operação a partir de C190/D190 ────────
+  // Chave do mapa: chave44 + '_' + oper (garante separação oper=0 vs oper=1)
+  const icmsMap={};
+  let curChave='', curOper='';
+
+  txt.split(/\r\n|\r|\n/).forEach(line=>{
+    const p=line.split('|');
+    if(p.length<3) return;
+
+    // Atualizar chave/oper corrente quando encontrar C100 ou D100
+    if(p[1]==='C100'||p[1]==='D100'){
+      const ci=findChave(p,6);
+      if(ci>=0){ curChave=p[ci].trim(); curOper=(p[2]||'').trim(); }
+      else { curChave=''; curOper=''; }
+    }
+
+    // C190/D190 — ICMS por CFOP+CST+alíq (filho do C100/D100)
+    // Layout: p[2]=CST p[3]=CFOP p[4]=ALIQ p[5]=VL_OPR p[6]=VL_BC_ICMS p[7]=VL_ICMS p[9]=VL_ICMS_ST p[10]=VL_RED_BC
+    if((p[1]==='C190'||p[1]==='D190') && curChave){
+      const key=curChave+'_'+curOper;
+      const vI  =parseFloat((p[7]||'0').trim().replace(',','.')) || 0;
+      const vST =parseFloat((p[9]||'0').trim().replace(',','.')) || 0;
+      const vBC =parseFloat((p[6]||'0').trim().replace(',','.')) || 0;
+      const vRed=parseFloat((p[10]||'0').trim().replace(',','.')) || 0;
+      const aliq=parseFloat((p[4]||'0').trim().replace(',','.')) || 0;
+      const cst =(p[2]||'').trim();
+      const cfop=(p[3]||'').trim();
+      if(!icmsMap[key]) icmsMap[key]={icms:0,icmsSt:0,bcIcms:0,vRed:0,aliqMax:0,cfops:[],csts:[]};
+      icmsMap[key].icms  +=vI;
+      icmsMap[key].icmsSt+=vST;
+      icmsMap[key].bcIcms+=vBC;
+      icmsMap[key].vRed  +=vRed;
+      if(aliq>icmsMap[key].aliqMax) icmsMap[key].aliqMax=aliq;
+      if(cst  && !icmsMap[key].csts.includes(cst))  icmsMap[key].csts.push(cst);
+      if(cfop && !icmsMap[key].cfops.includes(cfop)) icmsMap[key].cfops.push(cfop);
+    }
+
+    if(p.length<10) return;
+
+    // ── C100 — NF-e / NFC-e ──────────────────────────────────────
+    if(p[1]==='C100'){
+      const ci=findChave(p,6);
+      if(ci<0) return;
+      const chave=p[ci].trim();
+      const mod  =(p[5]||'55').trim();
+      const oper =(p[2]||'1').trim();
+      const sit  =(p[6]||'00').trim();
+      const serie  =(p[7]||'').trim();
+      const numDoc =(p[ci-1]||'').trim();
+      const {df,dtObj}=parseDate(p[ci+1]);
+      const vlDoc=parseFloat((p[ci+3]||'0').trim().replace(',','.'))||0;
+      const {df:dfES}=parseDate(p[ci+2]||'');
+      const dtSaida=oper==='1'?dfES:'';
+      const dtEntrada=oper==='0'?dfES:'';
+      const dvOkSped=verificarDV(chave);
+      const pf=i=>parseFloat((p[ci+i]||'0').trim().replace(',','.'))||0;
+      // Campos do DANFE (layout C100 SPED EFD ICMS/IPI)
+      const vlDescSped  = pf(5);   // VL_DESC
+      const vlMercSped  = pf(7);   // VL_MERC (total produtos)
+      const vlFrtSped   = pf(9);   // VL_FRT
+      const vlSegSped   = pf(10);  // VL_SEG
+      const vlOutDASped = pf(11);  // VL_OUT_DA (outras despesas)
+      const vlBcC100    = pf(12);  // VL_BC_ICMS (C100)
+      const vlIcmsC100  = pf(13);  // VL_ICMS (C100)
+      const vlBcStSped  = pf(14);  // VL_BC_ICMS_ST
+      const vlStSped    = pf(15);  // VL_ICMS_ST (C100)
+      const vlIpiSped   = pf(16);  // VL_IPI
+      out.push({chave,numDoc,serie,mod,oper,sit,dtDoc:df,dtSaida,dtEntrada,dtObj,vlDoc,fonte:'SPED',tipo:'nfe',
+        dvInvalido:dvOkSped===false,
+        vlDescSped,vlMercSped,vlFrtSped,vlSegSped,vlOutDASped,
+        vlBcC100,vlIcmsC100,vlBcStSped,vlStSped,vlIpiSped});
+    }
+
+    // ── D100 — CT-e ───────────────────────────────────────────────
+    if(p[1]==='D100'){
+      const ci=findChave(p,6);
+      if(ci<0) return;
+      const chave=p[ci].trim();
+      const mod  =(p[5]||'57').trim();
+      const oper =(p[2]||'0').trim();
+      const sit  =(p[6]||'00').trim();
+      const serie  =(p[7]||'').trim();
+      const numDoc =(p[ci-1]||'').trim();
+      const {df,dtObj}=parseDate(p[ci+1]);
+      const vlDoc=parseFloat((p[ci+3]||p[ci+4]||'0').trim().replace(',','.'))||0;
+      const dvOkD=verificarDV(chave);
+      out.push({chave,numDoc,serie,mod,oper,sit,dtDoc:df,dtObj,vlDoc,fonte:'SPED',tipo:'cte',dvInvalido:dvOkD===false});
+    }
+  });
+
+  // Aplicar ICMS acumulado a cada registro (2 casas decimais)
+  out.forEach(r=>{
+    const key=r.chave+'_'+r.oper;
+    const m=icmsMap[key];
+    r.icmsSped   = m ? parseFloat(m.icms.toFixed(2))   : null;
+    r.icmsStSped = m ? parseFloat(m.icmsSt.toFixed(2)) : null;
+    r.bcIcmsSped = m ? parseFloat(m.bcIcms.toFixed(2)) : null;
+    r.aliqSped   = m ? m.aliqMax                        : null;
+    r.cstsSped   = m ? m.csts.join(',')                 : null;
+    r.cfopsSped  = m ? m.cfops.join(',')                : null;
+    r.vRedSped   = m ? parseFloat(m.vRed.toFixed(2))   : null;
+  });
+
+  // ── E110 — Apuração mensal do ICMS ─────────────────────────────────
+  // Layout: p[2]=VL_TOT_DEB p[6]=VL_TOT_CRED p[10]=VL_SLD_CREDOR_ANT
+  //         p[13]=VL_ICMS_RECOLHER p[14]=VL_SLD_CREDOR_TRANSP
+  let e110Data=null;
+  txt.split(/\r\n|\r|\n/).forEach(line=>{
+    const p=line.split('|');
+    if(p[1]!=='E110'||p.length<15) return;
+    const pf=i=>parseFloat((p[i]||'0').trim().replace(',','.'))||0;
+    e110Data={
+      debitos:   pf(2),
+      ajDeb:     pf(3),
+      estCred:   pf(5),
+      creditos:  pf(6),
+      ajCred:    pf(7),
+      estDeb:    pf(9),
+      sldAnt:    pf(10),
+      sldApurado:pf(11),
+      totDed:    pf(12),
+      recolher:  pf(13),
+      sldCredor: pf(14),
+    };
+  });
+
+  // Calcular soma dos C190 por oper para comparar com E110
+  const c190Deb=parseFloat((Object.values(icmsMap)
+    .filter((_,i)=>Object.keys(icmsMap)[i].endsWith('_1'))
+    .reduce((s,v)=>s+v.icms,0)).toFixed(2));
+  const c190Cred=parseFloat((Object.values(icmsMap)
+    .filter((_,i)=>Object.keys(icmsMap)[i].endsWith('_0'))
+    .reduce((s,v)=>s+v.icms,0)).toFixed(2));
+
+  return {records:out, e110:e110Data, c190Deb, c190Cred};
 }
 
-function rText(file,enc){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Erro ao ler'));r.readAsText(file,enc);});}
-function rBuf(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Erro ao ler'));r.readAsArrayBuffer(file);});}
+// Extrai chave de eventos de CANCELAMENTO (tpEvento 110111/110112/110140)
+// Retorna a chave se for um evento de cancelamento, null caso contrário
+function extractCancelChave(txt){
+  try{
+    const xmlClean=txt.replace(/<\?xml[^?]*\?>/i,'<?xml version="1.0" encoding="UTF-8"?>');
+    const doc=new DOMParser().parseFromString(xmlClean,'text/xml');
+    if(doc.querySelector('parsererror')) return null;
+    const tp=doc.querySelector('tpEvento');
+    if(!tp) return null;
+    const cod=tp.textContent.trim();
+    // 110111=Cancelamento NF-e, 110112=Cancelamento fora prazo, 110140=EPEC
+    if(!['110111','110112','110140'].includes(cod)) return null;
+    // Verificar se o evento foi ACEITO pela SEFAZ (cStat 135=Evento registrado/vinculado)
+    // Se não houver protocolo de retorno, considerar aceito (arquivo local do emitente)
+    const cStatEl=doc.querySelector('retEvento infEvento cStat, cStat');
+    if(cStatEl){
+      const cs=cStatEl.textContent.trim();
+      // 135=Cancelamento homologado, 155=Cancelamento homologado fora prazo
+      if(!['135','155','101','136','151'].includes(cs)) return null;
+    }
+    const chEl=doc.querySelector('chNFe,chCTe');
+    if(chEl&&chEl.textContent.trim().length===44) return chEl.textContent.trim();
+    return null;
+  }catch(e){return null}
+}
 
-async function analisar(){
-  const sFiles=document.getElementById('sped-inp').files;
-  const xFiles=document.getElementById('xml-inp').files;
-  if(!sFiles.length&&!xFiles.length){alert('Selecione pelo menos um arquivo.');return;}
-  document.getElementById('loading').style.display='block';
-  document.getElementById('resultados').innerHTML='';
-  const S={},X={},erros=[];
-  for(const f of sFiles){
-    try{
-      if(f.name.toLowerCase().endsWith('.zip')){
-        const z=await JSZip.loadAsync(await rBuf(f));
-        for(const[n,e] of Object.entries(z.files)){
-          if(e.dir||!n.toLowerCase().endsWith('.txt'))continue;
-          const txt=new TextDecoder('iso-8859-1').decode(await e.async('arraybuffer'));
-          Object.assign(S,parseSped(txt));
-        }
-      }else{Object.assign(S,parseSped(await rText(f,'ISO-8859-1')));}
-    }catch(e){erros.push(`SPED ${f.name}: ${e.message}`);}
-  }
-  for(const f of xFiles){
-    try{
-      if(f.name.toLowerCase().endsWith('.zip')){
-        const z=await JSZip.loadAsync(await rBuf(f));
-        for(const[n,e] of Object.entries(z.files)){
-          if(e.dir||!n.toLowerCase().endsWith('.xml'))continue;
-          const txt=new TextDecoder('utf-8').decode(await e.async('arraybuffer'));
-          const nota=parseXmlDoc(n,txt);
-          if(nota.erro)erros.push(nota.erro);else X[nota.chave]=nota;
-        }
-      }else{
-        const nota=parseXmlDoc(f.name,await rText(f,'UTF-8'));
-        if(nota.erro)erros.push(nota.erro);else X[nota.chave]=nota;
+function parseXML(txt, filename){
+  try{
+    // Normalizar encoding declaration — ISO-8859-1 causa falha no DOMParser
+    // quando o texto já foi decodificado como UTF-8 (comportamento Safari)
+    const xmlClean=txt.replace(/<\?xml[^?]*\?>/i,'<?xml version="1.0" encoding="UTF-8"?>');
+    const doc=new DOMParser().parseFromString(xmlClean,'text/xml');
+    if(doc.querySelector('parsererror')) return null;
+
+    // ── Ignorar arquivos de EVENTO (cancelamentos, CCe, etc.) ──
+    const rootTag=(doc.documentElement||{}).tagName||'';
+    const isEvento=/evento|Evento|EVENTO/i.test(rootTag)||
+      !!doc.querySelector('procEventoNFe,procEventoCTe,eventoNFe,eventoCTe,retEventoNFe,retEventoCTe,procEventoNFCe');
+    if(isEvento) return null;
+
+    // ── Helper: extrair sit do protocolo ──────────────────────
+    function getSit(d){
+      const cStat=d.querySelector('infProt cStat, retEvento infEvento cStat, protNFe infProt cStat, protCTe infProt cStat');
+      const cs=cStat?.textContent?.trim()||'100';
+      if(cs==='101'||cs==='135') return '02'; // Cancelada
+      if(['110','111','204','205','301','302','303','610','612'].includes(cs)) return '04'; // Denegada
+      return '00'; // Autorizada
+    }
+
+    // ── CT-e ──────────────────────────────────────────────────
+    const infCteEl=doc.querySelector('infCte');
+    const chCTeEl=doc.querySelector('chCTe');
+    if(infCteEl||chCTeEl){
+      let chave='';
+      if(chCTeEl){ chave=chCTeEl.textContent.trim(); }
+      if(!chave||chave.length!==44){
+        const ic=doc.querySelector('infCte');
+        if(ic) chave=(ic.getAttribute('Id')||'').replace(/^[Cc][Tt][Ee]/,'').replace(/\s/g,'').trim();
       }
-    }catch(e){erros.push(`XML ${f.name}: ${e.message}`);}
-  }
-  const res=cruzar(S,X);
-  document.getElementById('loading').style.display='none';
-  render(res,erros);
+      if(!chave||chave.length!==44) return null;
+      const nCT=doc.querySelector('nCT')?.textContent?.trim()||'';
+      const serie=doc.querySelector('serie')?.textContent?.trim()||'';
+      const mod=doc.querySelector('mod')?.textContent?.trim()||'57';
+      // tpCTe: 0=Normal, 1=Complementar, 3=Anulação, 4=Substituto — não é Entrada/Saída
+      // A direção Entrada/Saída para CT-e vem do SPED (IND_OPER), não do XML
+      // Deixamos oper=null para ser sobrescrito pelo SPED no merge
+      const dhRaw=(doc.querySelector('dhEmi')||doc.querySelector('dEmi'))?.textContent?.trim()||'';
+      let df='',dtObj=null;
+      if(dhRaw){dtObj=new Date(dhRaw);if(!isNaN(dtObj))df=dtObj.toLocaleDateString('pt-BR')}
+      const vRec=parseFloat(doc.querySelector('vRec')?.textContent?.trim()||doc.querySelector('vTPrest')?.textContent?.trim()||'0')||0;
+      const sit=getSit(doc);
+      // CT-e: se CNPJ na chave = empresa → empresa emitiu (Saída)
+      // Caso contrário → empresa recebeu o serviço (Entrada)
+      // Será confirmado pelo SPED no merge; deixar null para XML-only
+      // CT-e: ICMS está em imp/ICMS/<ICMSxx>/vICMS (sem ICMSTot)
+      const cteIcmsEl=doc.querySelector('imp ICMS vICMS')||doc.querySelector('ICMS vICMS');
+      const cteIcmsXml=parseFloat(cteIcmsEl?.textContent?.trim()||'0')||0;
+      const cteBcEl=doc.querySelector('imp ICMS vBC')||doc.querySelector('ICMS vBC');
+      const cteBcXml=parseFloat(cteBcEl?.textContent?.trim()||'0')||0;
+      return{chave,numDoc:nCT,serie,mod,oper:null,sit,dtDoc:df,dtObj,vlDoc:vRec,fonte:'XML',tipo:'cte',
+        icmsXml:parseFloat(cteIcmsXml.toFixed(2)), bcIcmsXml:parseFloat(cteBcXml.toFixed(2)),
+        stXml:0, aliqXml:0, cfopXml:'', cstXml:'',
+        emitCNPJ:'',emitNome:'',emitUF:'',destCNPJ:'',destNome:'',destUF:''};
+    }
+
+    // ── NF-e / NFC-e ──────────────────────────────────────────
+    let chave='';
+    // Tentativa 1: <chNFe> no protocolo
+    const ce=doc.querySelector('chNFe');
+    if(ce) chave=ce.textContent.trim();
+    // Tentativa 2: atributo Id do infNFe
+    if(!chave||chave.length!==44){
+      const ie=doc.querySelector('infNFe,[Id]');
+      if(ie) chave=(ie.getAttribute('Id')||'').replace(/^NFe/i,'').replace(/\s/g,'').trim();
+    }
+    // Tentativa 3: procurar qualquer Id="NFe..." no XML bruto
+    if(!chave||chave.length!==44){
+      const m=txt.match(/Id=["']NFe(\d{44})["']/i)||txt.match(/Id=["'](\d{44})["']/);
+      if(m) chave=m[1]||m[0].replace(/.*?["']/,'').replace(/["'].*/,'').replace(/^NFe/i,'').trim();
+    }
+    // Tentativa 4: regex — qualquer sequência de 44 dígitos no XML (chave no body)
+    if(!chave||chave.length!==44){
+      const m44=txt.match(/>\s*(\d{44})\s*</);
+      if(m44) chave=m44[1];
+    }
+    // Tentativa 5: extrair do nome do arquivo (ex: NFE_[chave44]_...)
+    if((!chave||chave.length!==44)&&filename){
+      const mf=filename.match(/(\d{44})/);
+      if(mf) chave=mf[1];
+    }
+    if(!chave||chave.length!==44) return null;
+    const nNF=doc.querySelector('nNF')?.textContent?.trim()||'';
+    const serie=doc.querySelector('serie')?.textContent?.trim()||'';
+    const mod=doc.querySelector('mod')?.textContent?.trim()||'55';
+    // tpNF: 0=Entrada, 1=Saída — mas isso é do emitente
+    // Para o destinatário, uma nota recebida tem tpNF=1 no XML mas IND_OPER=0 no SPED
+    // Então deixamos oper=null para NF-e de entrada ser corrigida pelo SPED no merge
+    // Só usamos tpNF para NFC-e (65) que são SEMPRE saída, e para notas sem SPED
+    const tpNF=doc.querySelector('tpNF')?.textContent?.trim()||'1';
+    const operXml=tpNF==='0'?'0':'1';
+    const sit=getSit(doc);
+    const dhRaw=(doc.querySelector('dhEmi')||doc.querySelector('dEmi'))?.textContent?.trim()||'';
+    let df='',dtObj=null;
+    if(dhRaw){dtObj=new Date(dhRaw);if(!isNaN(dtObj))df=dtObj.toLocaleDateString('pt-BR')}
+    // ICMS total da nota (ICMSTot/vICMS — soma de todos os itens)
+    // Posição específica evita capturar vICMS de itens individuais
+    const icmsEl=doc.querySelector('ICMSTot vICMS')||doc.querySelector('total ICMSTot vICMS');
+    // Alíquota do primeiro item (pICMS — ICMS por fora)
+    const aliqEl=doc.querySelector('det imposto ICMS pICMS')||doc.querySelector('pICMS');
+    const aliqXml=parseFloat(aliqEl?.textContent?.trim()||'0')||0;
+    const icmsXml=parseFloat(icmsEl?.textContent?.trim()||'0')||0;
+    const bcEl=doc.querySelector('ICMSTot vBC')||doc.querySelector('total ICMSTot vBC');
+    const bcIcmsXml=parseFloat(bcEl?.textContent?.trim()||'0')||0;
+    const totEl=doc.querySelector('ICMSTot')||doc.querySelector('total ICMSTot');
+    const stEl=doc.querySelector('ICMSTot vST')||doc.querySelector('total ICMSTot vST');
+    // Novos campos do DANFE
+    const bcStEl=totEl?.querySelector('vBCST');
+    const bcStXml=parseFloat(bcStEl?.textContent?.trim()||'0')||0;
+    const prodEl =totEl?.querySelector('vProd');
+    const prodXml=parseFloat(prodEl?.textContent?.trim()||'0')||0;
+    const freteEl=totEl?.querySelector('vFrete');
+    const freteXml=parseFloat(freteEl?.textContent?.trim()||'0')||0;
+    const segEl  =totEl?.querySelector('vSeg');
+    const segXml =parseFloat(segEl?.textContent?.trim()||'0')||0;
+    const descEl =totEl?.querySelector('vDesc');
+    const descXml=parseFloat(descEl?.textContent?.trim()||'0')||0;
+    const outroEl=totEl?.querySelector('vOutro');
+    const outroXml=parseFloat(outroEl?.textContent?.trim()||'0')||0;
+    const ipiEl  =totEl?.querySelector('vIPI')||doc.querySelector('total IPI vIPI');
+    const ipiXml =parseFloat(ipiEl?.textContent?.trim()||'0')||0;
+    const stXml=parseFloat(stEl?.textContent?.trim()||'0')||0;
+    // Extrair campos completos para comparação e rankings
+    const qs=s=>doc.querySelector(s)?.textContent?.trim()||'';
+    const qn=s=>parseFloat(doc.querySelector(s)?.textContent?.trim()||'0')||0;
+    const dvOkXml=verificarDV(chave);
+    return{chave,numDoc:nNF,serie,mod,oper:operXml,sit,dtDoc:df,dtObj,dvInvalido:dvOkXml===false,
+      vlDoc:parseFloat(doc.querySelector('vNF')?.textContent?.trim()||'0')||0,
+      fonte:'XML',tipo:'nfe',
+      // ICMS
+      icmsXml:parseFloat(icmsXml.toFixed(2)),
+      bcIcmsXml:parseFloat(bcIcmsXml.toFixed(2)),
+      aliqXml:parseFloat(aliqXml.toFixed(2)),
+      stXml:parseFloat(stXml.toFixed(2)),
+      bcStXml,prodXml,freteXml,segXml,descXml,outroXml,ipiXml,
+      // Tributos adicionais
+      vIPIXml:parseFloat((qn('ICMSTot vIPI')||0).toFixed(2)),
+      vPISXml:parseFloat((qn('ICMSTot vPIS')||0).toFixed(2)),
+      vCOFINSXml:parseFloat((qn('ICMSTot vCOFINS')||0).toFixed(2)),
+      vFCPXml:parseFloat((qn('ICMSTot vFCP')||0).toFixed(2)),
+      vTotTribXml:parseFloat((qn('ICMSTot vTotTrib')||0).toFixed(2)),
+      // Emitente / destinatário
+      emitCNPJ:qs('emit CNPJ')||qs('emit CPF'),
+      emitNome:qs('emit xNome')||qs('emit xFant'),
+      emitUF:qs('emit enderEmit UF'),
+      destCNPJ:qs('dest CNPJ')||qs('dest CPF'),
+      destNome:qs('dest xNome'),
+      destUF:qs('dest enderDest UF'),
+      // Produto/operação (primeiro item)
+      natOp:qs('natOp'),
+      cfopXml:qs('det:first-child prod CFOP')||qs('CFOP'),
+      cstXml:qs('det:first-child imposto ICMS CST')||qs('det:first-child imposto ICMS CSOSN'),
+      ncmXml:qs('det:first-child prod NCM'),
+    };
+  }catch(e){return null}
 }
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function badge(st){
-  if(st==='ok')return '<span class="bok">OK</span>';
-  if(st==='divergente')return '<span class="bdiv">Divergente</span>';
-  if(st==='sem_xml')return '<span class="bsx">Sem XML</span>';
-  return '<span class="bss">Sem SPED</span>';
-}
+function processar(){
+  try{
+  const months=+document.getElementById('months-filter').value;
+  let cutoff=null; if(months>0){cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-months)}
+  const fs=cutoff?spedData.filter(n=>!n.dtObj||n.dtObj>=cutoff):spedData;
+  const fx=cutoff?xmlData.filter(n=>!n.dtObj||n.dtObj>=cutoff):xmlData;
 
-function render(res,erros){
-  const div=document.getElementById('resultados');
-  const total=res.length,div2=res.filter(r=>r.status==='divergente').length;
-  const sx=res.filter(r=>r.status==='sem_xml').length,ss=res.filter(r=>r.status==='sem_sped').length;
-  const ok=res.filter(r=>r.status==='ok').length;
-  let h='';
-  if(erros.length){h+=`<div class="erros-box">⚠️ <strong>${erros.length} problema(s):</strong><ul>`;erros.forEach(e=>h+=`<li>${esc(e)}</li>`);h+='</ul></div>';}
-  h+=`<div class="stats"><div class="stat s-total"><div class="sn">${total}</div><div class="sl">Total</div></div><div class="stat s-div"><div class="sn">${div2}</div><div class="sl">Divergentes</div></div><div class="stat s-sx"><div class="sn">${sx}</div><div class="sl">Sem XML</div></div><div class="stat s-ss"><div class="sn">${ss}</div><div class="sl">Sem SPED</div></div><div class="stat s-ok"><div class="sn">${ok}</div><div class="sl">OK</div></div></div>`;
-  if(res.length){
-    h+='<div class="filter-row">';
-    h+=`<button class="fbtn active" onclick="fil('todos',this)">Todos (${total})</button>`;
-    if(div2)h+=`<button class="fbtn fd" onclick="fil('divergente',this)">⚠ Divergentes (${div2})</button>`;
-    if(sx)h+=`<button class="fbtn fsx" onclick="fil('sem_xml',this)">Sem XML (${sx})</button>`;
-    if(ss)h+=`<button class="fbtn fss" onclick="fil('sem_sped',this)">Sem SPED (${ss})</button>`;
-    if(ok)h+=`<button class="fbtn fok" onclick="fil('ok',this)">✓ OK (${ok})</button>`;
-    h+='</div><div class="table-wrap"><table id="tbl"><thead><tr><th>Status</th><th>N\u00ba NF</th><th>S\u00e9rie</th><th>Data</th><th>Tipo</th><th>Emitente</th><th>Valor SPED</th><th>Valor XML</th><th>Diverg\u00eancias</th></tr></thead><tbody>';
-    res.forEach(r=>{
-      const dh=r.divergencias.length?'<ul class="dlist">'+r.divergencias.map(d=>`<li>${esc(d)}</li>`).join('')+'</ul>':'-';
-      h+=`<tr data-st="${r.status}"><td>${badge(r.status)}</td><td><strong>${esc(r.numDoc)}</strong><span class="chave">${esc((r.chave||'').substring(0,24))}</span></td><td>${esc(r.serie)||'-'}</td><td>${esc(r.dtDoc)||'-'}</td><td>${esc(r.tipo)||'-'}</td><td>${esc((r.emitente||'').substring(0,30))}</td><td>${r.valorSped!=='-'?'R$ '+r.valorSped:'-'}</td><td>${r.valorXml!=='-'?'R$ '+r.valorXml:'-'}</td><td>${dh}</td></tr>`;
+  // ── SPED Map: chave → array de registros ─────────────────────────────
+  // Uma mesma chave pode aparecer 2x no SPED quando a empresa emite nota
+  // para si mesma (filial→filial): entra como Saída E como Entrada.
+  // Usamos Map<chave, Record[]> para preservar ambos os registros.
+  const sm = new Map();
+  fs.forEach(n=>{
+    if(!sm.has(n.chave)) sm.set(n.chave,[]);
+    sm.get(n.chave).push(n);
+  });
+
+  const xm=new Map(fx.map(n=>[n.chave,n]));
+  allResults=[];
+  let _rid=0;
+
+  xm.forEach((n,k)=>{
+    const spedRecs=sm.get(k);
+
+    if(spedRecs && spedRecs.length>0){
+      // ── Nota encontrada no SPED ──────────────────────────────────────
+      // Se aparecer 2x (auto-emissão), criamos um resultado para cada
+      // registro SPED — um como Saída, um como Entrada.
+      // NFC-e (mod=65) é SEMPRE Saída — nunca pode ser Entrada
+      // Se SPED tiver dup oper=0+1 para NFC-e, ignorar o oper=0
+      const spedFiltered = n.mod==='65'
+        ? (spedRecs.filter(s=>s.oper==='1').length>0
+           ? spedRecs.filter(s=>s.oper==='1')
+           : spedRecs)
+        : spedRecs;
+
+      spedFiltered.forEach(s=>{
+        const oper=s.oper; // SPED é autoridade
+        // Valor total: comparar XML vs SPED
+        const vlXml=n.vlDoc||0;
+        const vlSped=s.vlDoc||0;
+        const vlDiff=parseFloat(Math.abs(vlXml-vlSped).toFixed(2));
+        const vlOk   = vlDiff===0;    // tolerância ZERO // tolerância R$0.02
+        // Prioridade: XML cancelamento/denegada > SPED sit > XML sit > '00'
+        const rawSit=(n.sit==='02'||n.sit==='04')?n.sit:(s.sit||n.sit||'00');
+        // Mapeamento correto do COD_SIT SPED e cStat XML para sit interno
+        // Cancelada: SPED 02,03 | XML 02 | Evento 02
+        // Denegada:  SPED 04    | XML 04 (cStat 110,111,204)
+        // Inutilizada: SPED 05
+        // Complementar: SPED 06,07 → tratar como regular (válido)
+        // Regular: SPED 00,01,08 | XML 00
+        const sitFinal=(rawSit==='02'||rawSit==='03'||rawSit==='07')?'02':
+                       rawSit==='04'?'04':
+                       rawSit==='05'?'05':
+                       '00';
+        // Cruzamento ICMS: comparar XML vs SPED com tolerância de R$0,02
+        const iXml = (typeof n.icmsXml==='number') ? n.icmsXml : null;
+        const iSped= (typeof s.icmsSped==='number') ? s.icmsSped : null;
+        const icmsDiff = (iXml!==null && iSped!==null)
+          ? parseFloat(Math.abs(iXml - iSped).toFixed(2))
+          : null;
+        const icmsOk = icmsDiff===null || icmsDiff<=0.02;
+        // BC divergente: base de cálculo XML vs SPED
+        const bcXml  = (typeof n.bcIcmsXml==='number') ? n.bcIcmsXml : null;
+        const bcSped = (typeof s.bcIcmsSped==='number') ? s.bcIcmsSped : null;
+        const bcDiff = (bcXml!==null && bcSped!==null)
+          ? parseFloat(Math.abs(bcXml - bcSped).toFixed(2))
+          : null;
+        const bcOk   = bcDiff===null || bcDiff<=0.02;
+
+        // ── Campos fiscais do DANFE — tolerância 0 (qualquer diff é erro) ──
+        const D2=(a,b)=>parseFloat(Math.abs((a||0)-(b||0)).toFixed(2));
+        const difFrete = D2(n.freteXml, s.vlFrtSped);
+        const freteOk  = difFrete===0;   // tolerância ZERO
+        const difSeg   = D2(n.segXml,   s.vlSegSped);
+        const segOk    = difSeg===0;
+        const difDesc  = D2(n.descXml,  s.vlDescSped);
+        const descOk   = difDesc===0;
+        const difOutro = D2(n.outroXml, s.vlOutDASped);
+        const outroOk  = difOutro===0;
+        const difIpi   = D2(n.ipiXml,   s.vlIpiSped);
+        const ipiOk    = difIpi===0;
+        const difProd  = D2(n.prodXml,  s.vlMercSped);
+        const prodOk   = difProd===0;    // total produtos: zero tolerância
+        const difBcSt  = D2(n.bcStXml,  s.vlBcStSped);
+        const bcStOk   = difBcSt<=0.02; // BC ST: mantém 0.02 (arredondamento)
+
+        // ── ICMS-ST divergente ──────────────────────────────────────────
+        const stXmlVal  = typeof n.stXml==='number'     ? n.stXml     : null;
+        const stSpedVal = typeof s.icmsStSped==='number' ? s.icmsStSped: null;
+        const stDiff    = (stXmlVal!==null&&stSpedVal!==null)
+          ? parseFloat(Math.abs(stXmlVal-stSpedVal).toFixed(2)) : null;
+        const stOk = stDiff===null || stDiff<=0.02;
+
+        // ── Valor total divergente — vlXml/vlSped/vlOk já declarados acima ──
+
+        // ── CFOP incompatível (direção entrada/saída) ───────────────────
+        const cfopStr=(s.cfopsSped||n.cfopXml||'').trim().split(',')[0];
+        const cfopN  = parseInt(cfopStr[0])||0;
+        const cfopOk = cfopN===0||
+          (oper==='0'&&[1,2,3].includes(cfopN))||
+          (oper==='1'&&[5,6,7].includes(cfopN));
+
+        // ── CFOP doméstico vs interestadual ────────────────────────────
+        const eUF=(n.emitUF||'').trim().toUpperCase();
+        const dUF=(n.destUF||'').trim().toUpperCase();
+        let cfopUFOk=true;
+        if(n.mod==='55'&&eUF&&dUF){
+          if(eUF!==dUF&&cfopN===5) cfopUFOk=false; // deveria ser 6xxx
+          if(eUF===dUF &&cfopN===6) cfopUFOk=false; // deveria ser 5xxx
+        }
+
+        // ── CST incompatível com ICMS ───────────────────────────────────
+        let cstIcmsOk=true;
+        const cstNum=parseInt((s.cstsSped||'').trim().split(',')[0])||null;
+        if(cstNum!==null&&[40,41,50,51,60].includes(cstNum)){
+          if((iSped!==null&&iSped>0.02)||(iXml!==null&&iXml>0.02)) cstIcmsOk=false;
+        }
+
+        // ── Data: emissão vs saída/entrada ─────────────────────────────
+        let dateOk=true, dateImpossivel=false;
+        const dtSaidaObj = s.dtObj||null;
+        if(n.dtObj&&dtSaidaObj){
+          const diffDays=Math.round((dtSaidaObj-n.dtObj)/(1000*60*60*24));
+          if(diffDays<-1){ dateOk=false; dateImpossivel=true; }
+          else if(Math.abs(diffDays)>30) dateOk=false;
+        }
+
+        allResults.push({...n, oper, sit:sitFinal, tipo:n.tipo||s.tipo, _id:_rid++, status:'ok',
+          icmsXml:iXml, icmsSped:iSped, icmsDiff, icmsOk,
+          bcIcmsXml:bcXml, bcIcmsSped:bcSped, bcDiff, bcOk,
+          stXml:stXmlVal, icmsStSped:stSpedVal, stDiff, stOk,
+          vlXml, vlSped, vlDiff, vlOk,
+          cfopOk, cfopUFOk, cstIcmsOk, dateOk, dateImpossivel,
+          aliqSped:s.aliqSped||null, cstsSped:s.cstsSped||null, cfopsSped:s.cfopsSped||null,
+          aliqXml:n.aliqXml||0, cfopXml:n.cfopXml||null,
+          // ── Campos fiscais do DANFE ────────────────────────────────
+          freteXml:n.freteXml||0,  freteSped:s.vlFrtSped||0,  difFrete,  freteOk,
+          segXml:n.segXml||0,      segSped:s.vlSegSped||0,    difSeg,    segOk,
+          descXml:n.descXml||0,    descSped:s.vlDescSped||0,  difDesc,   descOk,
+          outroXml:n.outroXml||0,  outroSped:s.vlOutDASped||0,difOutro,  outroOk,
+          ipiXml:n.ipiXml||0,      ipiSped:s.vlIpiSped||0,    difIpi,    ipiOk,
+          prodXml:n.prodXml||0,    prodSped:s.vlMercSped||0,  difProd,   prodOk,
+          bcStXml:n.bcStXml||0,    bcStSped:s.vlBcStSped||0,  difBcSt,   bcStOk});
+      });
+    } else {
+      // ── Nota só no XML (Falta no SPED) ──────────────────────────────
+      // Para determinar Entrada/Saída sem SPED, usamos o CNPJ da empresa:
+      //   chave[6:20] === CNPJ_empresa → Saída (empresa emitiu)
+      //   chave[6:20] !== CNPJ_empresa → Entrada (recebida de fornecedor)
+      // Exceção: se CNPJ bater MAS vier junto de XMLs de entrada,
+      // pode ser auto-emissão — marcamos como Saída (caso mais comum).
+      // O SPED sempre prevalece quando disponível.
+      let operXmlOnly;
+      if(n.tipo==='cte'){
+        // CT-e XML-only: CNPJ na chave decide direção
+        operXmlOnly=(companyCNPJ&&n.chave&&n.chave.slice(6,20)===companyCNPJ)?'1':'0';
+      } else if(companyCNPJ && n.chave && n.chave.length===44){
+        operXmlOnly = n.chave.slice(6,20)===companyCNPJ ? '1' : '0';
+      } else {
+        operXmlOnly = n.oper||'1';
+      }
+      // Normalizar sit para notas XML-only
+      const sitMiss=n.sit==='02'?'02':n.sit==='04'?'04':n.sit==='05'?'05':'00';
+      const cfopMiss=(n.cfopXml||'').trim();
+      const cpMiss=parseInt(cfopMiss[0])||0;
+      const cfopOkMiss=cpMiss===0||
+        (operXmlOnly==='0'&&[1,2,3].includes(cpMiss))||
+        (operXmlOnly==='1'&&[5,6,7].includes(cpMiss));
+      allResults.push({...n, oper:operXmlOnly, sit:sitMiss, _id:_rid++, status:'miss',
+        icmsXml:n.icmsXml||null, icmsSped:null, icmsDiff:null, icmsOk:true,
+        stOk:true, vlOk:true, cfopOk:cfopOkMiss,
+        cfopUFOk:true, cstIcmsOk:true, dateOk:true, dateImpossivel:false});
+    }
+  });
+
+  // ── Registros só no SPED (Extra no SPED) ─────────────────────────────
+  sm.forEach((spedRecs,k)=>{
+    if(!xm.has(k)){
+      spedRecs.forEach(s=>{
+        // Normalizar sit para notas SPED-only
+        const sitExtra=s.sit==='02'||s.sit==='03'?'02':s.sit==='04'?'04':s.sit==='05'?'05':'00';
+        const cfopExN=parseInt((s.cfopsSped||'').trim().split(',')[0][0])||0;
+        const cfopOkEx=cfopExN===0||
+          (s.oper==='0'&&[1,2,3].includes(cfopExN))||
+          (s.oper==='1'&&[5,6,7].includes(cfopExN));
+        allResults.push({...s, sit:sitExtra, _id:_rid++, status:'extra',
+          icmsXml:null, icmsSped:s.icmsSped||null, icmsDiff:null, icmsOk:true,
+          stOk:true, vlOk:true, cfopOk:cfopOkEx,
+          cfopUFOk:true, cstIcmsOk:true, dateOk:true, dateImpossivel:false});
+      });
+    }
+  });
+
+  // ── Detectar CFOP incompatível global e marcar ──────────────────────
+  allResults.forEach(r=>{
+    if(r.cfopOk===false) r._cfopIncompat=true;
+  });
+
+  // ── Detectar numeração quebrada (gaps na sequência) ──────────────────
+  // Agrupa por emitente (empresa emissora) + mod + serie e verifica gaps
+  const numGrp={};
+  allResults.filter(r=>r.oper==='1'&&r.numDoc&&r.mod==='55').forEach(r=>{
+    const key=(r.emitCNPJ||companyCNPJ||'')+'_'+(r.mod||'55')+'_'+(r.serie||'1');
+    if(!numGrp[key]) numGrp[key]=[];
+    const num=parseInt(r.numDoc)||0;
+    if(num>0) numGrp[key].push({num,id:r._id});
+  });
+  const gapNums=new Set();
+  Object.values(numGrp).forEach(arr=>{
+    if(arr.length<2) return;
+    arr.sort((a,b)=>a.num-b.num);
+    for(let i=1;i<arr.length;i++){
+      if(arr[i].num-arr[i-1].num>1){
+        // Gap detectado — marcar as notas em volta
+        gapNums.add(arr[i-1].id);
+        gapNums.add(arr[i].id);
+      }
+    }
+  });
+  allResults.forEach(r=>{ if(gapNums.has(r._id)) r.hasNumGap=true; });
+
+  // ── Detectar numeração duplicada (mesmo numDoc+série+mod+oper) ────── (mesmo numDoc+série no SPED) ──────
+  const numMap={};
+  allResults.forEach(r=>{
+    if(!r.numDoc||r.numDoc==='') return;
+    const key=(r.numDoc||'')+'_'+(r.serie||'')+'_'+(r.mod||'55')+'_'+(r.oper||'');
+    if(!numMap[key]) numMap[key]=[];
+    numMap[key].push(r._id);
+  });
+  Object.values(numMap).forEach(ids=>{
+    if(ids.length>1) ids.forEach(id=>{
+      const r=allResults.find(x=>x._id===id);
+      if(r) r.isDuplicate=true;
     });
-    h+='</tbody></table></div>';
-  }else{h+='<div class="empty">Nenhuma nota encontrada nos arquivos enviados.</div>';}
-  div.innerHTML=h;
+  });
+
+  const periodo=months>0?`Últimos ${months} meses`:'Todos os períodos';
+  const empresaLabel=companyNome?companyNome+(companyCNPJ?' · '+companyCNPJ.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):''):'';
+  document.getElementById('results-title').textContent=`${allResults.length} documentos · ${periodo}`;
+  const empEl=document.getElementById('empresa-label');
+  if(empEl) empEl.textContent=empresaLabel;
+  // Mostrar nome da empresa em destaque no topo da tela de resultados
+  if(companyNome){
+    const eh=document.getElementById('empresa-header');
+    const en=document.getElementById('empresa-nome');
+    const ec=document.getElementById('empresa-cnpj');
+    if(eh) eh.style.display='block';
+    if(en) en.textContent=companyNome;
+    if(ec) ec.textContent=companyCNPJ?'CNPJ: '+companyCNPJ.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'';
+  }
+  renderStats();setFilter('all');
+  renderRiskDashboard();
+  fecharComparacao();
+  salvarHistoricoConfronto();
+  // Garantir que dashboard fica fechado após processar
+  const dbDiv=document.getElementById('risk-dashboard');
+  if(dbDiv){ dbDiv.style.setProperty('display','none','important'); dbDiv.setAttribute('data-open','0'); }
+
+  // Popular filtro de mês com meses presentes nos dados
+  const mthSel=document.getElementById('month-filter');
+  if(mthSel){
+    const mthSet=new Set();
+    allResults.forEach(r=>{
+      if(r.dtDoc&&r.dtDoc.length>=7){
+        // dtDoc formato DD/MM/AAAA
+        const parts=r.dtDoc.split('/');
+        if(parts.length===3) mthSet.add(parts[2]+'/'+parts[1]);
+      } else if(r.dtObj instanceof Date&&!isNaN(r.dtObj)){
+        mthSet.add(r.dtObj.getFullYear()+'/'+String(r.dtObj.getMonth()+1).padStart(2,'0'));
+      }
+    });
+    const sorted=[...mthSet].sort().reverse();
+    mthSel.innerHTML='<option value="">Todos os meses</option>'+
+      sorted.map(m=>{
+        const [y,mo]=m.split('/');
+        const mNames=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        return `<option value="${m}">${mNames[parseInt(mo)]||mo}/${y}</option>`;
+      }).join('');
+    mthSel.style.display=sorted.length>1?'block':'none';
+  }
+  // Mostrar botão de Análise ICMS se há dados de ICMS
+  // Mostrar botão Apuração ICMS se E110 existe
+  const apurBtn=document.getElementById('apuracao-btn');
+  if(apurBtn){
+    apurBtn.style.display=window._e110?'inline-flex':'none';
+    if(window._e110){
+      const dD=Math.abs((window._c190Deb||0)-window._e110.debitos);
+      const dC=Math.abs((window._c190Cred||0)-window._e110.creditos);
+      const hasErr=(dD>0.02||dC>0.02);
+      apurBtn.style.background=hasErr?'#FEE2E2':'';
+      apurBtn.style.color=hasErr?'#B91C1C':'';
+      apurBtn.style.borderColor=hasErr?'#FECACA':'';
+      apurBtn.innerHTML='<i class="ti ti-receipt-tax"></i> Apuração ICMS'+(hasErr?' ⚠':'');
+    }
+  }
+  // Mostrar botão Detalhes ICMS se houver dados
+  const icmsDetailBtn=document.getElementById('icms-detail-btn');
+  const hasIcmsData=allResults.some(r=>r.icmsSped!==null||r.icmsXml!==null);
+  if(icmsDetailBtn){
+    icmsDetailBtn.style.display=hasIcmsData?'inline-flex':'none';
+    const divgCount=allResults.filter(r=>r.icmsOk===false).length;
+    if(divgCount>0){
+      icmsDetailBtn.style.background='#FEE2E2';
+      icmsDetailBtn.style.color='#B91C1C';
+      icmsDetailBtn.style.borderColor='#FECACA';
+      icmsDetailBtn.innerHTML='<i class="ti ti-calculator"></i> ICMS · '+divgCount+' divergência(s)';
+    } else {
+      icmsDetailBtn.innerHTML='<i class="ti ti-calculator"></i> Detalhes ICMS';
+    }
+  }
+  // Mostrar botão do dashboard com score e cor de risco
+  const dbBtn=document.getElementById('dashboard-btn');
+  const dbLbl=document.getElementById('dashboard-btn-label');
+  if(dbBtn){
+    const rs=calcRiskScore();
+    dbBtn.style.display='inline-flex';
+    dbBtn.style.background=rs.bg;
+    dbBtn.style.color=rs.color;
+    dbBtn.style.borderColor=rs.color+'55';
+    if(dbLbl) dbLbl.textContent='Risco '+rs.label+' · '+rs.score;
+  }
+  document.getElementById('icms-panel').style.display='none';
+  document.getElementById('upload-screen').style.display='none';
+  document.getElementById('results-screen').style.display='block';
+  }catch(err){
+    alert('Erro ao processar os arquivos: '+err.message+'\n\nVerifique se os arquivos são válidos e tente novamente.');
+    console.error('processar() error:',err);
+  }
 }
 
-function fil(st,btn){
-  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('#tbl tbody tr').forEach(r=>{r.style.display=(st==='todos'||r.dataset.st===st)?'':'none';});
+function voltarUpload(){
+  // Recarregar página — limpa tudo e mantém a licença salva no localStorage
+  location.reload();
+  return; // código abaixo não executa (mantido para referência)
+  allResults=[]; spedData=[]; xmlData=[]; currentFilter='all'; companyCNPJ=''; companyNome='';
+  window._e110=null; window._c190Deb=0; window._c190Cred=0;
+  _spedFileList=[]; _xmlFileList=[];
+  const lbR=document.getElementById('limpar-btn');if(lbR)lbR.style.display='none';
+  const apurPnl=document.getElementById('apuracao-panel');if(apurPnl)apurPnl.style.display='none';
+  const apurBtnR=document.getElementById('apuracao-btn');if(apurBtnR){apurBtnR.style.display='none';apurBtnR.style.background='';apurBtnR.style.color='';apurBtnR.style.borderColor='';}
+  document.getElementById('sped-status').innerHTML='';
+  const ehL=document.getElementById('empresa-header');if(ehL)ehL.style.display='none';
+  document.getElementById('xml-status').innerHTML='';
+  document.getElementById('process-btn').disabled=true;
+  // Resetar filtros e IDs
+  const sfEl=document.getElementById('sev-filter');if(sfEl)sfEl.value='';
+  const mfEl=document.getElementById('month-filter');if(mfEl){mfEl.value='';mfEl.style.display='none';mfEl.innerHTML='<option value="">Todos os meses</option>';}
+  const siEl=document.getElementById('search-input');if(siEl)siEl.value='';
+  const rdbClose=document.getElementById('risk-dashboard');if(rdbClose){rdbClose.style.setProperty('display','none','important');rdbClose.setAttribute('data-open','0');}
+  document.getElementById('rankings-section').style.display='none';
+  document.getElementById('results-screen').style.display='none';
+  document.getElementById('upload-screen').style.display='block';
+  const icmsPnl=document.getElementById('icms-panel');if(icmsPnl)icmsPnl.style.display='none';
+  const dbBtnReset=document.getElementById('dashboard-btn');if(dbBtnReset){dbBtnReset.style.display='none';dbBtnReset.style.background='';dbBtnReset.style.color='';dbBtnReset.style.borderColor='';}
+  const icmsDBtnReset=document.getElementById('icms-detail-btn');if(icmsDBtnReset){icmsDBtnReset.style.display='none';icmsDBtnReset.style.background='';icmsDBtnReset.style.color='';icmsDBtnReset.style.borderColor='';icmsDBtnReset.innerHTML='<i class="ti ti-calculator"></i> Detalhes ICMS';}
+}
+
+function renderStats(){
+  const n=v=>v.toLocaleString('pt-BR');
+  const total   =allResults.length;
+  const saidas  =allResults.filter(r=>r.oper==='1');
+  const entradas=allResults.filter(r=>r.oper==='0');
+  const sNfe    =saidas.filter(r=>r.mod==='55').length;
+  const sNfce   =saidas.filter(r=>r.mod==='65').length;
+  const sCte    =saidas.filter(r=>r.tipo==='cte').length;
+  const eNfe    =entradas.filter(r=>r.mod==='55').length;
+  const eCte    =entradas.filter(r=>r.tipo==='cte').length;
+
+  const sub=(items)=>items.filter(([,v])=>v>0)
+    .map(([l,v])=>`<span style="font-size:11px;color:var(--text-2)">${l}: <strong style="color:var(--text)">${n(v)}</strong></span>`)
+    .join('<span style="color:var(--border-dark);margin:0 4px">·</span>');
+
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card c-total">
+      <div class="stat-label"><i class="ti ti-files"></i>Total geral</div>
+      <div class="stat-value">${n(total)}</div>
+    </div>
+    <div class="stat-card c-total">
+      <div class="stat-label"><i class="ti ti-arrow-up" style="color:#C2410C"></i>Saídas</div>
+      <div class="stat-value" style="color:#C2410C">${n(saidas.length)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${sub([['NF-e',sNfe],['NFC-e',sNfce],['CT-e',sCte]])}</div>
+    </div>
+    <div class="stat-card c-total">
+      <div class="stat-label"><i class="ti ti-arrow-down" style="color:#0E7490"></i>Entradas</div>
+      <div class="stat-value" style="color:#0E7490">${n(entradas.length)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${sub([['NF-e',eNfe],['CT-e',eCte]])}</div>
+    </div>`;
+
+  const icmsDiv=allResults.filter(r=>r.icmsOk===false).length;
+
+  document.getElementById('stats-grid').style.gridTemplateColumns='repeat(3,1fr)';
+
+  // Card ICMS Divergente (só mostra se houver dados de ICMS)
+  const hasIcms=allResults.some(r=>r.icmsSped!==null||r.icmsXml!==null);
+  if(hasIcms){
+    const grid=document.getElementById('stats-grid');
+    const card=document.createElement('div');
+    card.className='stat-card '+(icmsDiv>0?'c-miss':'c-ok');
+    card.innerHTML=`<div class="stat-label"><i class="ti ti-calculator" style="color:${icmsDiv>0?'var(--danger)':'var(--ok)'}"></i>ICMS Divergente</div>
+      <div class="stat-value" style="color:${icmsDiv>0?'var(--danger)':'var(--ok)'}">${icmsDiv.toLocaleString('pt-BR')}</div>`;
+    grid.appendChild(card);
+    grid.style.gridTemplateColumns='repeat(4,1fr)';
+  }
+}
+
+// ── helpers ──────────────────────────────────────────────────────────
+function getFilteredRows(f){
+  if(f==='saida')    return allResults.filter(r=>r.oper==='1');
+  if(f==='entrada')  return allResults.filter(r=>r.oper==='0');
+  if(f==='cancelada')  return allResults.filter(r=>r.sit==='02');
+  if(f==='denegada')   return allResults.filter(r=>r.sit==='04');
+  if(f==='inutilizada')return allResults.filter(r=>r.sit==='05');
+  if(f==='ctesaida')  return allResults.filter(r=>r.tipo==='cte'&&r.oper==='1');
+  if(f==='icms')       return allResults.filter(r=>r.icmsOk===false);
+  if(f==='dup')        return allResults.filter(r=>r.isDuplicate===true);
+  if(f==='cfopinc')    return allResults.filter(r=>r.cfopOk===false);
+  if(f==='numgap')     return allResults.filter(r=>r.hasNumGap===true);
+  if(f==='dvinv')      return allResults.filter(r=>r.dvInvalido===true);
+  if(f==='icmsst')     return allResults.filter(r=>r.stOk===false);
+  if(f==='vldiv')      return allResults.filter(r=>r.vlOk===false);
+  if(f==='cfopuf')     return allResults.filter(r=>r.cfopUFOk===false);
+  if(f==='csticms')    return allResults.filter(r=>r.cstIcmsOk===false);
+  if(f==='dategap')    return allResults.filter(r=>r.dateOk===false);
+  if(f==='miss')     return allResults.filter(r=>r.status==='miss');
+  if(f==='extra')    return allResults.filter(r=>r.status==='extra');
+  if(f==='ok')       return allResults.filter(r=>r.status==='ok');
+  return allResults;
+}
+
+function renderDetailPanel(f){
+  const rows=getFilteredRows(f);
+  const dp=document.getElementById('detail-panel');
+  if(!rows.length){dp.innerHTML='';return;}
+
+  const num=a=>a.length.toLocaleString('pt-BR');
+  const nfe  =rows.filter(r=>r.mod==='55');
+  const nfce =rows.filter(r=>r.mod==='65');
+  const cte  =rows.filter(r=>r.tipo==='cte');
+  const ok   =rows.filter(r=>r.status==='ok');
+  const miss =rows.filter(r=>r.status==='miss');
+  const extra=rows.filter(r=>r.status==='extra');
+  const saidas=rows.filter(r=>r.oper==='1');
+  const ent  =rows.filter(r=>r.oper==='0');
+  const aut  =rows.filter(r=>r.sit==='00');
+  const canc =rows.filter(r=>r.sit==='02');
+  const den  =rows.filter(r=>r.sit==='04');
+  const inut =rows.filter(r=>r.sit==='05');
+
+  // mini card helper: cls, icon, label, arr
+  const mc=(bg,tc,ic,lbl,arr)=>arr.length===0?'':
+    `<div style="background:${bg};border:1px solid ${tc}22;border-radius:8px;padding:10px 14px;min-width:110px;flex:1">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${tc};display:flex;align-items:center;gap:4px;margin-bottom:4px">
+        <i class="ti ${ic}" style="font-size:12px"></i>${lbl}
+      </div>
+      <div style="font-size:22px;font-weight:700;color:${tc};letter-spacing:-.02em">${num(arr)}</div>
+    </div>`;
+
+  // section wrapper
+  const sec=(title,cards)=>{
+    const rendered=cards.filter(Boolean).join('');
+    if(!rendered) return '';
+    return `<div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:6px">${title}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${rendered}</div>
+    </div>`;
+  };
+
+  const cteEnt=cte.filter(r=>r.oper==='0');
+  const cteSai=cte.filter(r=>r.oper==='1');
+
+  // Sections
+  const secDocs = sec('Documentos',[
+    mc('#EFF6FF','#1D4ED8','ti-file-invoice','NF-e',nfe),
+    mc('#F0FDF4','#15803D','ti-receipt','NFC-e',nfce),
+    mc('#ECFEFF','#0E7490','ti-truck','CT-e Entrada',cteEnt),
+    ...(cteSai.length?[mc('#FFF7ED','#B45309','ti-truck','CT-e Saída',cteSai)]:[]),
+  ]);
+
+  const secDir = f==='saida'||f==='entrada' ? '' : sec('Direção',[
+    mc('#FFF7ED','#C2410C','ti-arrow-up','Saídas',saidas),
+    mc('#ECFEFF','#0E7490','ti-arrow-down','Entradas',ent),
+  ]);
+
+  const secConf = sec('Confronto SPED × XML',[
+    mc('#DCFCE7','#15803D','ti-circle-check','Coincidências',ok),
+    mc('#FEE2E2','#B91C1C','ti-alert-triangle','Falta no SPED',miss),
+    mc('#FEF3C7','#92400E','ti-file-plus','Extra no SPED',extra),
+  ]);
+
+  const cancNfe  =canc.filter(r=>r.mod==='55');
+  const cancNfce =canc.filter(r=>r.mod==='65');
+  const cancCte  =canc.filter(r=>r.tipo==='cte');
+
+  // Mini-card menor para breakdown de canceladas
+  const mcs=(bg,tc,ic,lbl,arr)=>arr.length===0?'':
+    `<div style="background:${bg};border:1px solid ${tc}22;border-radius:6px;padding:7px 12px;flex:1;min-width:80px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${tc};display:flex;align-items:center;gap:3px;margin-bottom:3px">
+        <i class="ti ${ic}" style="font-size:11px"></i>${lbl}
+      </div>
+      <div style="font-size:17px;font-weight:700;color:${tc}">${num(arr)}</div>
+    </div>`;
+
+  const cancBreakdown = canc.length ?
+    `<div style="margin-top:8px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#B91C1C;margin-bottom:5px">Detalhamento canceladas</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${mcs('#FEE2E2','#B91C1C','ti-file-invoice','NF-e',cancNfe)}
+        ${mcs('#FEE2E2','#B91C1C','ti-receipt','NFC-e',cancNfce)}
+        ${mcs('#FEE2E2','#B91C1C','ti-truck','CT-e',cancCte)}
+      </div>
+    </div>` : '';
+
+  const secSit = sec('Situação fiscal',[
+    mc('#DCFCE7','#15803D','ti-shield-check','Autorizadas',aut),
+    mc('#FEE2E2','#B91C1C','ti-ban','Canceladas',canc),
+    ...(den.length?[mc('#FEF3C7','#92400E','ti-alert-octagon','Denegadas',den)]:[]),
+    ...(inut.length?[mc('#F3E8FF','#7E22CE','ti-file-off','Inutilizadas',inut)]:[]),
+  ]) + cancBreakdown;
+
+  const labels={all:'Todos',saida:'Saídas',entrada:'Entradas',cancelada:'Canceladas',miss:'Falta no SPED',extra:'Extra no SPED',ok:'Coincidências'};
+
+  dp.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:4px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${labels[f]||'Todos'}</span>
+        <span style="font-size:12px;color:var(--text-2)">— <strong>${num(rows)}</strong> registro(s)</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div>${secDocs}${secDir}</div>
+      <div>${secConf}</div>
+      <div>${secSit}</div>
+    </div>
+  </div>`;
+}
+
+function setFilter(f){
+  // Limpar filtro de severidade ao trocar aba
+  const sf=document.getElementById('sev-filter');
+  if(sf&&sf.value) sf.value='';
+  currentFilter=f;
+  const hasCteS=allResults.some(r=>r.tipo==='cte'&&r.oper==='1');
+  const defs=[
+    ['all',      `Todos (${allResults.length})`],
+    ['saida',    `Saídas (${allResults.filter(r=>r.oper==='1').length})`],
+    ['entrada',  `Entradas (${allResults.filter(r=>r.oper==='0').length})`],
+    ['ok',       `Coincidências (${allResults.filter(r=>r.status==='ok').length})`],
+    ['miss',     `Falta no SPED (${allResults.filter(r=>r.status==='miss').length})`],
+    ['extra',    `Extra no SPED (${allResults.filter(r=>r.status==='extra').length})`],
+    ['cancelada',`Canceladas (${allResults.filter(r=>r.sit==='02').length})`],
+    ...(allResults.some(r=>r.sit==='04')?[['denegada',`Denegadas (${allResults.filter(r=>r.sit==='04').length})`]]:[]),
+    ...(allResults.some(r=>r.sit==='05')?[['inutilizada',`Inutilizadas (${allResults.filter(r=>r.sit==='05').length})`]]:[]),
+    ...(hasCteS?[['ctesaida',`CT-e Saída (${allResults.filter(r=>r.tipo==='cte'&&r.oper==='1').length})`]]:[]),
+    ...(allResults.some(r=>r.icmsOk===false)?[['icms',`ICMS Divergente (${allResults.filter(r=>r.icmsOk===false).length})`]]:[]),
+    ...(allResults.some(r=>r.isDuplicate)?[['dup',`Numeração Duplicada (${allResults.filter(r=>r.isDuplicate).length})`]]:[]),
+    ...(allResults.some(r=>r.cfopOk===false)?[['cfopinc',`CFOP Incompatível (${allResults.filter(r=>r.cfopOk===false).length})`]]:[]),
+    ...(allResults.some(r=>r.hasNumGap)?[['numgap',`Numeração Quebrada (${allResults.filter(r=>r.hasNumGap).length})`]]:[]),
+    ...(allResults.some(r=>r.dvInvalido)?[['dvinv',`Chave Inválida (${allResults.filter(r=>r.dvInvalido).length})`]]:[]),
+    ...(allResults.some(r=>r.stOk===false)?[['icmsst',`ICMS-ST Divergente (${allResults.filter(r=>r.stOk===false).length})`]]:[]),
+    ...(allResults.some(r=>r.vlOk===false)?[['vldiv',`Valor Divergente (${allResults.filter(r=>r.vlOk===false).length})`]]:[]),
+    ...(allResults.some(r=>r.cfopUFOk===false)?[['cfopuf',`CFOP UF (${allResults.filter(r=>r.cfopUFOk===false).length})`]]:[]),
+    ...(allResults.some(r=>r.cstIcmsOk===false)?[['csticms',`CST×ICMS (${allResults.filter(r=>r.cstIcmsOk===false).length})`]]:[]),
+    ...(allResults.some(r=>r.dateOk===false)?[['dategap',`Data Inválida (${allResults.filter(r=>r.dateOk===false).length})`]]:[]),
+  ];
+  document.getElementById('filter-tabs').innerHTML=
+    defs.map(([k,l])=>`<div class="tab${f===k?' active':''}" onclick="setFilter('${k}')">${l}</div>`).join('');
+  renderDetailPanel(f);
+  renderTable();
+}
+
+function renderTable(){
+  const q=(document.getElementById('search-input').value||'').toLowerCase().trim();
+  const sevF=(document.getElementById('sev-filter')?.value||'').toLowerCase();
+  const mthF=(document.getElementById('month-filter')?.value||'');
+  let rows=getFilteredRows(currentFilter);
+  if(mthF) rows=rows.filter(r=>(r.dtDoc||'').startsWith(mthF)||((r.dtObj instanceof Date)&&
+    (String(r.dtObj.getFullYear())+'/'+String(r.dtObj.getMonth()+1).padStart(2,'0'))===mthF));
+  if(sevF) rows=rows.filter(r=>{
+    const s=calcSeverity(r);
+    if(sevF==='ok') return !s;
+    if(sevF==='critica') return s?.order===0;
+    if(sevF==='alta') return s?.order===1;
+    if(sevF==='media') return s?.order===2;
+    if(sevF==='baixa') return s?.order===3;
+    return true;
+  });
+  if(q) rows=rows.filter(r=>{
+    const fields=[
+      r.chave||'',
+      r.numDoc||'',
+      r.serie||'',
+      (r.emitNome||'').toLowerCase(),
+      (r.emitCNPJ||'').replace(/\D/g,''),
+      (r.destNome||'').toLowerCase(),
+      (r.destCNPJ||'').replace(/\D/g,''),
+      (r.ncmXml||'').toLowerCase(),
+      (r.cfopXml||r.cfopsSped||'').toLowerCase(),
+      (r.cstXml||r.cstsSped||'').toLowerCase(),
+      (r.natOp||'').toLowerCase(),
+    ];
+    return fields.some(f=>f.includes(q));
+  });
+  const bdg=s=>({ok:`<span class="badge b-ok"><i class="ti ti-check" style="font-size:11px"></i> OK</span>`,miss:`<span class="badge b-miss"><i class="ti ti-x" style="font-size:11px"></i> Falta no SPED</span>`,extra:`<span class="badge b-extra"><i class="ti ti-plus" style="font-size:11px"></i> Extra no SPED</span>`})[s]||'';
+  const src=f=>f==='SPED'?`<span class="badge b-sped">SPED</span>`:`<span class="badge b-xml">XML</span>`;
+  const modBadge=(m,chave)=>{
+    const lbl=m==='65'?'NFC-e':m==='57'?'CT-e':'NF-e';
+    const cls=m==='65'?'badge-nfce':m==='57'?'badge-cte':'badge-nfe';
+    if(chave&&chave.length===44){
+      const url=urlSefaz(chave);
+      return '<a href="'+url+'" target="_blank" onclick="event.stopPropagation();copiarChaveClipboard(\'' + chave + '\')" title="Abrir no portal SEFAZ (chave copiada automaticamente)" style="text-decoration:none"><span class="badge '+cls+'" style="cursor:pointer">'+lbl+' ↗</span></a>';
+    }
+    return '<span class="badge '+cls+'">'+lbl+'</span>';
+  };
+  
+  const tipoBadge=o=>o==='0'
+    ?`<span class="badge" style="background:#ECFEFF;color:#0E7490;font-size:10px"><i class="ti ti-arrow-down" style="font-size:9px"></i> Entrada</span>`
+    :`<span class="badge" style="background:#FFF7ED;color:#C2410C;font-size:10px"><i class="ti ti-arrow-up" style="font-size:9px"></i> Saída</span>`;
+  const sevBadge=n=>{
+    const s=calcSeverity(n);
+    const dupBadge=n.isDuplicate?'<span class="sev sev-a" style="margin-left:3px">DUP</span>':'';
+    const icmsHint=n.icmsOk===false&&n.icmsDiff?
+      ' title="ICMS divergente: R$ '+n.icmsDiff.toLocaleString('pt-BR',{minimumFractionDigits:2})+'"':'';
+    if(!s) return dupBadge||'<span style="font-size:10px;color:var(--text-3)">—</span>';
+    return '<span class="sev '+s.cls+'"'+icmsHint+'>'+s.label+'</span>'+dupBadge;
+  };
+  const icmsBadge=n=>{
+    if(n.status!=='ok') return '<span style="font-size:10px;color:var(--text-3)">—</span>';
+    if(n.icmsSped===null&&n.icmsXml===null) return '<span style="font-size:10px;color:var(--text-3)">—</span>';
+    if(n.icmsOk===false){
+      const d=n.icmsDiff!==null?n.icmsDiff.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'?';
+      return`<span style="font-size:10px;font-weight:600;background:var(--danger-bg);color:var(--danger);padding:2px 6px;border-radius:4px" title="SPED: R$${(n.icmsSped||0).toLocaleString('pt-BR',{minimumFractionDigits:2})} | XML: R$${(n.icmsXml||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}">⚠ R$${d}</span>`;
+    }
+    if(n.icmsSped===0&&n.icmsXml===0) return '<span style="font-size:10px;color:var(--text-3)">0,00</span>';
+    return`<span style="font-size:10px;color:var(--ok)">✓</span>`;
+  };
+  const sitBadge=s=>{
+    if(s==='02'||s==='07') return`<span class="badge" style="background:#FEE2E2;color:#B91C1C;font-size:10px"><i class="ti ti-ban" style="font-size:9px"></i> Cancelada</span>`;
+    if(s==='06') return`<span class="badge" style="background:#FEF3C7;color:#92400E;font-size:10px"><i class="ti ti-x" style="font-size:9px"></i> Denegada</span>`;
+    return`<span class="badge" style="background:#DCFCE7;color:#15803D;font-size:10px"><i class="ti ti-check" style="font-size:9px"></i> Autorizada</span>`;
+  };
+  const fmt=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('results-body').innerHTML=rows.slice(0,2000).map(n=>`
+    <tr onclick="abrirComparacao(${n._id})" title="Clique para ver detalhes" style="cursor:pointer">
+      <td class="mono">${(n.chave||'').slice(0,12)}&hellip;${(n.chave||'').slice(-8)}</td>
+      <td>${n.numDoc||'—'}</td><td>${n.serie||'—'}</td><td>${n.dtDoc||'—'}</td>
+      <td class="right">${fmt(n.vlDoc)}</td>
+      <td>${modBadge(n.mod||'55',n.chave)}</td>
+      <td>${tipoBadge(n.oper||'1')}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text-2)">${(n.cfopsSped||n.cfopXml||'—').split(',')[0]}</td>
+      <td>${sitBadge(n.sit||'00')}</td>
+      <td>${src(n.fonte,n.chave)}</td><td>${bdg(n.status)}</td>
+      <td>${sevBadge(n)}</td>
+    </tr>`).join('');
+  const extra=rows.length>2000?` (mostrando 2.000 de ${rows.length.toLocaleString('pt-BR')})`:'';
+  document.getElementById('results-count').innerHTML=
+    `<span>${rows.length.toLocaleString('pt-BR')} registro(s)${q?' encontrado(s)':''}${extra}</span>`+
+    `<span style="margin-left:16px;color:var(--text-3)">Clique em uma linha para copiar a chave completa</span>`;
+}
+
+function copiarChave(c){
+  const showToast=()=>{const t=document.getElementById('toast');t.style.display='flex';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2500)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(c).then(showToast).catch(()=>copiarFallback(c,showToast));
+  } else { copiarFallback(c,showToast); }
+}
+function copiarFallback(c,cb){
+  try{
+    const el=document.createElement('textarea');
+    el.value=c; el.style.position='fixed'; el.style.opacity='0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    if(cb) cb();
+  }catch(e){}
+}
+
+function exportarExcel(){
+  try{
+  // ── helpers ───────────────────────────────────────────────
+  const n2 =v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const num =v=>(v||0).toLocaleString('pt-BR');
+  const fmt =v=>parseFloat((v||0).toFixed(2));
+  const now =new Date().toLocaleString('pt-BR');
+  const today=new Date().toLocaleDateString('pt-BR');
+
+  const tipoLabel=o=>o==='0'?'Entrada':'Saída';
+  const modLabel =m=>m==='65'?'NFC-e':m==='57'?'CT-e':'NF-e';
+  const sitLabel =s=>s==='02'?'Cancelada':
+                   s==='04'?'Denegada':
+                   s==='05'?'Inutilizada':
+                   'Autorizada';
+  const statusLabel=s=>({ok:'✓ Coincidência',miss:'✗ Falta no SPED',extra:'+ Extra no SPED'})[s]||s;
+
+  // ── estilos ───────────────────────────────────────────────
+  const ST = {
+    title:   {font:{bold:true,color:{rgb:'FFFFFF'},sz:14},fill:{fgColor:{rgb:'0F2340'}},alignment:{horizontal:'left',vertical:'center'}},
+    sec:     {font:{bold:true,color:{rgb:'0F2340'},sz:11},fill:{fgColor:{rgb:'EBF1FB'}},alignment:{horizontal:'left',vertical:'center'}},
+    secR:    {font:{bold:true,color:{rgb:'0F2340'},sz:11},fill:{fgColor:{rgb:'EBF1FB'}},alignment:{horizontal:'right',vertical:'center'}},
+    lbl:     {font:{color:{rgb:'374151'},sz:10},alignment:{horizontal:'left',vertical:'center'}},
+    num:     {font:{bold:true,color:{rgb:'111827'},sz:11},alignment:{horizontal:'right',vertical:'center'}},
+    note:    {font:{italic:true,color:{rgb:'6B7280'},sz:9},alignment:{horizontal:'left',vertical:'center',wrapText:true}},
+    hdr:     {font:{bold:true,color:{rgb:'FFFFFF'},sz:10},fill:{fgColor:{rgb:'0F2340'}},alignment:{horizontal:'center',vertical:'center'},border:{bottom:{style:'medium',color:{rgb:'1D5FC4'}}}},
+    hdrL:    {font:{bold:true,color:{rgb:'FFFFFF'},sz:10},fill:{fgColor:{rgb:'0F2340'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'medium',color:{rgb:'1D5FC4'}}}},
+    ok:      {fill:{fgColor:{rgb:'DCFCE7'}},font:{color:{rgb:'15803D'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'D1FAE5'}}}},
+    miss:    {fill:{fgColor:{rgb:'FEE2E2'}},font:{color:{rgb:'B91C1C'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'FECACA'}}}},
+    extra:   {fill:{fgColor:{rgb:'FEF3C7'}},font:{color:{rgb:'92400E'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'FDE68A'}}}},
+    base:    {alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}}}},
+    baseR:   {alignment:{horizontal:'right',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}}}},
+    mono:    {font:{name:'Courier New',sz:9,color:{rgb:'4B5563'}},alignment:{horizontal:'left',vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}}}},
+    total:   {font:{bold:true,color:{rgb:'0F2340'},sz:11},fill:{fgColor:{rgb:'F1F5F9'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'0F2340'}}}},
+    totalR:  {font:{bold:true,color:{rgb:'0F2340'},sz:11},fill:{fgColor:{rgb:'F1F5F9'}},alignment:{horizontal:'right',vertical:'center'},border:{top:{style:'medium',color:{rgb:'0F2340'}}}},
+    totalV:  {font:{bold:true,color:{rgb:'0F2340'},sz:11},fill:{fgColor:{rgb:'F1F5F9'}},alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0.00',border:{top:{style:'medium',color:{rgb:'0F2340'}}}},
+    warn:    {font:{bold:true,color:{rgb:'92400E'},sz:10},fill:{fgColor:{rgb:'FEF3C7'}},alignment:{horizontal:'left',vertical:'center'}},
+    good:    {font:{bold:true,color:{rgb:'15803D'},sz:10},fill:{fgColor:{rgb:'DCFCE7'}},alignment:{horizontal:'left',vertical:'center'}},
+  };
+
+  const wb=XLSX.utils.book_new();
+  const ap=(ws,r,c,st)=>{const ref=XLSX.utils.encode_cell({r,c});if(ws[ref])ws[ref].s=st;};
+  const apRange=(ws,row,cols,st)=>cols.forEach(c=>ap(ws,row,c,st));
+
+  // ── conjuntos por tipo ────────────────────────────────────
+  const nfeSai =allResults.filter(r=>r.mod==='55'&&r.oper==='1');
+  const nfeEnt =allResults.filter(r=>r.mod==='55'&&r.oper==='0');
+  const nfceSai=allResults.filter(r=>r.mod==='65');               // NFC-e sempre saída
+  const cteEnt =allResults.filter(r=>r.tipo==='cte'&&r.oper==='0');
+  const cteSai =allResults.filter(r=>r.tipo==='cte'&&r.oper==='1');
+
+  const grp=[
+    {label:'NF-e Saída',     rows:nfeSai,  cor:'#1D5FC4'},
+    {label:'NF-e Entrada',   rows:nfeEnt,  cor:'#0E7490'},
+    {label:'NFC-e Saída',    rows:nfceSai, cor:'#15803D'},
+    {label:'CT-e Entrada',   rows:cteEnt,  cor:'#7E22CE'},
+    {label:'CT-e Saída',     rows:cteSai,  cor:'#B45309'},
+  ];
+
+  const tot=arr=>({
+    total:arr.length,
+    aut:arr.filter(r=>r.sit==='00').length,
+    canc:arr.filter(r=>r.sit==='02').length,
+    den:arr.filter(r=>r.sit==='04').length,
+    inut:arr.filter(r=>r.sit==='05').length,
+    miss:arr.filter(r=>r.status==='miss').length,
+    extra:arr.filter(r=>r.status==='extra').length,
+    ok:arr.filter(r=>r.status==='ok').length,
+    vlTotal:arr.reduce((s,r)=>s+(r.vlDoc||0),0),
+  });
+
+  // ══════════════════════════════════════════════════════════
+  // ABA RESUMO
+  // ══════════════════════════════════════════════════════════
+  // ══ ABA RESUMO — só números, tudo tudo tudo ═════════════════
+  const rNfeSai =allResults.filter(r=>r.mod==='55'&&r.oper==='1');
+  const rNfeEnt =allResults.filter(r=>r.mod==='55'&&r.oper==='0');
+  const rNfceSai=allResults.filter(r=>r.mod==='65');
+  const rCteEnt =allResults.filter(r=>r.tipo==='cte'&&r.oper==='0');
+  const rCteSai =allResults.filter(r=>r.tipo==='cte'&&r.oper==='1');
+
+  const T=(arr)=>({
+    total: arr.length,
+    aut:   arr.filter(r=>r.sit==='00').length,
+    canc:  arr.filter(r=>r.sit==='02').length,
+    den:   arr.filter(r=>r.sit==='04').length,
+    inut:  arr.filter(r=>r.sit==='05').length,
+    ok:    arr.filter(r=>r.status==='ok').length,
+    miss:  arr.filter(r=>r.status==='miss').length,
+    extra: arr.filter(r=>r.status==='extra').length,
+    vl:    fmt(arr.reduce((s,r)=>s+(r.vlDoc||0),0)),
+  });
+
+  const tAll=T(allResults);
+  const tNfS=T(rNfeSai), tNfE=T(rNfeEnt);
+  const tNcS=T(rNfceSai);
+  const tCE =T(rCteEnt),  tCS =T(rCteSai);
+  const tSai=T(allResults.filter(r=>r.oper==='1'));
+  const tEnt=T(allResults.filter(r=>r.oper==='0'));
+
+  const H=['INDICADOR','TOTAL','AUTORIZADAS','CANCELADAS','DENEGADAS','COINCIDÊNCIAS','FALTA NO SPED','EXTRA NO SPED','VALOR TOTAL (R$)'];
+  const R=(lbl,t)=>[lbl,t.total,t.aut,t.canc,t.den,t.ok,t.miss,t.extra,t.vl];
+  const hasCteSai=rCteSai.length>0;
+
+  // ── colunas de dados completas para miss/extra ──────────────
+  const DC=['Chave de Acesso','Nº Doc','Série','Data','Valor (R$)','Modelo','Tipo','Situação','Origem'];
+  const DR=n=>[n.chave||'',n.numDoc||'',n.serie||'',n.dtDoc||'',fmt(n.vlDoc),modLabel(n.mod||'55'),tipoLabel(n.oper||'1'),sitLabel(n.sit||'00'),n.fonte||''];
+
+  const missRows =allResults.filter(r=>r.status==='miss');
+  const extraRows=allResults.filter(r=>r.status==='extra');
+  const missVl  =missRows.reduce((s,r)=>s+(r.vlDoc||0),0);
+  const extraVl =extraRows.reduce((s,r)=>s+(r.vlDoc||0),0);
+
+  const resumoData=[
+    ['MALHA FISCAL — SPED × XML — RELATÓRIO DE CONFRONTO','','','','','','','',''],
+    ['CNPJ:',companyCNPJ||'N/D','','Gerado em:',now,'','','',''],
+    [''],
+
+    // ── CONFRONTO SPED × XML ──────────────────────────────────
+    ['CONFRONTO SPED × XML','Quantidade','','','','','','',''],
+    ['Documentos no SPED',allResults.filter(r=>r.status==='ok'||r.status==='extra').length,'','','','','','',''],
+    ['Documentos no XML',allResults.filter(r=>r.status==='ok'||r.status==='miss').length,'','','','','','',''],
+    ['Coincidências (SPED + XML)',tAll.ok,'','','','','','',''],
+    ['Faltando no SPED (no XML, não no SPED)',tAll.miss,'','','','','','',''],
+    ['Extra no SPED (no SPED, sem XML)',tAll.extra,'','','','','','',''],
+    ['Total de documentos analisados',allResults.length,'','','','','','',''],
+    [''],
+
+    // ── POR TIPO DE DOCUMENTO ─────────────────────────────────
+    ['POR TIPO DE DOCUMENTO','Total','Autorizadas','Canceladas','Denegadas','Coincidências','Falta SPED','Extra SPED','Valor Total (R$)'],
+    ['NF-e Saída (mod.55)',tNfS.total,tNfS.aut,tNfS.canc,tNfS.den,tNfS.ok,tNfS.miss,tNfS.extra,tNfS.vl],
+    ['NF-e Entrada (mod.55)',tNfE.total,tNfE.aut,tNfE.canc,tNfE.den,tNfE.ok,tNfE.miss,tNfE.extra,tNfE.vl],
+    ['NFC-e Saída (mod.65)',tNcS.total,tNcS.aut,tNcS.canc,tNcS.den,tNcS.ok,tNcS.miss,tNcS.extra,tNcS.vl],
+    ['CT-e Entrada (mod.57)',tCE.total,tCE.aut,tCE.canc,tCE.den,tCE.ok,tCE.miss,tCE.extra,tCE.vl],
+    ...(hasCteSai?[['CT-e Saída (mod.57)',tCS.total,tCS.aut,tCS.canc,tCS.den,tCS.ok,tCS.miss,tCS.extra,tCS.vl]]:[]),
+    ['TOTAL GERAL',tAll.total,tAll.aut,tAll.canc,tAll.den,tAll.ok,tAll.miss,tAll.extra,tAll.vl],
+    [''],
+
+    // ── POR DIREÇÃO ───────────────────────────────────────────
+    ['POR DIREÇÃO','Total','Autorizadas','Canceladas','NF-e','NFC-e','CT-e','Coincidências','Valor Total (R$)'],
+    ['Saídas',tSai.total,tSai.aut,tSai.canc,rNfeSai.length,rNfceSai.length,rCteSai.length,tSai.ok,fmt(allResults.filter(r=>r.oper==='1').reduce((s,r)=>s+(r.vlDoc||0),0))],
+    ['Entradas',tEnt.total,tEnt.aut,tEnt.canc,rNfeEnt.length,0,rCteEnt.length,tEnt.ok,fmt(allResults.filter(r=>r.oper==='0').reduce((s,r)=>s+(r.vlDoc||0),0))],
+    [''],
+
+    // ── SITUAÇÃO FISCAL ───────────────────────────────────────
+    ['SITUAÇÃO FISCAL','NF-e Saída','NF-e Entrada','NFC-e Saída','CT-e Entrada',...(hasCteSai?['CT-e Saída']:[]),'Total','',''],
+    ['Autorizadas',tNfS.aut,tNfE.aut,tNcS.aut,tCE.aut,...(hasCteSai?[tCS.aut]:[]),tAll.aut,'',''],
+    ['Canceladas',tNfS.canc,tNfE.canc,tNcS.canc,tCE.canc,...(hasCteSai?[tCS.canc]:[]),tAll.canc,'',''],
+    ['Denegadas',tNfS.den,tNfE.den,tNcS.den,tCE.den,...(hasCteSai?[tCS.den]:[]),tAll.den,'',''],
+    [''],
+
+    // ── VALORES ───────────────────────────────────────────────
+    ['VALOR TOTAL (R$)','NF-e Saída','NF-e Entrada','NFC-e Saída','CT-e Entrada',...(hasCteSai?['CT-e Saída']:[]),'Total','',''],
+    ['',tNfS.vl,tNfE.vl,tNcS.vl,tCE.vl,...(hasCteSai?[tCS.vl]:[]),tAll.vl,'',''],
+  ];
+
+  const wsR=XLSX.utils.aoa_to_sheet(resumoData);
+  wsR['!cols']=[{wch:36},{wch:13},{wch:14},{wch:14},{wch:12},{wch:15},{wch:14},{wch:14},{wch:18}];
+  wsR['!merges']=[{s:{r:0,c:0},e:{r:0,c:8}}];
+
+  const apR=(row,col,st)=>{const ref=XLSX.utils.encode_cell({r:row,c:col});if(wsR[ref])wsR[ref].s=st;};
+  const apRRow=(row,cols,st)=>cols.forEach(c=>apR(row,c,st));
+  const allCols=[0,1,2,3,4,5,6,7,8];
+
+  apR(0,0,ST.title);
+  [0,1,3,4].forEach(c=>apR(1,c,ST.lbl));
+
+  // Confronto (linha 3)
+  apRRow(3,[0,1],ST.sec);
+  [4,5,6,7,8,9].forEach(r=>{apR(r,0,ST.lbl);apR(r,1,ST.num);});
+
+  // Por tipo (linha 11)
+  const hR=11; apRRow(hR,allCols,ST.hdr); apR(hR,0,ST.hdrL);
+  const nT=4+(hasCteSai?1:0);
+  for(let i=1;i<=nT;i++){
+    apR(hR+i,0,ST.lbl);
+    [1,2,3,4,5,6,7].forEach(c=>apR(hR+i,c,ST.num));
+    apR(hR+i,8,{...ST.num,numFmt:'#,##0.00'});
+  }
+  const totR=hR+nT+1;
+  apR(totR,0,ST.total);[1,2,3,4,5,6,7].forEach(c=>apR(totR,c,ST.totalR));apR(totR,8,ST.totalV);
+
+  // Por direção (totR+2)
+  const drH=totR+2; apRRow(drH,allCols,ST.hdr);apR(drH,0,ST.hdrL);
+  [drH+1,drH+2].forEach(r=>{apR(r,0,ST.lbl);[1,2,3,4,5,6,7].forEach(c=>apR(r,c,ST.num));apR(r,8,{...ST.num,numFmt:'#,##0.00'});});
+
+  // Situação (drH+4)
+  const nSC=5+(hasCteSai?1:0);
+  const sitH=drH+4; apRRow(sitH,[...Array(nSC+1).keys()],ST.hdr);apR(sitH,0,ST.hdrL);
+  [sitH+1,sitH+2,sitH+3].forEach(r=>{apR(r,0,ST.lbl);[...Array(nSC).keys()].map(i=>i+1).forEach(c=>apR(r,c,ST.num));});
+
+  // Valores (sitH+5)
+  const vlH=sitH+5; apRRow(vlH,[...Array(nSC+1).keys()],ST.hdr);apR(vlH,0,ST.hdrL);
+  [...Array(nSC+1).keys()].map(i=>i+1).forEach(c=>apR(vlH+1,c,{...ST.num,numFmt:'#,##0.00'}));
+  apR(vlH+1,0,ST.lbl);
+
+  XLSX.utils.book_append_sheet(wb,wsR,'Resumo');
+
+
+
+  // ══════════════════════════════════════════════════════════
+  // FUNÇÃO: criar aba de dados
+  // ══════════════════════════════════════════════════════════
+  // Estilos dark para o Excel (não afeta o browser, só para consistência)
+  const ST_D={
+    ok:   {...ST.ok},
+    miss: {...ST.miss},
+    extra:{...ST.extra},
+    base: {...ST.base},
+  };
+  function makeDataSheet(rowData, label, descricao){
+    if(!rowData.length) return null;
+    const t=tot(rowData);
+    const vlTotal=rowData.reduce((s,r)=>s+(r.vlDoc||0),0);
+    const vlStr='R$ '+n2(vlTotal);
+    const icmsDivCount=rowData.filter(r=>r.icmsOk===false).length;
+
+    // ── Novas flags de auditoria ─────────────────────────────────────
+    const cfopUFDiv=rowData.filter(r=>r.cfopUFOk===false).length;
+    const cstDiv   =rowData.filter(r=>r.cstIcmsOk===false).length;
+    const dateDiv  =rowData.filter(r=>r.dateOk===false).length;
+    const stDiv    =rowData.filter(r=>r.stOk===false).length;
+    const vlDiv    =rowData.filter(r=>r.vlOk===false).length;
+
+    // ── Colunas reorganizadas: dado mais útil primeiro, chave no final ──
+    const headers=[
+      'Nº Doc','Série','Data','Emitente','CNPJ Emitente','Destinatário',
+      'Valor (R$)','Modelo','Tipo','Situação Fiscal','Status Confronto',
+      'ICMS XML (R$)','ICMS SPED (R$)','Dif. ICMS','ICMS-ST XML','ICMS-ST SPED',
+      'Alíq. XML','Alíq. SPED','CST/SPED','CFOP/SPED',
+      'Flags Auditoria','Chave de Acesso'
+    ];
+
+    const flags=n=>{
+      const f=[];
+      if(n.icmsOk===false)    f.push('ICMS DIV.');
+      if(n.stOk===false)      f.push('ST DIV.');
+      if(n.vlOk===false)      f.push('VALOR DIV.');
+      if(n.bcOk===false)      f.push('BC DIV.');
+      if(n.cfopOk===false)    f.push('CFOP INCOMPAT.');
+      if(n.cfopUFOk===false)  f.push('CFOP UF');
+      if(n.cstIcmsOk===false) f.push('CST×ICMS');
+      if(n.dateOk===false)    f.push(n.dateImpossivel?'DATA IMPOSÍVEL':'DATA GAP');
+      if(n.isDuplicate)       f.push('DUPLICATA');
+      if(n.hasNumGap)         f.push('NUM. GAP');
+      if(n.dvInvalido)        f.push('CHAVE INVÁLIDA');
+      if(n.sit==='04')        f.push('DENEGADA');
+      if(n.sit==='05')        f.push('INUTILIZADA');
+      return f.join(' | ')||'';
+    };
+
+    const vals=rowData.map(n=>[
+      n.numDoc||'',
+      n.serie||'',
+      getDataDoc(n)||'',
+      n.emitNome||'',
+      n.emitCNPJ?n.emitCNPJ.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'',
+      n.destNome||'',
+      fmt(n.vlDoc),
+      modLabel(n.mod||'55'),
+      tipoLabel(n.oper||'1'),
+      sitLabel(n.sit||'00'),
+      statusLabel(n.status),
+      n.icmsXml!=null?fmt(n.icmsXml):'',
+      n.icmsSped!=null?fmt(n.icmsSped):'',
+      n.icmsDiff!=null?fmt(n.icmsDiff):'',
+      n.stXml!=null?fmt(n.stXml):'',
+      n.icmsStSped!=null?fmt(n.icmsStSped):'',
+      n.aliqXml>0?n.aliqXml+'%':'',
+      n.aliqSped!=null?n.aliqSped+'%':'',
+      n.cstsSped||'',
+      n.cfopsSped||'',
+      flags(n),
+      n.chave||'',
+    ]);
+
+    // ── Linha de resumo no topo ──────────────────────────────────────
+    const summaryRow=[
+      `${t.total} nota(s)`,
+      `${t.aut} autorizadas`,
+      `${t.canc} canceladas`,
+      `${t.den} denegadas`,
+      vlStr,
+      `${t.miss} falta SPED`,
+      `${t.extra} extra SPED`,
+      `${icmsDivCount} ICMS div.`,
+      stDiv>0?stDiv+' ST div.':'',
+      vlDiv>0?vlDiv+' valor div.':'',
+      cfopUFDiv>0?cfopUFDiv+' CFOP UF':'',
+      cstDiv>0?cstDiv+' CST×ICMS':'',
+      dateDiv>0?dateDiv+' data gap':'',
+      '','','','','','','','','',
+    ];
+
+    const ws=XLSX.utils.aoa_to_sheet([
+      [label,'','','','','','','','','','','','','','','','','','','','',''],
+      summaryRow,
+      headers,
+      ...vals,
+    ]);
+
+    // Larguras das colunas
+    ws['!cols']=[
+      {wch:10},{wch:6},{wch:12},{wch:28},{wch:18},{wch:24},
+      {wch:13},{wch:7},{wch:9},{wch:13},{wch:18},
+      {wch:13},{wch:13},{wch:12},{wch:13},{wch:13},
+      {wch:10},{wch:10},{wch:10},{wch:10},
+      {wch:30},{wch:46}
+    ];
+    // Congelar linhas do cabeçalho + primeira coluna
+    ws['!freeze']={xSplit:1,ySplit:3};
+    // Auto-filter na linha de cabeçalho (linha 2, index 2)
+    ws['!autofilter']={ref:'A3:'+XLSX.utils.encode_col(headers.length-1)+'3'};
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:headers.length-1}}];
+
+    const NC=headers.length;
+
+    // Título (linha 0)
+    ap(ws,0,0,ST.title);
+
+    // Linha de resumo (linha 1) — destaque azul
+    const sumSt={font:{bold:true,color:{rgb:'0F2340'},sz:10},
+                 fill:{fgColor:{rgb:'EBF1FB'}},
+                 alignment:{horizontal:'left',vertical:'center'},
+                 border:{bottom:{style:'medium',color:{rgb:'1D5FC4'}}}};
+    for(let ci=0;ci<NC;ci++) ap(ws,1,ci,ci===4?{...sumSt,font:{bold:true,color:{rgb:'15803D'},sz:11}}:sumSt);
+
+    // Cabeçalho (linha 2)
+    for(let ci=0;ci<NC;ci++){
+      const ref=XLSX.utils.encode_cell({r:2,c:ci});
+      if(!ws[ref]) ws[ref]={v:headers[ci],t:'s'};
+      ws[ref].s=ci===0?ST.hdrL:ST.hdr;
+    }
+
+    // Linhas de dados (linha 3+)
+    rowData.forEach((row,ri)=>{
+      const rs=row.status==='ok'?ST.ok:row.status==='miss'?ST.miss:row.status==='extra'?ST.extra:ST.base;
+      // Verificar flags para destacar linha
+      const hasCritical=row.icmsOk===false||row.stOk===false||row.vlOk===false||row.bcOk===false||row.cstIcmsOk===false||row.dateImpossivel;
+      const rowSt=hasCritical&&row.status==='ok'?{...ST.base,fill:{fgColor:{rgb:'FFF5F5'}}}:rs;
+      for(let ci=0;ci<NC;ci++){
+        const ref=XLSX.utils.encode_cell({r:ri+3,c:ci});
+        if(!ws[ref]) continue;
+        if(ci===6)  ws[ref].s={...rowSt,alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0.00'};
+        else if([11,12,13,14,15].includes(ci)) ws[ref].s={...rowSt,alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0.00'};
+        else if(ci===20){ // Flags — vermelho se tem flag crítica
+          const flagVal=ws[ref].v||'';
+          ws[ref].s=flagVal?{font:{bold:true,color:{rgb:hasCritical?'B91C1C':'B45309'},sz:9},
+            fill:{fgColor:{rgb:hasCritical?'FFF5F5':'FFFBEB'}},
+            alignment:{horizontal:'left',vertical:'center'}}:rowSt;
+        }
+        else if(ci===21) ws[ref].s={...rowSt,font:{...((rowSt.font)||{}),name:'Courier New',sz:8}}; // chave
+        else ws[ref].s=rowSt;
+      }
+    });
+
+    // Linha TOTAL no final
+    const totalRowIdx=rowData.length+3;
+    const totRow=['TOTAL: '+t.total+' notas',t.aut+' aut.',t.canc+' canc.',
+      t.den>0?t.den+' den.':'',vlStr,t.miss+' falta',t.extra+' extra',
+      icmsDivCount>0?icmsDivCount+' ICMS':'ICMS OK',
+      '','','','','','','','','','','','','',''];
+    XLSX.utils.sheet_add_aoa(ws,[totRow],{origin:totalRowIdx});
+    for(let ci=0;ci<NC;ci++){
+      const ref=XLSX.utils.encode_cell({r:totalRowIdx,c:ci});
+      if(!ws[ref]) continue;
+      ws[ref].s=ci===4?ST.totalV:ci===7?{...ST.total,font:{bold:true,color:{rgb:icmsDivCount>0?'B91C1C':'15803D'},sz:11}}:ST.total;
+    }
+
+    return ws;
+  }
+
+  // ── Abas por tipo ─────────────────────────────────────────
+  // Nome da aba com valor total embutido (máx 31 chars no Excel)
+  const fmtTab=arr=>{
+    const vl=arr.reduce((s,r)=>s+(r.vlDoc||0),0);
+    if(vl>=1000000) return `${(vl/1000000).toFixed(1)}M`;
+    if(vl>=1000)    return `${(vl/1000).toFixed(1)}k`;
+    return vl.toFixed(0);
+  };
+
+  const tabDefs=[
+    ['NF-e Saída',   nfeSai,  'NF-e Modelo 55 — Notas fiscais emitidas pela empresa para clientes e outras empresas'],
+    ['NF-e Entrada', nfeEnt,  'NF-e Modelo 55 — Notas fiscais recebidas de fornecedores e prestadores de serviço'],
+    ['NFC-e Saída',  nfceSai, 'NFC-e Modelo 65 — Cupom fiscal eletrônico emitido nas vendas diretas ao consumidor final'],
+    ['CT-e Entrada', cteEnt,  'CT-e Modelo 57 — Conhecimento de Transporte recebido — empresa contratou o frete (tomadora)'],
+    ['CT-e Saída',   cteSai,  'CT-e Modelo 57 — Conhecimento de Transporte emitido — empresa prestou o serviço de transporte'],
+  ];
+
+  tabDefs.forEach(([tabName,rowData,desc])=>{
+    if(!rowData.length) return;
+    const ws=makeDataSheet(rowData,tabName,desc);
+    if(ws){
+      // Nome da aba inclui valor total: "NF-e Saída R$47.8k"
+      XLSX.utils.book_append_sheet(wb,ws,tabName);
+    }
+  });
+
+  // ── Aba: Faltando no SPED ────────────────────────────────
+  const rowsMiss=allResults.filter(r=>r.status==='miss');
+  if(rowsMiss.length){
+    const ws=makeDataSheet(rowsMiss,'Faltando no SPED','Notas presentes no XML mas NÃO declaradas no SPED — verificar inclusão');
+    if(ws){
+      XLSX.utils.book_append_sheet(wb,ws,'Faltando no SPED');
+    }
+  }
+
+  // ── Aba: Extra no SPED ────────────────────────────────────
+  const rowsExtra=allResults.filter(r=>r.status==='extra');
+  if(rowsExtra.length){
+    const ws=makeDataSheet(rowsExtra,'Extra no SPED','Notas declaradas no SPED sem XML correspondente — verificar ou recuperar XML');
+    if(ws){
+      XLSX.utils.book_append_sheet(wb,ws,'Extra no SPED');
+    }
+  }
+
+  // ── Aba ICMS Divergente ──────────────────────────────────
+  const rowsIcmsDiv=allResults.filter(r=>r.icmsOk===false);
+  if(rowsIcmsDiv.length){
+    const ws=makeDataSheet(rowsIcmsDiv,'ICMS Divergente','Notas onde o ICMS declarado no SPED diverge do ICMS no XML — requerem análise e possível retificação');
+    if(ws) XLSX.utils.book_append_sheet(wb,ws,'ICMS Divergente');
+  }
+
+  // ── Aba Todos ────────────────────────────────────────────
+  const wsAll=makeDataSheet(allResults,'Todos os Documentos','Listagem completa de todos os documentos analisados no confronto SPED × XML');
+  if(wsAll) XLSX.utils.book_append_sheet(wb,wsAll,'Todos');
+
+  const filename=`malha_fiscal_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb,filename,{bookType:'xlsx',type:'binary',cellStyles:true});
+  }catch(err){alert('Erro ao gerar Excel: '+err.message);console.error(err);}
 }
 </script>
 </body>
