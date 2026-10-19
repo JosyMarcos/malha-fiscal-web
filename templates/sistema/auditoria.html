@@ -316,6 +316,50 @@
   [data-theme="dark"] .diag-box-title { background:#1E293B; border-color:rgba(255,255,255,.08); color:#94A3B8; }
   [data-theme="dark"] .diag-item { border-color:rgba(255,255,255,.06); }
   [data-theme="dark"] .cm-section-title { color:#64748B; }
+
+  /* ── RESPONSIVE MOBILE ─────────────────────────────────────────────────── */
+  @media (max-width:640px){
+    /* Header compacto */
+    header { padding:0 12px; gap:8px; }
+    .logo-sep, .logo-sub { display:none; }
+    .hdr-sep, .hdr-user, .hdr-plan { display:none; }
+    .hdr-right { gap:6px; }
+
+    /* Main sem padding lateral excessivo */
+    main { padding:1rem 0.75rem; }
+
+    /* Stats em mobile: 2 colunas */
+    .stats-grid { grid-template-columns:repeat(2,1fr) !important; gap:8px !important; }
+
+    /* Upload grid: 1 coluna */
+    .upload-grid { grid-template-columns:1fr !important; }
+
+    /* Tabela de resultados: scroll horizontal */
+    .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    /* Drawer: tela cheia no mobile */
+    #compare-overlay { width:100vw; border-left:none; border-top:1px solid var(--border); }
+    
+    /* Comparação: scroll horizontal dentro do drawer */
+    .cmp-section { overflow-x:auto; -webkit-overflow-scrolling:touch; padding:12px; }
+    .cmp-table { min-width:420px; }
+
+    /* Pills do meta em coluna */
+    .cm-meta { flex-direction:column; gap:5px; padding:10px 12px; }
+    .cm-pill { width:100%; box-sizing:border-box; }
+    .cm-pill[style*="margin-left:auto"] { margin-left:0 !important; }
+    .cm-btn-sefaz { align-self:flex-start; }
+
+    /* Page title menor */
+    .page-title { font-size:18px !important; }
+    .page-sub   { font-size:13px !important; }
+  }
+
+  @media (max-width:900px) and (min-width:641px){
+    /* Tablet: esconde nome/email, mantém plano e botões */
+    .hdr-user { display:none; }
+    .hdr-sep  { display:none; }
+  }
 </style>
 </head>
 <body>
@@ -328,7 +372,7 @@
     <div class="logo-sep"></div>
     <span class="logo-sub">SPED × XML</span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+  <div class="hdr-right" style="display:flex;align-items:center;gap:10px;margin-left:auto">
     <!-- dark mode toggle -->
     <button onclick="toggleTheme()" title="Alternar tema" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;color:rgba(255,255,255,.7);font-size:11px;font-weight:600;letter-spacing:.03em">
       <i id="theme-icon" class="ti ti-sun" style="font-size:14px"></i>
@@ -336,12 +380,12 @@
         <span style="position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .2s" id="theme-knob"></span>
       </span>
     </button>
-    <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
-    <div style="font-size:12px;color:rgba(255,255,255,.6);text-align:right;line-height:1.3">
+    <div class="hdr-sep" style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+    <div class="hdr-user" style="font-size:12px;color:rgba(255,255,255,.6);text-align:right;line-height:1.3">
       <strong style="color:#fff;display:block;font-size:13px">{{ usuario.get_full_name|default:usuario.username }}</strong>
       <span style="font-size:10px">{{ usuario.empresa|default:usuario.email }}</span>
     </div>
-    <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)">{{ usuario.get_plano_display }}</span>
+    <span class="hdr-plan" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)">{{ usuario.get_plano_display }}</span>
     <a href="{% url 'sistema:dashboard' %}" style="background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none"><i class="ti ti-layout-dashboard" style="font-size:12px;vertical-align:-1px"></i> Sistema</a>
     <a href="{% url 'accounts:logout' %}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">Sair</a>
   </div>
