@@ -360,9 +360,41 @@
     .hdr-user { display:none; }
     .hdr-sep  { display:none; }
   }
+
+/* ── Trial banner ───────────────────────────────────────────────── */
+.trial-bar{background:linear-gradient(90deg,#0B1E3D,#1a3558);border-bottom:2px solid #00D4AA;padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;min-height:42px;position:sticky;top:0;z-index:200}
+.trial-bar-left{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.85)}
+.trial-clock{font-size:16px;font-weight:800;color:#00D4AA;font-variant-numeric:tabular-nums;min-width:64px;display:inline-block}
+.trial-bar-cta{background:#00D4AA;color:#0B1E3D;font-weight:700;font-size:11px;padding:5px 14px;border-radius:6px;text-decoration:none;white-space:nowrap}
+/* trial limit overlay */
+.trial-limit-overlay{text-align:center;padding:24px 16px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 40%);margin-top:-60px;position:relative;z-index:10;border-radius:0 0 8px 8px}
+.trial-limit-overlay p{font-size:13px;color:#374151;margin-bottom:12px;font-weight:500}
+.trial-limit-cta{display:inline-block;background:#0B1E3D;color:#fff;font-weight:700;font-size:13px;padding:9px 22px;border-radius:8px;text-decoration:none}
 </style>
 </head>
 <body>
+{% if trial_segundos is not None %}
+<div class="trial-bar">
+  <div class="trial-bar-left">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Período de teste — expira em&nbsp;<span class="trial-clock" id="trial-clock">--:--:--</span>
+  </div>
+  <a href="https://wa.me/5583999924562" target="_blank" class="trial-bar-cta">Assinar plano →</a>
+</div>
+<script>
+(function(){
+  var secs={{ trial_segundos }};
+  function tick(){
+    if(secs<=0){var el=document.getElementById('trial-clock');if(el)el.textContent='00:00:00';return;}
+    var h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60;
+    var el=document.getElementById('trial-clock');
+    if(el)el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    secs--;setTimeout(tick,1000);
+  }
+  tick();
+})();
+</script>
+{% endif %}
 
 <!-- APP PRINCIPAL -->
 <header>
@@ -523,7 +555,11 @@
         <button class="btn-s" onclick="imprimirRelatorio()" style="padding:7px 14px">
           <i class="ti ti-printer"></i> Imprimir
         </button>
+        {% if is_trial %}
+        <button class="btn-s" style="opacity:.45;cursor:not-allowed" title="Disponível nos planos pagos" onclick="alert('A exportação está disponível nos planos pagos. Clique em Assinar plano para contratar.');"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
+        {% else %}
         <button class="btn-s" onclick="exportarExcel()"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
+        {% endif %}
       </div>
     </div>
     <!-- Painel Análise de ICMS (colapsável, aparece só se há dados) -->
@@ -2867,6 +2903,9 @@ function setFilter(f){
   renderTable();
 }
 
+// ── Trial: limite de 20 resultados ──────────────────────────────
+const TRIAL_LIMIT = {% if is_trial %}20{% else %}0{% endif %};  // 0 = sem limite
+
 function renderTable(){
   const q=(document.getElementById('search-input').value||'').toLowerCase().trim();
   const sevF=(document.getElementById('sev-filter')?.value||'').toLowerCase();
@@ -2938,7 +2977,9 @@ function renderTable(){
     return`<span class="badge" style="background:#DCFCE7;color:#15803D;font-size:10px"><i class="ti ti-check" style="font-size:9px"></i> Autorizada</span>`;
   };
   const fmt=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById('results-body').innerHTML=rows.slice(0,2000).map(n=>`
+  const displayRows = TRIAL_LIMIT>0 ? rows.slice(0,TRIAL_LIMIT) : rows.slice(0,2000);
+  const trialCapped = TRIAL_LIMIT>0 && rows.length>TRIAL_LIMIT;
+  document.getElementById('results-body').innerHTML=displayRows.map(n=>`
     <tr onclick="abrirComparacao(${n._id})" title="Clique para ver detalhes" style="cursor:pointer">
       <td class="mono">${(n.chave||'').slice(0,12)}&hellip;${(n.chave||'').slice(-8)}</td>
       <td>${n.numDoc||'—'}</td><td>${n.serie||'—'}</td><td>${n.dtDoc||'—'}</td>
@@ -2950,7 +2991,17 @@ function renderTable(){
       <td>${src(n.fonte,n.chave)}</td><td>${bdg(n.status)}</td>
       <td>${sevBadge(n)}</td>
     </tr>`).join('');
-  const extra=rows.length>2000?` (mostrando 2.000 de ${rows.length.toLocaleString('pt-BR')})`:'';
+  if(trialCapped){
+    const tbl=document.querySelector('#results-body')?.closest('table')?.parentElement;
+    if(tbl){
+      const ov=document.createElement('div');ov.className='trial-limit-overlay';
+      ov.innerHTML='<p>Você está vendo <strong>20 de '+rows.length.toLocaleString('pt-BR')+' registros</strong>. Assine um plano para ver todos.</p>'+
+        '<a href="https://wa.me/5583999924562" target="_blank" class="trial-limit-cta">Ver todos os resultados →</a>';
+      tbl.appendChild(ov);
+    }
+  }
+  const extra=rows.length>2000?` (mostrando 2.000 de ${rows.length.toLocaleString('pt-BR')})`:
+    (trialCapped?` (mostrando 20 de ${rows.length.toLocaleString('pt-BR')} — Trial)`:'');
   document.getElementById('results-count').innerHTML=
     `<span>${rows.length.toLocaleString('pt-BR')} registro(s)${q?' encontrado(s)':''}${extra}</span>`+
     `<span style="margin-left:16px;color:var(--text-3)">Clique em uma linha para copiar a chave completa</span>`;

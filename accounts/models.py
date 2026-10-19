@@ -4,6 +4,7 @@ from django.utils import timezone
 
 
 class Plano(models.TextChoices):
+    TRIAL         = 'trial',         'Trial — 48h gratuito'
     ESSENCIAL     = 'essencial',     'Essencial — R$157/mês'
     PROFISSIONAL  = 'profissional',  'Profissional — R$397/mês'
     ENTERPRISE    = 'enterprise',    'Enterprise — R$697/mês'
@@ -36,6 +37,18 @@ class Usuario(AbstractUser):
         if self.data_expiracao and self.data_expiracao < timezone.now().date():
             return False
         return True
+
+    @property
+    def is_trial(self):
+        return self.plano == Plano.TRIAL
+
+    @property
+    def trial_expira_em(self):
+        """Datetime exato de expiração do trial (criado_em + 48h)."""
+        if self.is_trial and self.criado_em:
+            from datetime import timedelta
+            return self.criado_em + timedelta(hours=48)
+        return None
 
     @property
     def status_display(self):

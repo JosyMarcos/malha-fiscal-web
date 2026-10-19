@@ -29,6 +29,12 @@ h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:6px}
 .card-main{border-color:#00D4AA;background:linear-gradient(135deg,#f0fdf9,#fff)}
 .card-main h3{color:#065F46}
 .tag-soon{font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:10px;font-weight:700;margin-left:6px}
+
+.trial-banner{background:linear-gradient(90deg,#0B1E3D 0%,#1a3558 100%);border-bottom:2px solid #00D4AA;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:44px}
+.trial-banner-left{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.85)}
+.trial-banner-left strong{color:#00D4AA}
+.trial-clock{font-size:18px;font-weight:800;color:#00D4AA;font-variant-numeric:tabular-nums;min-width:68px;display:inline-block}
+.trial-banner-cta{background:#00D4AA;color:#0B1E3D;font-weight:700;font-size:12px;padding:6px 16px;border-radius:6px;text-decoration:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -41,6 +47,30 @@ h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:6px}
     <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
   </div>
 </div>
+
+{% if trial_segundos is not None %}
+<div class="trial-banner">
+  <div class="trial-banner-left">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Período de teste — seu acesso expira em
+    <span class="trial-clock" id="trial-clock">--:--:--</span>
+  </div>
+  <a href="https://wa.me/5583999924562" target="_blank" class="trial-banner-cta">Assinar agora →</a>
+</div>
+<script>
+(function(){
+  var secs={{ trial_segundos }};
+  function tick(){
+    if(secs<=0){document.getElementById('trial-clock').textContent='00:00:00';return;}
+    var h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60;
+    document.getElementById('trial-clock').textContent=
+      String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    secs--;setTimeout(tick,1000);
+  }
+  tick();
+})();
+</script>
+{% endif %}
 <div class="content">
   <h1>Ola, {{ usuario.get_full_name|default:usuario.username }}</h1>
   <div class="sub">O que voce quer fazer hoje?</div>

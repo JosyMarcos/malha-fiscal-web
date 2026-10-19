@@ -134,3 +134,59 @@ def minha_senha(request):
             update_session_auth_hash(request, request.user)
             messages.success(request, 'Senha alterada com sucesso!')
     return render(request, 'admin_panel/minha_senha.html')
+
+
+# ── REGISTRO PÚBLICO (Trial 48h) ─────────────────────────────────
+
+def registro(request):
+    """Cadastro público — cria conta com plano Trial (48h, ativo=True)."""
+    if request.user.is_authenticated:
+        return redirect('sistema:dashboard')
+
+    error = None
+    if request.method == 'POST':
+        nome     = request.POST.get('nome', '').strip()
+        empresa  = request.POST.get('empresa', '').strip()
+        email    = request.POST.get('email', '').strip()
+        senha    = request.POST.get('senha', '').strip()
+        confirma = request.POST.get('confirma', '').strip()
+
+        if not all([nome, empresa, email, senha]):
+            error = 'Preencha todos os campos obrigatórios.'
+        elif senha != confirma:
+            error = 'As senhas não coincidem.'
+        elif len(senha) < 6:
+            error = 'A senha precisa ter pelo menos 6 caracteres.'
+        elif Usuario.objects.filter(email=email).exists():
+            error = 'Já existe uma conta com este e-mail.'
+        else:
+            from datetime import timedelta
+            # username = parte antes do @ do e-mail (garante unicidade)
+            base_username = email.split('@')[0][:30]
+            username = base_username
+            counter = 1
+            while Usuario.objects.filter(username=username).exists():
+                username = f'{base_username}{counter}'
+                counter += 1
+
+            parts = nome.split(' ', 1)
+            first = parts[0]; last = parts[1] if len(parts) > 1 else ''
+
+            user = Usuario.objects.create_user(
+                username=username,
+                email=email,
+                password=senha,
+                first_name=first,
+                last_name=last,
+                empresa=empresa,
+                plano='trial',
+                ativo=True,
+                data_expiracao=(timezone.now() + timedelta(hours=48)).date(),
+            )
+            from django.contrib.auth import authenticate, login as auth_login
+            user = authenticate(request, username=username, password=senha)
+            if user:
+                auth_login(request, user)
+            return redirect('sistema:dashboard')
+
+    return render(request, 'registration/registro.html', {'error': error})

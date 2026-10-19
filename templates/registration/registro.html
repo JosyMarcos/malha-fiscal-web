@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Criar conta gratuita — Malha Fiscal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(11,30,61,.10);padding:40px 36px;width:100%;max-width:440px}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-icon{width:36px;height:36px;background:#0B1E3D;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#00D4AA;font-size:13px}
+.logo-name{font-size:18px;font-weight:700;color:#0B1E3D}.logo-name span{color:#00D4AA}
+h1{font-size:22px;font-weight:700;color:#0B1E3D;margin-bottom:4px}
+.subtitle{font-size:14px;color:#64748B;margin-bottom:24px}
+.trial-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,170,.10);border:1px solid rgba(0,212,170,.35);color:#059669;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;margin-bottom:22px}
+.trial-badge svg{flex-shrink:0}
+.form-group{margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:5px}
+input{width:100%;padding:10px 14px;border:1px solid #D1D5DB;border-radius:8px;font-size:14px;font-family:inherit;color:#111827;outline:none;transition:border .15s}
+input:focus{border-color:#0B1E3D;box-shadow:0 0 0 3px rgba(11,30,61,.08)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{width:100%;padding:12px;background:#0B1E3D;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:background .15s}
+.btn:hover{background:#112544}
+.error{background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px}
+.footer{text-align:center;font-size:13px;color:#6B7280;margin-top:20px}
+.footer a{color:#0B1E3D;font-weight:600;text-decoration:none}
+.divider{border:none;border-top:1px solid #E5E7EB;margin:20px 0}
+.restrictions{background:#F8FAFF;border-radius:8px;padding:12px 14px;font-size:12px;color:#64748B;margin-top:16px}
+.restrictions strong{color:#374151;display:block;margin-bottom:6px}
+.restrictions ul{padding-left:16px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">MF</div>
+    <div class="logo-name">Malha <span>Fiscal</span></div>
+  </div>
+
+  <h1>Experimente grátis</h1>
+  <p class="subtitle">Sem cartão de crédito. Acesso imediato por 48 horas.</p>
+
+  <div class="trial-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    48 horas de acesso gratuito
+  </div>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>Nome completo *</label>
+      <input type="text" name="nome" placeholder="Seu nome" required>
+    </div>
+    <div class="form-group">
+      <label>Escritório / Empresa *</label>
+      <input type="text" name="empresa" placeholder="Nome do escritório ou empresa" required>
+    </div>
+    <div class="form-group">
+      <label>E-mail *</label>
+      <input type="email" name="email" placeholder="seu@email.com" required>
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>Senha *</label>
+        <input type="password" name="senha" placeholder="Mín. 6 caracteres" required>
+      </div>
+      <div class="form-group">
+        <label>Confirmar senha *</label>
+        <input type="password" name="confirma" placeholder="Repita a senha" required>
+      </div>
+    </div>
+    <button type="submit" class="btn">Criar conta e começar →</button>
+  </form>
+
+  <div class="restrictions">
+    <strong>O que está disponível no Trial:</strong>
+    <ul>
+      <li>Auditoria SPED × NF-e completa</li>
+      <li>Visualização de até 20 divergências</li>
+      <li>Dashboard de resumo</li>
+      <li>Exportação disponível nos planos pagos</li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+  <div class="footer">Já tem uma conta? <a href="/login/">Entrar</a></div>
+</div>
+</body>
+</html>
