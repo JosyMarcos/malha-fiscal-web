@@ -4,18 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Malha Fiscal — Auditoria SPED × XML para Contadores</title>
-<meta name="description" content="Cruze arquivos SPED Fiscal com XMLs de NF-e e CT-e em segundos. Encontre divergências fiscais, erros de ICMS e inconsistências antes da fiscalização. Experimente grátis por 48 horas.">
+<meta name="description" content="Cruze arquivos SPED Fiscal com XMLs de NF-e e CT-e em segundos. Encontre divergências fiscais, erros de ICMS e inconsistências antes da fiscalização. Para escritórios contábeis.">
 <meta name="keywords" content="auditoria fiscal, SPED, NF-e, XML, divergências fiscais, ICMS, contabilidade, escritório contábil">
 <meta name="author" content="Malha Fiscal">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://malha-fiscal-web-liart.vercel.app/">
 <meta property="og:title" content="Malha Fiscal — Auditoria SPED × XML para Contadores">
-<meta property="og:description" content="Cruze SPED Fiscal com XMLs de NF-e e CT-e em segundos. Encontre divergências fiscais antes da fiscalização. Teste grátis por 48h.">
+<meta property="og:description" content="Cruze SPED Fiscal com XMLs de NF-e e CT-e em segundos. Encontre divergências fiscais antes da fiscalização. Para escritórios contábeis.">
 <meta property="og:image" content="https://malha-fiscal-web-liart.vercel.app/static/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Malha Fiscal — Auditoria SPED × XML">
-<meta name="twitter:description" content="Detecte divergências fiscais entre SPED e NF-e em segundos. Experimente grátis.">
+<meta name="twitter:description" content="Detecte divergências fiscais entre SPED e NF-e em segundos. Para escritórios contábeis.">
 <link rel="canonical" href="https://malha-fiscal-web-liart.vercel.app/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2300D4AA'/%3E%3Ctext x='16' y='23' font-family='Inter,Arial,sans-serif' font-size='15' font-weight='900' fill='%230B1E3D' text-anchor='middle'%3EMF%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -294,7 +295,8 @@ footer {
 /* ── MOBILE ── */
 @media (max-width: 640px) {
   nav { padding: 0 5%; }
-  .nav-links { display: none; }
+  .nav-links a:not(.nav-btn-entrar):not(.nav-cta) { display: none; }
+  .nav-links { gap: 10px; }
   .stats { grid-template-columns: 1fr; }
   .stat { border-right: none; border-bottom: 1px solid var(--border); }
   .stat:last-child { border-bottom: none; }
