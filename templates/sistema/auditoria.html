@@ -45,9 +45,9 @@
   .gate-footer { font-size:11px; color:var(--text-3); margin-top:1.5rem; }
 
   /* HEADER */
-  header { background:var(--navy); padding:0 2rem; height:56px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; }
+  header { background:var(--navy); padding:0 1.5rem; height:52px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; }
   .logo { display:flex; align-items:center; gap:10px; color:#fff; }
-  .logo-icon { width:32px; height:32px; background:var(--blue); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .logo-icon { width:30px; height:30px; background:#00D4AA; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#0B1E3D; }
   .logo-text { font-size:15px; font-weight:600; letter-spacing:-.01em; }
   .logo-sep { width:1px; height:20px; background:rgba(255,255,255,.15); margin:0 4px; }
   .logo-sub { font-size:12px; color:rgba(255,255,255,.45); }
@@ -63,21 +63,21 @@
   .upload-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem; }
   @media(max-width:600px){ .upload-grid{grid-template-columns:1fr} }
   .up-label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-2); margin-bottom:8px; }
-  .drop-zone { border:1.5px dashed var(--border-dark); border-radius:var(--radius); padding:2rem 1rem; text-align:center; cursor:pointer; transition:border-color .15s,background .15s; }
-  .drop-zone:hover,.drop-zone.drag-over { border-color:var(--blue); background:var(--blue-light); }
-  .dz-icon { font-size:32px; color:var(--text-3); display:block; margin-bottom:8px; }
-  .drop-zone:hover .dz-icon { color:var(--blue); }
+  .drop-zone { border:2px dashed var(--border-dark); border-radius:var(--radius); padding:2.5rem 1rem; text-align:center; cursor:pointer; transition:border-color .2s,background .2s,transform .1s; }
+  .drop-zone:hover,.drop-zone.drag-over { border-color:#00D4AA; background:rgba(0,212,170,.06); transform:translateY(-1px); }
+  .dz-icon { font-size:36px; color:var(--text-3); display:block; margin-bottom:10px; transition:color .2s; }
+  .drop-zone:hover .dz-icon { color:#00D4AA; }
   .drop-zone p { font-size:13px; color:var(--text-2); margin-bottom:2px; }
   .drop-zone small { font-size:11px; color:var(--text-3); }
-  .period-row { display:flex; align-items:center; gap:10px; padding:12px 16px; background:#F7F9FB; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:1.25rem; }
+  .period-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(0,0,0,.02); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:1.25rem; }
   .period-row label { font-size:13px; color:var(--text-2); font-weight:500; }
   .period-row select { font-family:inherit; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:5px 10px; background:#fff; color:var(--text); cursor:pointer; outline:none; }
 
   /* BUTTONS */
   button { font-family:'Inter',sans-serif; font-size:13px; font-weight:500; cursor:pointer; border:none; border-radius:var(--radius-sm); padding:9px 18px; display:inline-flex; align-items:center; gap:6px; transition:all .15s; }
-  .btn-p { background:var(--blue); color:#fff; width:100%; justify-content:center; font-size:14px; padding:11px; }
-  .btn-p:hover { background:#1750a8; }
-  .btn-p:disabled { background:var(--border-dark); color:var(--text-3); cursor:not-allowed; }
+  .btn-p { background:#00D4AA; color:#0B1E3D; width:100%; justify-content:center; font-size:14px; padding:11px; font-weight:700; }
+  .btn-p:hover { background:#00bfa0; }
+  .btn-p:disabled { background:var(--border-dark); color:var(--text-3); cursor:not-allowed; font-weight:500; }
   .btn-s { background:var(--surface); color:var(--text-2); border:1px solid var(--border-dark); }
   .btn-s:hover { background:var(--bg); }
 
@@ -96,7 +96,7 @@
   .tabs { display:flex; gap:4px; margin-bottom:1rem; flex-wrap:wrap; }
   .tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid var(--border-dark); background:var(--surface); color:var(--text-2); transition:all .15s; }
   .tab:hover { background:var(--bg); }
-  .tab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .tab.active { background:#00D4AA; color:#0B1E3D; border-color:#00D4AA; font-weight:600; }
   .table-wrap { overflow-x:auto; border-radius:var(--radius); border:1px solid var(--border); }
   table { width:100%; border-collapse:collapse; table-layout:fixed; }
   thead tr { background:#F7F9FB; }
@@ -120,11 +120,11 @@
   .toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
   .search-in { font-family:'Inter',sans-serif; font-size:13px; border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:7px 12px; width:240px; color:var(--text); outline:none; background:var(--surface); }
   .search-in:focus { border-color:var(--blue); }
-  .page-title { font-size:20px; font-weight:600; letter-spacing:-.02em; margin-bottom:2px; }
+  .page-title { font-size:22px; font-weight:700; letter-spacing:-.03em; color:var(--navy); margin-bottom:2px; }
   .page-sub { font-size:13px; color:var(--text-2); margin-bottom:1.5rem; }
   .dz-st { margin-top:8px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:5px; }
   .dz-st.ok { color:var(--success); } .dz-st.err { color:var(--danger); }
-  .info-note { background:var(--blue-light); border:1px solid #BFDBFE; border-radius:var(--radius-sm); padding:10px 14px; font-size:12px; color:#1E40AF; display:flex; align-items:flex-start; gap:8px; margin-top:1rem; }
+  .info-note { background:rgba(0,212,170,.08); border:1px solid rgba(0,212,170,.25); border-radius:var(--radius-sm); padding:10px 14px; font-size:12px; color:#065F46; display:flex; align-items:flex-start; gap:8px; margin-top:1rem; }
   #toast { position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:10px 18px; border-radius:var(--radius); font-size:13px; font-weight:500; display:none; align-items:center; gap:8px; box-shadow:var(--shadow-md); z-index:9998; }
   input[type="file"] { display:none; }
   #results-screen { display:none; }
@@ -150,7 +150,7 @@
   [data-theme="dark"] #detail-panel>div{background:rgba(255,255,255,.03)!important;border-color:rgba(255,255,255,.09)!important}
   /* Filtros */
   [data-theme="dark"] .filter-btn{background:rgba(255,255,255,.05)!important;color:#94A3B8!important;border-color:rgba(255,255,255,.09)!important}
-  [data-theme="dark"] .filter-btn.active{background:#1D4ED8!important;color:#fff!important;border-color:#1D4ED8!important}
+  [data-theme="dark"] .filter-btn.active{background:#00D4AA!important;color:#0B1E3D!important;border-color:#00D4AA!important}
   /* Inputs e selects */
   [data-theme="dark"] input:not([type=file]):not([type=checkbox]),[data-theme="dark"] select{background:#1E293B!important;color:#F1F5F9!important;border-color:rgba(255,255,255,.15)!important}
   [data-theme="dark"] input::placeholder{color:#475569!important}
@@ -159,7 +159,7 @@
   [data-theme="dark"] .drop-zone p{color:#94A3B8}
   [data-theme="dark"] .drop-zone small{color:#475569}
   /* Info note */
-  [data-theme="dark"] .info-note{background:rgba(59,130,246,.1)!important;border-color:rgba(59,130,246,.2)!important;color:#93C5FD!important}
+  [data-theme="dark"] .info-note{background:rgba(0,212,170,.1)!important;border-color:rgba(0,212,170,.2)!important;color:#6ee7b7!important}
   /* Period row */
   [data-theme="dark"] .period-row{background:rgba(255,255,255,.03)!important;border-color:rgba(255,255,255,.09)!important}
   /* Tabela */
@@ -172,7 +172,7 @@
   [data-theme="dark"] .toolbar{background:transparent}
   [data-theme="dark"] .stats-grid .stat-card{background:#1E293B!important;border-color:rgba(255,255,255,.1)!important}
   [data-theme="dark"] .stat-label{color:#94A3B8!important}
-  [data-theme="dark"] .stat-card .stat-value{color:#F1F5F9!important}
+  [data-theme="dark"] .stat-card.c-ok .stat-value{color:#4ADE80!important}  [data-theme="dark"] .stat-card.c-miss .stat-value{color:#F87171!important}  [data-theme="dark"] .stat-card.c-extra .stat-value{color:#FCD34D!important}  [data-theme="dark"] .stat-card.c-total .stat-value{color:#F1F5F9!important}
   [data-theme="dark"] #detail-panel{background:#1E293B!important;border-color:rgba(255,255,255,.1)!important}
   [data-theme="dark"] #detail-panel *{border-color:rgba(255,255,255,.07)!important}
   [data-theme="dark"] .filter-section{background:transparent!important;border-color:rgba(255,255,255,.08)!important}
@@ -212,19 +212,26 @@
 <!-- APP PRINCIPAL -->
 <header>
   <div class="logo">
-    <div class="logo-icon"><i class="ti ti-report-search"></i></div>
-    <span class="logo-text">Malha Fiscal</span>
+    <div class="logo-icon">MF</div>
+    <span class="logo-text">Malha <span style="color:#00D4AA">Fiscal</span></span>
     <div class="logo-sep"></div>
-    <span class="logo-sub">SPED × XML · Confronto de Notas Fiscais</span>
-    <span style="margin-left:8px;font-size:10px;color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);padding:2px 7px;border-radius:10px">v9</span>
+    <span class="logo-sub">SPED × XML</span>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
-    <div style="font-size:12px;color:rgba(255,255,255,.6);text-align:right">
+  <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+    <!-- dark mode toggle -->
+    <button onclick="toggleTheme()" title="Alternar tema" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;color:rgba(255,255,255,.7);font-size:11px;font-weight:600;letter-spacing:.03em">
+      <i id="theme-icon" class="ti ti-sun" style="font-size:14px"></i>
+      <span style="display:inline-block;width:32px;height:16px;background:rgba(255,255,255,.2);border-radius:8px;position:relative;transition:background .2s" id="theme-switch">
+        <span style="position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .2s" id="theme-knob"></span>
+      </span>
+    </button>
+    <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+    <div style="font-size:12px;color:rgba(255,255,255,.6);text-align:right;line-height:1.3">
       <strong style="color:#fff;display:block;font-size:13px">{{ usuario.get_full_name|default:usuario.username }}</strong>
-      {{ usuario.empresa|default:usuario.email }}
+      <span style="font-size:10px">{{ usuario.empresa|default:usuario.email }}</span>
     </div>
     <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)">{{ usuario.get_plano_display }}</span>
-    <a href="{% url 'sistema:dashboard' %}" style="background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">Sistema</a>
+    <a href="{% url 'sistema:dashboard' %}" style="background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none"><i class="ti ti-layout-dashboard" style="font-size:12px;vertical-align:-1px"></i> Sistema</a>
     <a href="{% url 'accounts:logout' %}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">Sair</a>
   </div>
 </header>
@@ -236,7 +243,7 @@
       <button id="limpar-btn" onclick="limparArquivos()" style="display:none;background:#FEE2E2;border:1px solid #FECACA;color:#B91C1C;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer"><i class="ti ti-trash"></i> Limpar tudo</button>
     </div>
     <p class="page-sub">Arraste quantos arquivos quiser — acumula sem apagar. Use "Limpar tudo" para começar do zero.</p>
-    <div class="card"><div class="card-body">
+    <div class="card" style="border-top:3px solid #00D4AA"><div class="card-body">
       <div class="upload-grid">
         <div>
           <span class="up-label"><i class="ti ti-file-text" style="font-size:13px"></i> SPED Fiscal (.txt) — vários meses</span>
@@ -1599,9 +1606,10 @@ function toggleTheme(){
 }
 
 function initTheme(){
-  // Sempre modo claro — dark mode removido
-  applyTheme(false);
-  try{ localStorage.removeItem('mf_theme'); }catch(e){}
+  try{
+    const saved=localStorage.getItem('mf_theme');
+    applyTheme(saved==='dark');
+  }catch(e){ applyTheme(false); }
 }
 initTheme();
 
