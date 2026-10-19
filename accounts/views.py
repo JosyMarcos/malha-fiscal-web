@@ -71,10 +71,6 @@ def admin_dashboard(request):
 
 @login_required
 @user_passes_test(is_admin)
-
-
-@login_required
-@user_passes_test(is_admin)
 def editar_usuario(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     form = EditarUsuarioForm(request.POST or None, instance=usuario)
