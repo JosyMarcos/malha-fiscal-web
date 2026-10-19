@@ -91,8 +91,19 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 dias
 # CSRF — necessário para Vercel/Railway com domínio próprio
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:8000,http://127.0.0.1:8000'
+    default='http://localhost:8000,http://127.0.0.1:8000,https://malha-fiscal-web-liart.vercel.app'
 ).split(',')
+
+# Adiciona automaticamente qualquer host em ALLOWED_HOSTS como origem CSRF confiável
+# (evita ter que atualizar manualmente ao adicionar domínio personalizado)
+for _h in ALLOWED_HOSTS:
+    if _h and _h != '*':
+        for _origin in (f'https://{_h}', f'http://{_h}'):
+            if _origin not in CSRF_TRUSTED_ORIGINS:
+                CSRF_TRUSTED_ORIGINS.append(_origin)
+
+# Necessário para Vercel/Railway que ficam atrás de proxy reverso HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # ── E-mail (notificações internas) ──────────────────────────────
 EMAIL_BACKEND   = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
