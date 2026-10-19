@@ -4,6 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Auditoria SPED x XML — Malha Fiscal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
@@ -25,22 +26,21 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
 .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .file-area{border:2px dashed #D6E0F0;border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:.2s}
 .file-area:hover{border-color:#00D4AA;background:#f0fdf9}
-.file-area .fi{font-size:30px;margin-bottom:8px}
-.file-area .fl{font-size:13px;font-weight:600;color:#0B1E3D;margin-bottom:4px}
-.file-area .fs{font-size:11px;color:#8898AA}
-.file-area .fc{font-size:12px;color:#00D4AA;font-weight:600;margin-top:6px;min-height:18px}
-.file-area input[type=file]{display:none}
+.fi{font-size:30px;margin-bottom:8px}
+.fl{font-size:13px;font-weight:600;color:#0B1E3D;margin-bottom:4px}
+.fs{font-size:11px;color:#8898AA}
+.fc{font-size:12px;color:#00D4AA;font-weight:600;margin-top:6px;min-height:18px}
+input[type=file]{display:none}
 .btn-analisar{background:#00D4AA;color:#0B1E3D;border:none;padding:13px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
 .btn-analisar:hover{background:#00bfa0}
+.loading{display:none;text-align:center;padding:40px;color:#0B1E3D;font-weight:600}
+.spinner{width:36px;height:36px;border:3px solid #D6E0F0;border-top-color:#00D4AA;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
 .stat{background:#fff;border:1px solid #D6E0F0;border-radius:10px;padding:16px;text-align:center}
-.stat .sn{font-size:30px;font-weight:800;line-height:1}
-.stat .sl{font-size:11px;color:#8898AA;margin-top:4px;font-weight:500}
-.s-total .sn{color:#0B1E3D}
-.s-div   .sn{color:#EF4444}
-.s-sx    .sn{color:#F59E0B}
-.s-ss    .sn{color:#3B82F6}
-.s-ok    .sn{color:#10B981}
+.sn{font-size:30px;font-weight:800;line-height:1}
+.sl{font-size:11px;color:#8898AA;margin-top:4px;font-weight:500}
+.s-total .sn{color:#0B1E3D}.s-div .sn{color:#EF4444}.s-sx .sn{color:#F59E0B}.s-ss .sn{color:#3B82F6}.s-ok .sn{color:#10B981}
 .erros-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:#B91C1C}
 .erros-box ul{margin:6px 0 0 16px}
 .filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
@@ -56,11 +56,11 @@ th{background:#F8FAFD;padding:10px 12px;text-align:left;font-size:11px;font-weig
 td{padding:10px 12px;border-bottom:1px solid #F0F4FF;color:#0B1E3D;vertical-align:top}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#FAFBFF}
-.bok {display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#D1FAE5;color:#065F46}
+.bok{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#D1FAE5;color:#065F46}
 .bdiv{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEE2E2;color:#991B1B}
-.bsx {display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEF3C7;color:#92400E}
-.bss {display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#DBEAFE;color:#1E40AF}
-.chave{font-family:monospace;font-size:10px;color:#8898AA;display:block;margin-top:2px;word-break:break-all}
+.bsx{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEF3C7;color:#92400E}
+.bss{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#DBEAFE;color:#1E40AF}
+.chave{font-family:monospace;font-size:10px;color:#8898AA;display:block;margin-top:2px}
 .dlist{margin-top:4px;color:#DC2626;font-size:11px;list-style:none}
 .dlist li::before{content:'• '}
 .empty{text-align:center;padding:48px;color:#8898AA;font-size:13px}
@@ -77,101 +77,207 @@ tr:hover td{background:#FAFBFF}
     <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
   </div>
 </div>
-
 <div class="main">
   <div class="page-title">Auditoria SPED x XML</div>
-  <div class="page-sub">Carregue arquivos SPED Fiscal e XMLs de NF-e/CT-e para identificar divergencias fiscais</div>
-
+  <div class="page-sub">Os arquivos s\u00e3o processados direto no seu navegador — nada \u00e9 enviado ao servidor</div>
   <div class="upload-card">
     <h3>Carregar arquivos</h3>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="upload-grid">
-        <div class="file-area" onclick="document.getElementById('sped-inp').click()">
-          <div class="fi">📄</div>
-          <div class="fl">SPED Fiscal (.txt)</div>
-          <div class="fs">Um ou mais arquivos SPED</div>
-          <div class="fc" id="sped-ct"></div>
-          <input type="file" id="sped-inp" name="sped_files" multiple accept=".txt">
-        </div>
-        <div class="file-area" onclick="document.getElementById('xml-inp').click()">
-          <div class="fi">🗂️</div>
-          <div class="fl">NF-e / CT-e (XMLs)</div>
-          <div class="fs">Arquivos XML ou ZIP com as notas</div>
-          <div class="fc" id="xml-ct"></div>
-          <input type="file" id="xml-inp" name="xml_files" multiple accept=".xml,.zip">
-        </div>
+    <div class="upload-grid">
+      <div class="file-area" onclick="document.getElementById('sped-inp').click()">
+        <div class="fi">📄</div>
+        <div class="fl">SPED Fiscal (.txt ou .zip)</div>
+        <div class="fs">Um ou mais arquivos SPED</div>
+        <div class="fc" id="sped-ct"></div>
+        <input type="file" id="sped-inp" multiple accept=".txt,.zip">
       </div>
-      <button type="submit" class="btn-analisar">🔍 Analisar divergencias</button>
-    </form>
+      <div class="file-area" onclick="document.getElementById('xml-inp').click()">
+        <div class="fi">🗂️</div>
+        <div class="fl">NF-e / CT-e (.xml ou .zip)</div>
+        <div class="fs">Arquivos XML ou ZIP com as notas</div>
+        <div class="fc" id="xml-ct"></div>
+        <input type="file" id="xml-inp" multiple accept=".xml,.zip">
+      </div>
+    </div>
+    <button type="button" onclick="analisar()" class="btn-analisar">🔍 Analisar divergencias</button>
   </div>
-
-  {% if processado %}
-  {% if erros %}
-  <div class="erros-box">
-    ⚠️ <strong>{{ erros|length }} arquivo(s) com problema:</strong>
-    <ul>{% for e in erros %}<li>{{ e }}</li>{% endfor %}</ul>
-  </div>
-  {% endif %}
-
-  <div class="stats">
-    <div class="stat s-total"><div class="sn">{{ total }}</div><div class="sl">Total</div></div>
-    <div class="stat s-div">  <div class="sn">{{ divergentes }}</div><div class="sl">Divergentes</div></div>
-    <div class="stat s-sx">   <div class="sn">{{ sem_xml }}</div><div class="sl">Sem XML</div></div>
-    <div class="stat s-ss">   <div class="sn">{{ sem_sped }}</div><div class="sl">Sem SPED</div></div>
-    <div class="stat s-ok">   <div class="sn">{{ ok }}</div><div class="sl">OK</div></div>
-  </div>
-
-  {% if resultados %}
-  <div class="filter-row">
-    <button class="fbtn active"   onclick="fil('todos',this)">Todos ({{ total }})</button>
-    {% if divergentes %}<button class="fbtn fd"  onclick="fil('divergente',this)">⚠ Divergentes ({{ divergentes }})</button>{% endif %}
-    {% if sem_xml %}    <button class="fbtn fsx" onclick="fil('sem_xml',this)">Sem XML ({{ sem_xml }})</button>{% endif %}
-    {% if sem_sped %}   <button class="fbtn fss" onclick="fil('sem_sped',this)">Sem SPED ({{ sem_sped }})</button>{% endif %}
-    {% if ok %}         <button class="fbtn fok" onclick="fil('ok',this)">✓ OK ({{ ok }})</button>{% endif %}
-  </div>
-  <div class="table-wrap">
-    <table id="tbl">
-      <thead><tr>
-        <th>Status</th><th>Nº NF</th><th>Serie</th><th>Data</th>
-        <th>Tipo</th><th>Emitente</th><th>Valor SPED</th><th>Valor XML</th><th>Divergencias</th>
-      </tr></thead>
-      <tbody>
-      {% for r in resultados %}
-      <tr data-st="{{ r.status }}">
-        <td>{% if r.status == 'ok' %}<span class="bok">OK</span>{% elif r.status == 'divergente' %}<span class="bdiv">Divergente</span>{% elif r.status == 'sem_xml' %}<span class="bsx">Sem XML</span>{% else %}<span class="bss">Sem SPED</span>{% endif %}</td>
-        <td><strong>{{ r.num_doc }}</strong><span class="chave">{{ r.chave|truncatechars:24 }}</span></td>
-        <td>{{ r.serie|default:'-' }}</td>
-        <td>{{ r.dt_doc|default:'-' }}</td>
-        <td>{{ r.tipo|default:'-' }}</td>
-        <td>{{ r.emitente|truncatechars:28 }}</td>
-        <td>{% if r.valor_sped != '-' %}R$ {{ r.valor_sped }}{% else %}-{% endif %}</td>
-        <td>{% if r.valor_xml != '-' %}R$ {{ r.valor_xml }}{% else %}-{% endif %}</td>
-        <td>{% if r.divergencias %}<ul class="dlist">{% for d in r.divergencias %}<li>{{ d }}</li>{% endfor %}</ul>{% else %}-{% endif %}</td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="empty">Nenhuma nota encontrada nos arquivos enviados.</div>
-  {% endif %}
-  {% endif %}
+  <div id="loading" class="loading"><div class="spinner"></div>Processando arquivos, aguarde...</div>
+  <div id="resultados"></div>
 </div>
-
 <script>
-document.getElementById('sped-inp').onchange = function(){
-  document.getElementById('sped-ct').textContent = this.files.length ? this.files.length + ' arquivo(s)' : '';
-};
-document.getElementById('xml-inp').onchange = function(){
-  document.getElementById('xml-ct').textContent = this.files.length ? this.files.length + ' arquivo(s)' : '';
-};
-function fil(status, btn){
+document.getElementById('sped-inp').onchange=function(){document.getElementById('sped-ct').textContent=this.files.length?this.files.length+' arquivo(s)':''};
+document.getElementById('xml-inp').onchange=function(){document.getElementById('xml-ct').textContent=this.files.length?this.files.length+' arquivo(s)':''};
+
+function pNum(s){if(!s)return 0;return parseFloat(String(s).trim().replace(',','.'))||0;}
+
+function parseSped(txt){
+  const notas={};
+  for(const line of txt.split('\n')){
+    const t=line.trim();
+    if(!t.startsWith('|C100|'))continue;
+    const p=t.split('|');
+    if(p.length<13)continue;
+    try{
+      const nota={
+        chave:p[9].trim(),numDoc:p[8].trim(),serie:p[7].trim(),dtDoc:p[10].trim(),
+        valorSped:pNum(p[12]),icmsSped:pNum(p[19]||0),pisSped:pNum(p[23]||0),cofinsSped:pNum(p[24]||0),
+        tipo:p[2].trim()==='0'?'Entrada':'Sa\u00edda',
+        modelo:({'55':'NF-e','65':'NFC-e','57':'CT-e'})[p[5].trim()]||p[5].trim(),
+        cancelada:p[6].trim()==='02'
+      };
+      const k=(nota.chave&&nota.chave.length===44)?nota.chave:`SEM_CHAVE_${nota.numDoc}_${nota.serie}`;
+      notas[k]=nota;
+    }catch(e){}
+  }
+  return notas;
+}
+
+function parseXmlDoc(filename,content){
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(content,'application/xml');
+  if(doc.querySelector('parsererror'))return{erro:`${filename}: XML inv\u00e1lido`};
+  const data={arquivo:filename};
+  const seen=new Set();
+  const all=doc.getElementsByTagName('*');
+  for(let i=0;i<all.length;i++){
+    const el=all[i];
+    const ch=el.childNodes;
+    if(ch.length!==1||ch[0].nodeType!==3)continue;
+    const ln=el.localName||el.tagName.split(':').pop();
+    if(seen.has(ln))continue;
+    seen.add(ln);
+    const txt=ch[0].nodeValue.trim();
+    if(!txt)continue;
+    switch(ln){
+      case 'chNFe':case 'chCTe':data.chave=txt;break;
+      case 'nNF':case 'nCT':data.numDoc=txt;break;
+      case 'serie':data.serie=txt;break;
+      case 'dhEmi':case 'dEmi':data.dtDoc=txt.substring(0,10);break;
+      case 'xNome':data.emitente=txt;break;
+      case 'tpNF':data.tipo=txt==='0'?'Entrada':'Sa\u00edda';break;
+      case 'vNF':case 'vCT':data.valorXml=pNum(txt);break;
+      case 'vICMS':data.icmsXml=pNum(txt);break;
+      case 'vPIS':data.pisXml=pNum(txt);break;
+      case 'vCOFINS':data.cofinsXml=pNum(txt);break;
+    }
+  }
+  if(!data.chave)return{erro:`${filename}: chave n\u00e3o encontrada`};
+  data.valorXml=data.valorXml||0;data.icmsXml=data.icmsXml||0;
+  data.pisXml=data.pisXml||0;data.cofinsXml=data.cofinsXml||0;
+  data.emitente=data.emitente||'N/D';data.tipo=data.tipo||'N/D';
+  return data;
+}
+
+function cruzar(S,X){
+  const TOL=0.01,res=[];
+  for(const chave of new Set([...Object.keys(S),...Object.keys(X)])){
+    const s=S[chave],x=X[chave];
+    if(s&&x){
+      const divs=[];
+      const dv=Math.abs(s.valorSped-x.valorXml),di=Math.abs(s.icmsSped-x.icmsXml);
+      const dp=Math.abs(s.pisSped-x.pisXml),dc=Math.abs(s.cofinsSped-x.cofinsXml);
+      if(dv>TOL)divs.push(`Valor: SPED R$${s.valorSped.toFixed(2)} x XML R$${x.valorXml.toFixed(2)} (dif R$${dv.toFixed(2)})`);
+      if(di>TOL)divs.push(`ICMS: R$${s.icmsSped.toFixed(2)} x R$${x.icmsXml.toFixed(2)} (dif R$${di.toFixed(2)})`);
+      if(dp>TOL)divs.push(`PIS: R$${s.pisSped.toFixed(2)} x R$${x.pisXml.toFixed(2)} (dif R$${dp.toFixed(2)})`);
+      if(dc>TOL)divs.push(`COFINS: R$${s.cofinsSped.toFixed(2)} x R$${x.cofinsXml.toFixed(2)} (dif R$${dc.toFixed(2)})`);
+      res.push({chave,numDoc:s.numDoc||x.numDoc,serie:s.serie||x.serie,dtDoc:s.dtDoc||x.dtDoc,
+        tipo:s.tipo||x.tipo,modelo:s.modelo||'NF-e',emitente:x.emitente,
+        valorSped:s.valorSped.toFixed(2),valorXml:x.valorXml.toFixed(2),
+        status:divs.length?'divergente':'ok',divergencias:divs});
+    }else if(s){
+      res.push({chave,numDoc:s.numDoc,serie:s.serie,dtDoc:s.dtDoc,tipo:s.tipo,modelo:s.modelo||'NF-e',
+        emitente:'N/D',valorSped:s.valorSped.toFixed(2),valorXml:'-',
+        status:'sem_xml',divergencias:['NF no SPED sem XML correspondente']});
+    }else{
+      res.push({chave,numDoc:x.numDoc,serie:x.serie,dtDoc:x.dtDoc,tipo:x.tipo,modelo:'NF-e',
+        emitente:x.emitente,valorSped:'-',valorXml:x.valorXml.toFixed(2),
+        status:'sem_sped',divergencias:['XML sem registro no SPED']});
+    }
+  }
+  const ord={divergente:0,sem_xml:1,sem_sped:2,ok:3};
+  res.sort((a,b)=>(ord[a.status]-ord[b.status])||((a.numDoc||'').localeCompare(b.numDoc||'')));
+  return res;
+}
+
+function rText(file,enc){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Erro ao ler'));r.readAsText(file,enc);});}
+function rBuf(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Erro ao ler'));r.readAsArrayBuffer(file);});}
+
+async function analisar(){
+  const sFiles=document.getElementById('sped-inp').files;
+  const xFiles=document.getElementById('xml-inp').files;
+  if(!sFiles.length&&!xFiles.length){alert('Selecione pelo menos um arquivo.');return;}
+  document.getElementById('loading').style.display='block';
+  document.getElementById('resultados').innerHTML='';
+  const S={},X={},erros=[];
+  for(const f of sFiles){
+    try{
+      if(f.name.toLowerCase().endsWith('.zip')){
+        const z=await JSZip.loadAsync(await rBuf(f));
+        for(const[n,e] of Object.entries(z.files)){
+          if(e.dir||!n.toLowerCase().endsWith('.txt'))continue;
+          const txt=new TextDecoder('iso-8859-1').decode(await e.async('arraybuffer'));
+          Object.assign(S,parseSped(txt));
+        }
+      }else{Object.assign(S,parseSped(await rText(f,'ISO-8859-1')));}
+    }catch(e){erros.push(`SPED ${f.name}: ${e.message}`);}
+  }
+  for(const f of xFiles){
+    try{
+      if(f.name.toLowerCase().endsWith('.zip')){
+        const z=await JSZip.loadAsync(await rBuf(f));
+        for(const[n,e] of Object.entries(z.files)){
+          if(e.dir||!n.toLowerCase().endsWith('.xml'))continue;
+          const txt=new TextDecoder('utf-8').decode(await e.async('arraybuffer'));
+          const nota=parseXmlDoc(n,txt);
+          if(nota.erro)erros.push(nota.erro);else X[nota.chave]=nota;
+        }
+      }else{
+        const nota=parseXmlDoc(f.name,await rText(f,'UTF-8'));
+        if(nota.erro)erros.push(nota.erro);else X[nota.chave]=nota;
+      }
+    }catch(e){erros.push(`XML ${f.name}: ${e.message}`);}
+  }
+  const res=cruzar(S,X);
+  document.getElementById('loading').style.display='none';
+  render(res,erros);
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function badge(st){
+  if(st==='ok')return '<span class="bok">OK</span>';
+  if(st==='divergente')return '<span class="bdiv">Divergente</span>';
+  if(st==='sem_xml')return '<span class="bsx">Sem XML</span>';
+  return '<span class="bss">Sem SPED</span>';
+}
+
+function render(res,erros){
+  const div=document.getElementById('resultados');
+  const total=res.length,div2=res.filter(r=>r.status==='divergente').length;
+  const sx=res.filter(r=>r.status==='sem_xml').length,ss=res.filter(r=>r.status==='sem_sped').length;
+  const ok=res.filter(r=>r.status==='ok').length;
+  let h='';
+  if(erros.length){h+=`<div class="erros-box">⚠️ <strong>${erros.length} problema(s):</strong><ul>`;erros.forEach(e=>h+=`<li>${esc(e)}</li>`);h+='</ul></div>';}
+  h+=`<div class="stats"><div class="stat s-total"><div class="sn">${total}</div><div class="sl">Total</div></div><div class="stat s-div"><div class="sn">${div2}</div><div class="sl">Divergentes</div></div><div class="stat s-sx"><div class="sn">${sx}</div><div class="sl">Sem XML</div></div><div class="stat s-ss"><div class="sn">${ss}</div><div class="sl">Sem SPED</div></div><div class="stat s-ok"><div class="sn">${ok}</div><div class="sl">OK</div></div></div>`;
+  if(res.length){
+    h+='<div class="filter-row">';
+    h+=`<button class="fbtn active" onclick="fil('todos',this)">Todos (${total})</button>`;
+    if(div2)h+=`<button class="fbtn fd" onclick="fil('divergente',this)">⚠ Divergentes (${div2})</button>`;
+    if(sx)h+=`<button class="fbtn fsx" onclick="fil('sem_xml',this)">Sem XML (${sx})</button>`;
+    if(ss)h+=`<button class="fbtn fss" onclick="fil('sem_sped',this)">Sem SPED (${ss})</button>`;
+    if(ok)h+=`<button class="fbtn fok" onclick="fil('ok',this)">✓ OK (${ok})</button>`;
+    h+='</div><div class="table-wrap"><table id="tbl"><thead><tr><th>Status</th><th>N\u00ba NF</th><th>S\u00e9rie</th><th>Data</th><th>Tipo</th><th>Emitente</th><th>Valor SPED</th><th>Valor XML</th><th>Diverg\u00eancias</th></tr></thead><tbody>';
+    res.forEach(r=>{
+      const dh=r.divergencias.length?'<ul class="dlist">'+r.divergencias.map(d=>`<li>${esc(d)}</li>`).join('')+'</ul>':'-';
+      h+=`<tr data-st="${r.status}"><td>${badge(r.status)}</td><td><strong>${esc(r.numDoc)}</strong><span class="chave">${esc((r.chave||'').substring(0,24))}</span></td><td>${esc(r.serie)||'-'}</td><td>${esc(r.dtDoc)||'-'}</td><td>${esc(r.tipo)||'-'}</td><td>${esc((r.emitente||'').substring(0,30))}</td><td>${r.valorSped!=='-'?'R$ '+r.valorSped:'-'}</td><td>${r.valorXml!=='-'?'R$ '+r.valorXml:'-'}</td><td>${dh}</td></tr>`;
+    });
+    h+='</tbody></table></div>';
+  }else{h+='<div class="empty">Nenhuma nota encontrada nos arquivos enviados.</div>';}
+  div.innerHTML=h;
+}
+
+function fil(st,btn){
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.querySelectorAll('#tbl tbody tr').forEach(function(row){
-    row.style.display = (status==='todos' || row.dataset.st===status) ? '' : 'none';
-  });
+  document.querySelectorAll('#tbl tbody tr').forEach(r=>{r.style.display=(st==='todos'||r.dataset.st===st)?'':'none';});
 }
 </script>
 </body>

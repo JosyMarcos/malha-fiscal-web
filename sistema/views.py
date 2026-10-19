@@ -1,9 +1,6 @@
-import zipfile
-import io
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .auditoria import parse_sped, parse_xmls, cruzar_dados
 
 
 @login_required
@@ -24,50 +21,4 @@ def auditoria(request):
     user = request.user
     if not user.is_staff and not user.acesso_valido:
         return render(request, 'sistema/acesso_negado.html', {'usuario': user})
-    ctx = {'usuario': user}
-    if request.method == 'POST':
-        erros = []
-        sped_notas = {}
-
-        for f in request.FILES.getlist('sped_files'):
-            try:
-                content = f.read()
-                if f.name.lower().endswith('.zip'):
-                    with zipfile.ZipFile(io.BytesIO(content)) as zf:
-                        for name in zf.namelist():
-                            if name.lower().endswith('.txt'):
-                                txt = zf.read(name).decode('latin-1')
-                                sped_notas.update(parse_sped(txt))
-                else:
-                    sped_notas.update(parse_sped(content.decode('latin-1')))
-            except Exception as e:
-                erros.append(f'SPED {f.name}: {e}')
-
-        xml_data = []
-        for f in request.FILES.getlist('xml_files'):
-            try:
-                content = f.read()
-                if f.name.lower().endswith('.zip'):
-                    with zipfile.ZipFile(io.BytesIO(content)) as zf:
-                        for name in zf.namelist():
-                            if name.lower().endswith('.xml'):
-                                xml_data.append((name, zf.read(name)))
-                else:
-                    xml_data.append((f.name, content))
-            except Exception as e:
-                erros.append(f'XML/ZIP {f.name}: {e}')
-
-        xml_notas, xml_erros = parse_xmls(xml_data)
-        erros.extend(xml_erros)
-        resultados = cruzar_dados(sped_notas, xml_notas)
-        ctx.update({
-            'resultados':  resultados,
-            'total':       len(resultados),
-            'divergentes': sum(1 for r in resultados if r['status'] == 'divergente'),
-            'sem_xml':     sum(1 for r in resultados if r['status'] == 'sem_xml'),
-            'sem_sped':    sum(1 for r in resultados if r['status'] == 'sem_sped'),
-            'ok':          sum(1 for r in resultados if r['status'] == 'ok'),
-            'erros':       erros,
-            'processado':  True,
-        })
-    return render(request, 'sistema/auditoria.html', ctx)
+    return render(request, 'sistema/auditoria.html', {'usuario': user})
