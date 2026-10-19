@@ -246,7 +246,7 @@
             <small>Um ou mais arquivos .txt — cada mês/período separado</small>
             <div id="sped-status"></div>
           </div>
-          </div></label>
+          </label>
           <input type="file" id="sped-input" accept=".txt" multiple>
         </div>
         <div>
@@ -257,7 +257,7 @@
             <small>Arquivos .xml (NF-e, NFC-e, CT-e) ou .zip com vários XMLs</small>
             <div id="xml-status"></div>
           </div>
-          </div></label>
+          </label>
           <input type="file" id="xml-input" accept=".xml,.zip" multiple>
         </div>
       </div>
@@ -617,16 +617,16 @@ function validarChave(chave) {
   return { ok:false, msg:'Chave não reconhecida. Confirme que usou o Gerador de Licenças correto.' };
 }
 
-document.getElementById('key-input').addEventListener('input', function() {
+(document.getElementById('key-input')||document.createElement('span')).addEventListener('input', function() {
   // Mantém o valor como o usuário digitou, só remove espaços extras e passa pra maiúsculo
   // Não reformata automaticamente para não quebrar colas de outros formatos
   const cur = this.value.toUpperCase().trim();
   this.value = cur;
   this.classList.remove('err-state','ok-state');
   const msg = document.getElementById('gate-msg');
-  msg.textContent=''; msg.className='gate-msg';
+  if(msg){ msg.textContent=''; msg.className='gate-msg'; }
 });
-document.getElementById('key-input').addEventListener('keydown', function(e) {
+(document.getElementById('key-input')||document.createElement('span')).addEventListener('keydown', function(e) {
   if (e.key === 'Enter') { e.preventDefault(); ativar(); }
 });
 
