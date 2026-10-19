@@ -17,14 +17,18 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
 .badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)}
 .btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
 .btn-admin{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
-.content{max-width:800px;margin:60px auto;padding:0 24px;text-align:center}
-.icon{font-size:56px;margin-bottom:24px}
-h1{font-size:28px;font-weight:800;color:#0B1E3D;margin-bottom:12px}
-p{color:#8898AA;font-size:16px;line-height:1.6;margin-bottom:32px}
-.card{background:#fff;border:1px solid #D6E0F0;border-radius:12px;padding:32px;margin-bottom:16px;text-align:left}
-.card h3{font-size:15px;font-weight:700;color:#0B1E3D;margin-bottom:8px}
-.card p{font-size:13px;color:#8898AA;margin-bottom:0}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#00D4AA;color:#0B1E3D;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none}
+.content{max-width:860px;margin:48px auto;padding:0 24px}
+h1{font-size:24px;font-weight:800;color:#0B1E3D;margin-bottom:6px}
+.sub{color:#8898AA;font-size:14px;margin-bottom:32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:#fff;border:1px solid #D6E0F0;border-radius:12px;padding:24px;text-decoration:none;display:block;transition:.2s;color:inherit}
+.card:hover{border-color:#00D4AA;box-shadow:0 4px 16px rgba(0,212,170,.12)}
+.card-icon{font-size:32px;margin-bottom:12px}
+.card h3{font-size:15px;font-weight:700;color:#0B1E3D;margin-bottom:6px}
+.card p{font-size:12px;color:#8898AA;line-height:1.5}
+.card-main{border-color:#00D4AA;background:linear-gradient(135deg,#f0fdf9,#fff)}
+.card-main h3{color:#065F46}
+.tag-soon{font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:10px;font-weight:700;margin-left:6px}
 </style>
 </head>
 <body>
@@ -33,25 +37,32 @@ p{color:#8898AA;font-size:16px;line-height:1.6;margin-bottom:32px}
   <div class="topbar-right">
     <span class="badge">{{ usuario.get_plano_display }}</span>
     <div class="user-info"><strong>{{ usuario.get_full_name|default:usuario.username }}</strong>{{ usuario.empresa|default:usuario.email }}</div>
-    {% if usuario.is_staff %}<a href="{% url 'accounts:admin_dashboard' %}" class="btn-admin">⚙ Admin</a>{% endif %}
+    {% if usuario.is_staff %}<a href="{% url 'accounts:admin_dashboard' %}" class="btn-admin">Admin</a>{% endif %}
     <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
   </div>
 </div>
 <div class="content">
-  <div class="icon">⚙️</div>
-  <h1>Sistema em integração</h1>
-  <p>O login está funcionando corretamente. O sistema de auditoria SPED × XML será integrado aqui em breve.</p>
-  <div class="card">
-    <h3>✅ Infraestrutura funcionando</h3>
-    <p>Banco de dados conectado, autenticação ativa, painel admin disponível.</p>
+  <h1>Ola, {{ usuario.get_full_name|default:usuario.username }}</h1>
+  <div class="sub">O que voce quer fazer hoje?</div>
+  <div class="grid">
+    <a href="{% url 'sistema:auditoria' %}" class="card card-main">
+      <div class="card-icon">🔍</div>
+      <h3>Auditoria SPED x XML</h3>
+      <p>Cruze arquivos SPED Fiscal com XMLs de NF-e e CT-e para encontrar divergencias fiscais.</p>
+    </a>
+    {% if usuario.is_staff %}
+    <a href="{% url 'accounts:admin_dashboard' %}" class="card">
+      <div class="card-icon">⚙️</div>
+      <h3>Painel Administrativo</h3>
+      <p>Gerencie usuarios, planos de acesso e clientes cadastrados.</p>
+    </a>
+    {% endif %}
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Relatorios<span class="tag-soon">Em breve</span></h3>
+      <p>Historico de auditorias e exportacao em Excel com divergencias destacadas.</p>
+    </div>
   </div>
-  {% if usuario.is_staff %}
-  <div class="card">
-    <h3>🔧 Painel administrativo</h3>
-    <p>Gerencie usuários, planos e acessos pelo painel admin.</p>
-  </div>
-  <a href="{% url 'accounts:admin_dashboard' %}" class="btn">Ir para o painel admin →</a>
-  {% endif %}
 </div>
 </body>
 </html>

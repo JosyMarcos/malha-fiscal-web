@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auditoria SPED x XML — Malha Fiscal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
+.topbar{background:#0B1E3D;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:99}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:#00D4AA;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0B1E3D;font-size:11px}
+.logo-name{font-size:15px;font-weight:700;color:#fff}.logo-name span{color:#00D4AA}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-info{font-size:12px;color:rgba(255,255,255,.6)}
+.user-info strong{color:#fff;display:block;font-size:13px}
+.badge-plan{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)}
+.btn-nav{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
+.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
+.main{max-width:1200px;margin:0 auto;padding:32px 24px}
+.page-title{font-size:22px;font-weight:800;color:#0B1E3D;margin-bottom:4px}
+.page-sub{font-size:13px;color:#8898AA;margin-bottom:28px}
+.upload-card{background:#fff;border:1px solid #D6E0F0;border-radius:12px;padding:28px;margin-bottom:24px}
+.upload-card h3{font-size:15px;font-weight:700;color:#0B1E3D;margin-bottom:16px}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.file-area{border:2px dashed #D6E0F0;border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:.2s}
+.file-area:hover{border-color:#00D4AA;background:#f0fdf9}
+.file-area .fi{font-size:30px;margin-bottom:8px}
+.file-area .fl{font-size:13px;font-weight:600;color:#0B1E3D;margin-bottom:4px}
+.file-area .fs{font-size:11px;color:#8898AA}
+.file-area .fc{font-size:12px;color:#00D4AA;font-weight:600;margin-top:6px;min-height:18px}
+.file-area input[type=file]{display:none}
+.btn-analisar{background:#00D4AA;color:#0B1E3D;border:none;padding:13px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.btn-analisar:hover{background:#00bfa0}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.stat{background:#fff;border:1px solid #D6E0F0;border-radius:10px;padding:16px;text-align:center}
+.stat .sn{font-size:30px;font-weight:800;line-height:1}
+.stat .sl{font-size:11px;color:#8898AA;margin-top:4px;font-weight:500}
+.s-total .sn{color:#0B1E3D}
+.s-div   .sn{color:#EF4444}
+.s-sx    .sn{color:#F59E0B}
+.s-ss    .sn{color:#3B82F6}
+.s-ok    .sn{color:#10B981}
+.erros-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:#B91C1C}
+.erros-box ul{margin:6px 0 0 16px}
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fbtn{border:1px solid #D6E0F0;background:#fff;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;color:#8898AA}
+.fbtn.active{background:#0B1E3D;color:#fff;border-color:#0B1E3D}
+.fbtn.fd.active{background:#EF4444;border-color:#EF4444;color:#fff}
+.fbtn.fsx.active{background:#F59E0B;border-color:#F59E0B;color:#fff}
+.fbtn.fss.active{background:#3B82F6;border-color:#3B82F6;color:#fff}
+.fbtn.fok.active{background:#10B981;border-color:#10B981;color:#fff}
+.table-wrap{background:#fff;border:1px solid #D6E0F0;border-radius:12px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:800px}
+th{background:#F8FAFD;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#8898AA;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #E8EEF5}
+td{padding:10px 12px;border-bottom:1px solid #F0F4FF;color:#0B1E3D;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFF}
+.bok {display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#D1FAE5;color:#065F46}
+.bdiv{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEE2E2;color:#991B1B}
+.bsx {display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#FEF3C7;color:#92400E}
+.bss {display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#DBEAFE;color:#1E40AF}
+.chave{font-family:monospace;font-size:10px;color:#8898AA;display:block;margin-top:2px;word-break:break-all}
+.dlist{margin-top:4px;color:#DC2626;font-size:11px;list-style:none}
+.dlist li::before{content:'• '}
+.empty{text-align:center;padding:48px;color:#8898AA;font-size:13px}
+@media(max-width:768px){.upload-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo"><div class="logo-icon">MF</div><div class="logo-name">Malha <span>Fiscal</span></div></div>
+  <div class="topbar-right">
+    <span class="badge-plan">{{ usuario.get_plano_display }}</span>
+    <div class="user-info"><strong>{{ usuario.get_full_name|default:usuario.username }}</strong>{{ usuario.empresa|default:usuario.email }}</div>
+    <a href="{% url 'sistema:dashboard' %}" class="btn-nav">Sistema</a>
+    <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">Auditoria SPED x XML</div>
+  <div class="page-sub">Carregue arquivos SPED Fiscal e XMLs de NF-e/CT-e para identificar divergencias fiscais</div>
+
+  <div class="upload-card">
+    <h3>Carregar arquivos</h3>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="upload-grid">
+        <div class="file-area" onclick="document.getElementById('sped-inp').click()">
+          <div class="fi">📄</div>
+          <div class="fl">SPED Fiscal (.txt)</div>
+          <div class="fs">Um ou mais arquivos SPED</div>
+          <div class="fc" id="sped-ct"></div>
+          <input type="file" id="sped-inp" name="sped_files" multiple accept=".txt">
+        </div>
+        <div class="file-area" onclick="document.getElementById('xml-inp').click()">
+          <div class="fi">🗂️</div>
+          <div class="fl">NF-e / CT-e (XMLs)</div>
+          <div class="fs">Arquivos XML das notas fiscais</div>
+          <div class="fc" id="xml-ct"></div>
+          <input type="file" id="xml-inp" name="xml_files" multiple accept=".xml">
+        </div>
+      </div>
+      <button type="submit" class="btn-analisar">🔍 Analisar divergencias</button>
+    </form>
+  </div>
+
+  {% if processado %}
+  {% if erros %}
+  <div class="erros-box">
+    ⚠️ <strong>{{ erros|length }} arquivo(s) com problema:</strong>
+    <ul>{% for e in erros %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <div class="stats">
+    <div class="stat s-total"><div class="sn">{{ total }}</div><div class="sl">Total</div></div>
+    <div class="stat s-div">  <div class="sn">{{ divergentes }}</div><div class="sl">Divergentes</div></div>
+    <div class="stat s-sx">   <div class="sn">{{ sem_xml }}</div><div class="sl">Sem XML</div></div>
+    <div class="stat s-ss">   <div class="sn">{{ sem_sped }}</div><div class="sl">Sem SPED</div></div>
+    <div class="stat s-ok">   <div class="sn">{{ ok }}</div><div class="sl">OK</div></div>
+  </div>
+
+  {% if resultados %}
+  <div class="filter-row">
+    <button class="fbtn active"   onclick="fil('todos',this)">Todos ({{ total }})</button>
+    {% if divergentes %}<button class="fbtn fd"  onclick="fil('divergente',this)">⚠ Divergentes ({{ divergentes }})</button>{% endif %}
+    {% if sem_xml %}    <button class="fbtn fsx" onclick="fil('sem_xml',this)">Sem XML ({{ sem_xml }})</button>{% endif %}
+    {% if sem_sped %}   <button class="fbtn fss" onclick="fil('sem_sped',this)">Sem SPED ({{ sem_sped }})</button>{% endif %}
+    {% if ok %}         <button class="fbtn fok" onclick="fil('ok',this)">✓ OK ({{ ok }})</button>{% endif %}
+  </div>
+  <div class="table-wrap">
+    <table id="tbl">
+      <thead><tr>
+        <th>Status</th><th>Nº NF</th><th>Serie</th><th>Data</th>
+        <th>Tipo</th><th>Emitente</th><th>Valor SPED</th><th>Valor XML</th><th>Divergencias</th>
+      </tr></thead>
+      <tbody>
+      {% for r in resultados %}
+      <tr data-st="{{ r.status }}">
+        <td>{% if r.status == 'ok' %}<span class="bok">OK</span>{% elif r.status == 'divergente' %}<span class="bdiv">Divergente</span>{% elif r.status == 'sem_xml' %}<span class="bsx">Sem XML</span>{% else %}<span class="bss">Sem SPED</span>{% endif %}</td>
+        <td><strong>{{ r.num_doc }}</strong><span class="chave">{{ r.chave|truncatechars:24 }}</span></td>
+        <td>{{ r.serie|default:'-' }}</td>
+        <td>{{ r.dt_doc|default:'-' }}</td>
+        <td>{{ r.tipo|default:'-' }}</td>
+        <td>{{ r.emitente|truncatechars:28 }}</td>
+        <td>{% if r.valor_sped != '-' %}R$ {{ r.valor_sped }}{% else %}-{% endif %}</td>
+        <td>{% if r.valor_xml != '-' %}R$ {{ r.valor_xml }}{% else %}-{% endif %}</td>
+        <td>{% if r.divergencias %}<ul class="dlist">{% for d in r.divergencias %}<li>{{ d }}</li>{% endfor %}</ul>{% else %}-{% endif %}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">Nenhuma nota encontrada nos arquivos enviados.</div>
+  {% endif %}
+  {% endif %}
+</div>
+
+<script>
+document.getElementById('sped-inp').onchange = function(){
+  document.getElementById('sped-ct').textContent = this.files.length ? this.files.length + ' arquivo(s)' : '';
+};
+document.getElementById('xml-inp').onchange = function(){
+  document.getElementById('xml-ct').textContent = this.files.length ? this.files.length + ' arquivo(s)' : '';
+};
+function fil(status, btn){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#tbl tbody tr').forEach(function(row){
+    row.style.display = (status==='todos' || row.dataset.st===status) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
