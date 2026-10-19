@@ -1624,8 +1624,7 @@ function imprimirRelatorio(){
     '<div class="footer">Relatório gerado pelo Malha Fiscal SPED × XML &nbsp;·&nbsp; '+today+'</div>',
 
     sTag+'window.onload=function(){window.print()}'+eTag,
-    '
-</body></html>'
+    '</body></html>'
   ];
 
   w.document.write(parts.join(''));
