@@ -1426,7 +1426,7 @@ function abrirComparacao(id){
   document.getElementById('cm-body').innerHTML=
     '<div class="cm-meta">'+
       '<span class="cm-pill"><strong>Chave:</strong>&nbsp;'+(r.chave||'').slice(0,10)+'…'+(r.chave||'').slice(-8)+'</span>'+
-      (r.chave&&r.chave.length===44?'<a href="'+urlSefaz(r.chave)+'" target="_blank" onclick="event.stopPropagation();copiarChaveClipboard(\'+(r.chave||'')+'\')" title="Consultar no portal SEFAZ" class="cm-btn-sefaz"><i class="ti ti-external-link" style="font-size:11px"></i> Abrir no SEFAZ</a>':'')+
+      (r.chave&&r.chave.length===44?'<a href="'+urlSefaz(r.chave)+'" target="_blank" onclick="event.stopPropagation();copiarChaveClipboard(\''+(r.chave||'')+'\')" title="Consultar no portal SEFAZ" class="cm-btn-sefaz"><i class="ti ti-external-link" style="font-size:11px"></i> Abrir no SEFAZ</a>':'')+
       (r.emitNome?'<span class="cm-pill"><strong>Emit.:</strong>&nbsp;'+r.emitNome+(r.emitUF?' ('+r.emitUF+')':'')+'</span>':'')+
       (r.destNome?'<span class="cm-pill"><strong>Dest.:</strong>&nbsp;'+r.destNome+'</span>':'')+
       (r.natOp?'<span class="cm-pill"><strong>Op.:</strong>&nbsp;'+r.natOp+'</span>':'')+
