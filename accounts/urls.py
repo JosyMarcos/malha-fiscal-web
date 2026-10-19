@@ -9,7 +9,6 @@ urlpatterns = [
     path('logout/', views.logout_view,     name='logout'),
     # Painel Admin
     path('admin-painel/',             views.admin_dashboard,  name='admin_dashboard'),
-    path('admin-painel/criar/',       views.criar_usuario,    name='criar_usuario'),
     path('admin-painel/<int:pk>/',    views.editar_usuario,   name='editar_usuario'),
     path('admin-painel/<int:pk>/toggle/', views.toggle_ativo, name='toggle_ativo'),
     path('admin-painel/<int:pk>/deletar/', views.deletar_usuario, name='deletar_usuario'),

@@ -71,13 +71,6 @@ def admin_dashboard(request):
 
 @login_required
 @user_passes_test(is_admin)
-def criar_usuario(request):
-    form = CriarUsuarioForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user = form.save()
-        messages.success(request, f'Usuário {user.username} criado com sucesso.')
-        return redirect('accounts:admin_dashboard')
-    return render(request, 'admin_panel/form_usuario.html', {'form': form, 'titulo': 'Novo usuário'})
 
 
 @login_required
