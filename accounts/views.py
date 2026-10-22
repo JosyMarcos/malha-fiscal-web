@@ -144,12 +144,15 @@ def recuperar_senha(request):
             from django.contrib.auth.forms import PasswordResetForm
             form = PasswordResetForm({'email': email})
             if form.is_valid():
-                form.save(
-                    request=request,
-                    use_https=True,
-                    email_template_name='registration/password_reset_email.html',
-                    subject_template_name='registration/password_reset_subject.txt',
-                )
+                try:
+                    form.save(
+                        request=request,
+                        use_https=True,
+                        email_template_name='registration/password_reset_email.html',
+                        subject_template_name='registration/password_reset_subject.txt',
+                    )
+                except Exception:
+                    pass  # SMTP falhou; redireciona mesmo assim
             return redirect('/senha/recuperar/enviado/')
     return render(request, 'registration/password_reset_form.html', {'error': error})
 
