@@ -197,6 +197,28 @@ def registro(request):
             except Exception:
                 pass
 
+            # E-mail de boas-vindas ao usuário
+            try:
+                from django.core.mail import send_mail as _send
+                _send(
+                    subject='Bem-vindo à Malha Fiscal — seu acesso está pronto ✅',
+                    message=(
+                        f'Olá, {first}!\n\n'
+                        f'Sua conta na Malha Fiscal foi criada com sucesso.\n\n'
+                        f'Você tem 48 horas de acesso trial para explorar a plataforma. '
+                        f'Após esse período, entre em contato para contratar um plano.\n\n'
+                        f'Acesse agora: https://malha-fiscal-web-liart.vercel.app/login/\n\n'
+                        f'Qualquer dúvida, responda este e-mail ou fale conosco pelo WhatsApp:\n'
+                        f'https://wa.me/5583999924562\n\n'
+                        f'Atenciosamente,\nEquipe Malha Fiscal'
+                    ),
+                    from_email=None,
+                    recipient_list=[email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             user = authenticate(request, username=username, password=senha)
             if user:
                 auth_login(request, user)
