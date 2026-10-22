@@ -11,16 +11,15 @@ urlpatterns = [
 
     # ── Recuperação de senha ─────────────────────────────────────────
     path('senha/recuperar/',
-         auth_views.PasswordResetView.as_view(
-             email_template_name='registration/password_reset_email.html',
-             subject_template_name='registration/password_reset_subject.txt',
-         ),
+         views.recuperar_senha,
          name='password_reset'),
     path('senha/recuperar/enviado/',
          auth_views.PasswordResetDoneView.as_view(),
          name='password_reset_done'),
     path('senha/recuperar/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(),
+         auth_views.PasswordResetConfirmView.as_view(
+             success_url='/senha/recuperar/concluido/',
+         ),
          name='password_reset_confirm'),
     path('senha/recuperar/concluido/',
          auth_views.PasswordResetCompleteView.as_view(),

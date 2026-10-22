@@ -127,6 +127,33 @@ def minha_senha(request):
     return render(request, 'admin_panel/minha_senha.html')
 
 
+
+# ── RECUPERAÇÃO DE SENHA ─────────────────────────────────────────────
+
+def recuperar_senha(request):
+    """Password reset com validação: mostra erro se e-mail não existe."""
+    error = None
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        if not email:
+            error = 'Informe seu e-mail.'
+        elif not Usuario.objects.filter(email=email).exists():
+            error = 'Nenhuma conta encontrada com este e-mail.'
+        else:
+            # Dispara o fluxo padrão do Django
+            from django.contrib.auth.forms import PasswordResetForm
+            form = PasswordResetForm({'email': email})
+            if form.is_valid():
+                form.save(
+                    request=request,
+                    use_https=True,
+                    email_template_name='registration/password_reset_email.html',
+                    subject_template_name='registration/password_reset_subject.txt',
+                )
+            return redirect('/senha/recuperar/enviado/')
+    return render(request, 'registration/password_reset_form.html', {'error': error})
+
+
 # ── REGISTRO PÚBLICO (Trial 48h) ─────────────────────────────────
 
 def registro(request):
