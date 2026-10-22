@@ -63,6 +63,10 @@ else:
     }
 
 AUTH_USER_MODEL = 'accounts.Usuario'
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailOrUsernameBackend',
+]
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/sistema/'
 LOGOUT_REDIRECT_URL = '/login/'
