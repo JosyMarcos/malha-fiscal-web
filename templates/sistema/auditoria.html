@@ -3260,7 +3260,8 @@ function exportarExcel(){
       'Valor (R$)','Modelo','Tipo','Situação Fiscal','Status Confronto',
       'ICMS XML (R$)','ICMS SPED (R$)','Dif. ICMS','ICMS-ST XML','ICMS-ST SPED',
       'Alíq. XML','Alíq. SPED','CST/SPED','CFOP/SPED',
-      'Flags Auditoria','Chave de Acesso'
+      'Flags Auditoria','Chave de Acesso',
+      'BC XML (R$)','BC SPED (R$)','PIS (R$)','COFINS (R$)','Frete (R$)','Seguro (R$)','V.Tot.Trib. (R$)'
     ];
 
     const flags=n=>{
@@ -3304,6 +3305,13 @@ function exportarExcel(){
       n.cfopsSped||'',
       flags(n),
       n.chave||'',
+      n.bcIcmsXml!=null?fmt(n.bcIcmsXml):'',
+      n.bcIcmsSped!=null?fmt(n.bcIcmsSped):'',
+      n.vPISXml>0?fmt(n.vPISXml):'',
+      n.vCOFINSXml>0?fmt(n.vCOFINSXml):'',
+      n.freteXml>0?fmt(n.freteXml):'',
+      n.segXml>0?fmt(n.segXml):'',
+      n.vTotTribXml>0?fmt(n.vTotTribXml):'',
     ]);
 
     // ── Linha de resumo no topo ──────────────────────────────────────
@@ -3321,11 +3329,11 @@ function exportarExcel(){
       cfopUFDiv>0?cfopUFDiv+' CFOP UF':'',
       cstDiv>0?cstDiv+' CST×ICMS':'',
       dateDiv>0?dateDiv+' data gap':'',
-      '','','','','','','','','',
+      '','','','','','','','','','','','','','','','',
     ];
 
     const ws=XLSX.utils.aoa_to_sheet([
-      [label,'','','','','','','','','','','','','','','','','','','','',''],
+      [label,'','','','','','','','','','','','','','','','','','','','','','','','','','','',''],
       summaryRow,
       headers,
       ...vals,
@@ -3337,7 +3345,8 @@ function exportarExcel(){
       {wch:13},{wch:7},{wch:9},{wch:13},{wch:18},
       {wch:13},{wch:13},{wch:12},{wch:13},{wch:13},
       {wch:10},{wch:10},{wch:10},{wch:10},
-      {wch:30},{wch:46}
+      {wch:30},{wch:46},
+      {wch:12},{wch:12},{wch:10},{wch:11},{wch:10},{wch:10},{wch:13}
     ];
     // Congelar linhas do cabeçalho + primeira coluna
     ws['!freeze']={xSplit:1,ySplit:3};
@@ -3374,7 +3383,7 @@ function exportarExcel(){
         const ref=XLSX.utils.encode_cell({r:ri+3,c:ci});
         if(!ws[ref]) continue;
         if(ci===6)  ws[ref].s={...rowSt,alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0.00'};
-        else if([11,12,13,14,15].includes(ci)) ws[ref].s={...rowSt,alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0.00'};
+        else if([11,12,13,14,15,22,23,24,25,26,27,28].includes(ci)) ws[ref].s={...rowSt,alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0.00'};
         else if(ci===20){ // Flags — vermelho se tem flag crítica
           const flagVal=ws[ref].v||'';
           ws[ref].s=flagVal?{font:{bold:true,color:{rgb:hasCritical?'B91C1C':'B45309'},sz:9},
