@@ -95,7 +95,7 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 dias
 # CSRF — necessário para Vercel/Railway com domínio próprio
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:8000,http://127.0.0.1:8000,https://malha-fiscal-web-liart.vercel.app'
+    default='http://localhost:8000,http://127.0.0.1:8000,https://malha-fiscal-web-liart.vercel.app,https://*.vercel.app'
 ).split(',')
 
 # Adiciona automaticamente qualquer host em ALLOWED_HOSTS como origem CSRF confiável
