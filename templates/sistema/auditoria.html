@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -563,8 +564,10 @@
         </button>
         {% if is_trial %}
         <button class="btn-s" style="opacity:.45;cursor:not-allowed" title="Disponível nos planos pagos" onclick="alert('A exportação está disponível nos planos pagos. Clique em Assinar plano para contratar.');"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
+        <button class="btn-s" style="opacity:.45;cursor:not-allowed" title="Disponível nos planos pagos"><i class="ti ti-file-type-pdf"></i> Exportar PDF</button>
         {% else %}
         <button class="btn-s" onclick="exportarExcel()"><i class="ti ti-file-spreadsheet"></i> Exportar Excel</button>
+        {% if not is_trial %}<button class="btn-s" onclick="exportarPDF()"><i class="ti ti-file-type-pdf"></i> Exportar PDF</button>{% endif %}
         {% endif %}
         <button class="btn-s" id="btn-salvar-hist" onclick="salvarAuditoria()" style="display:none;background:#0B1E3D;color:#fff;border-color:#0B1E3D" title="Salva um resumo desta auditoria no seu histórico">
           <i class="ti ti-device-floppy"></i> Salvar no histórico
@@ -2670,6 +2673,138 @@ function processar(){
     alert('Erro ao processar os arquivos: '+err.message+'\n\nVerifique se os arquivos são válidos e tente novamente.');
     console.error('processar() error:',err);
   }
+}
+
+
+function exportarPDF(){
+  const rs=calcRiskScore();
+  const f2=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const nu=v=>(v||0).toLocaleString('pt-BR');
+  const today=new Date().toLocaleDateString('pt-BR');
+  const divgList=allResults.filter(r=>calcSeverity(r)!==null);
+  const vlDivg=allResults.filter(r=>r.icmsOk===false).reduce((s,r)=>s+(r.icmsDiff||0),0);
+  const pct=allResults.length>0?((divgList.length/allResults.length)*100).toFixed(1):'0';
+  const sevColor={Crítica:'#7F1D1D',Alta:'#B91C1C',Média:'#B45309',Baixa:'#1D4ED8'};
+  const cnpjFmt=companyCNPJ?companyCNPJ.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'N/D';
+
+  const rowsHtml=divgList.slice(0,300).map(function(r){
+    const sv=calcSeverity(r);
+    const pds=[];
+    if(r.icmsOk===false)    pds.push('ICMS R$'+f2(r.icmsDiff||0));
+    if(r.stOk===false)      pds.push('ST div.');
+    if(r.vlOk===false)      pds.push('Valor div.');
+    if(r.cfopOk===false||r.cfopUFOk===false) pds.push('CFOP');
+    if(r.cstIcmsOk===false) pds.push('CST');
+    if(r.dateImpossivel)    pds.push('Data imp.');
+    if(r.isDuplicate)       pds.push('Dup.');
+    return '<tr>'+
+      '<td>'+(r.numDoc||'—')+'</td>'+
+      '<td style="font-size:8px">'+(r.emitNome||'—').slice(0,24)+'</td>'+
+      '<td>'+(getDataDoc(r)||'—')+'</td>'+
+      '<td style="text-align:right">R$ '+f2(r.vlDoc)+'</td>'+
+      '<td style="color:'+(sevColor[sv&&sv.label]||'#000')+';font-weight:700">'+(sv?sv.label:'—')+'</td>'+
+      '<td style="font-size:8px;color:#B91C1C">'+(pds.join(' | ')||'—')+'</td>'+
+    '</tr>';
+  }).join('');
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;font-size:10px;color:#111;padding:20px}
+.header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:3px solid #0B1E3D;margin-bottom:16px}
+.logo{font-size:20px;font-weight:900;letter-spacing:-1px;color:#0B1E3D}
+.logo span{color:#00D4AA}
+.meta{font-size:9px;color:#555;text-align:right;line-height:1.6}
+.score-box{border:2px solid ${rs.color};border-radius:8px;padding:8px 18px;text-align:center;margin-left:16px}
+.score-num{font-size:32px;font-weight:900;color:${rs.color};line-height:1}
+.score-lbl{font-size:9px;color:${rs.color};font-weight:700;text-transform:uppercase}
+h2{font-size:11px;font-weight:700;text-transform:uppercase;color:#0B1E3D;border-bottom:1.5px solid #0B1E3D;padding-bottom:3px;margin:14px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.card{border:1px solid #ddd;border-radius:5px;padding:8px 10px}
+.card .lbl{font-size:8px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:2px}
+.card .val{font-size:15px;font-weight:700;color:#111}
+.card .sub{font-size:8px;color:#888;margin-top:1px}
+.resumo{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:9.5px;line-height:1.7;color:#334155}
+table{width:100%;border-collapse:collapse;font-size:9px}
+th{background:#0B1E3D;color:#fff;padding:5px 7px;text-align:left;font-size:8px;text-transform:uppercase}
+td{padding:4px 7px;border-bottom:1px solid #eee}
+tr:nth-child(even) td{background:#f9f9f9}
+.footer{margin-top:16px;padding-top:8px;border-top:1px solid #ddd;font-size:8px;color:#999;text-align:center}
+</style></head><body>
+
+<div class="header">
+  <div>
+    <div class="logo">Malha <span>Fiscal</span></div>
+    <div style="font-size:9px;color:#666;margin-top:3px">Relatório de Auditoria Fiscal — SPED × NF-e</div>
+  </div>
+  <div style="display:flex;align-items:center">
+    <div class="meta">
+      CNPJ: <strong>${cnpjFmt}</strong><br>
+      Empresa: <strong>${companyNome||'N/D'}</strong><br>
+      Gerado em: <strong>${today}</strong>
+    </div>
+    <div class="score-box">
+      <div class="score-num">${rs.score}</div>
+      <div class="score-lbl">Risco ${rs.label}</div>
+    </div>
+  </div>
+</div>
+
+<div class="resumo">
+  Foram analisados <strong>${nu(allResults.length)}</strong> documento(s) fiscal(is) no confronto SPED × XML.
+  ${divgList.length>0
+    ? `Foram encontradas <strong style="color:#B91C1C">${nu(divgList.length)} inconsistência(s)</strong> (${pct}% dos documentos),
+       sendo <strong>${nu(rs.criticos||0)}</strong> crítica(s), <strong>${nu(rs.altos||0)}</strong> alta(s) e <strong>${nu(rs.medios||0)}</strong> média(s).
+       ${vlDivg>0?`O valor total em risco no ICMS é de <strong style="color:#B91C1C">R$ ${f2(vlDivg)}</strong>.`:''}`
+    : '<strong style="color:#15803D">Nenhuma inconsistência encontrada neste período. ✓</strong>'}
+</div>
+
+<h2>Resumo Executivo</h2>
+<div class="grid">
+  <div class="card"><div class="lbl">Total de documentos</div><div class="val">${nu(allResults.length)}</div><div class="sub">SPED × XML</div></div>
+  <div class="card"><div class="lbl">Inconsistências</div><div class="val" style="color:#B91C1C">${nu(divgList.length)}</div><div class="sub">${pct}% do total</div></div>
+  <div class="card"><div class="lbl">ICMS em risco</div><div class="val" style="color:#B91C1C">R$ ${f2(vlDivg)}</div><div class="sub">${nu(rs.icmsDivg||0)} nota(s)</div></div>
+  <div class="card"><div class="lbl">Falta no SPED</div><div class="val" style="color:#B91C1C">${nu(rs.miss)}</div><div class="sub">XMLs não declarados</div></div>
+  <div class="card"><div class="lbl">CST incompatível</div><div class="val" style="color:${rs.cstInc>0?'#B91C1C':'#111'}">${nu(rs.cstInc||0)}</div><div class="sub">notas</div></div>
+  <div class="card"><div class="lbl">CFOP incompatível</div><div class="val" style="color:${rs.cfopInc>0?'#B91C1C':'#111'}">${nu(rs.cfopInc||0)}</div><div class="sub">notas</div></div>
+  <div class="card"><div class="lbl">Críticas</div><div class="val" style="color:${rs.criticos>0?'#7F1D1D':'#111'}">${nu(rs.criticos||0)}</div><div class="sub">prioridade máxima</div></div>
+  <div class="card"><div class="lbl">Score de conformidade</div><div class="val" style="color:${rs.color}">${rs.score}/100</div><div class="sub">Risco ${rs.label}</div></div>
+</div>
+
+${divgList.length>0?`
+<h2>Inconsistências Encontradas (${nu(divgList.length)})</h2>
+<table>
+  <thead><tr>
+    <th>Nº Doc</th><th>Emitente</th><th>Data</th><th>Valor</th><th>Severidade</th><th>Pendências</th>
+  </tr></thead>
+  <tbody>${rowsHtml}</tbody>
+</table>
+${divgList.length>300?`<p style="font-size:8px;color:#666;margin-top:4px;font-style:italic">Exibindo 300 de ${nu(divgList.length)} inconsistências. Consulte o Excel para a lista completa.</p>`:''}
+`:''}
+
+<div class="footer">
+  Relatório gerado pelo <strong>Malha Fiscal SPED × NF-e</strong> &nbsp;·&nbsp; ${today} &nbsp;·&nbsp; malha-fiscal-web-liart.vercel.app
+</div>
+</body></html>`;
+
+  const el=document.createElement('div');
+  el.innerHTML=html;
+  el.style.cssText='position:fixed;top:-99999px;left:-99999px;width:210mm;background:#fff';
+  document.body.appendChild(el);
+
+  const cnpjSlug=(companyCNPJ||'sem-cnpj').replace(/\D/g,'');
+  const dateSlug=new Date().toISOString().slice(0,10);
+  const filename='malha-fiscal-'+cnpjSlug+'-'+dateSlug+'.pdf';
+
+  html2pdf().set({
+    margin:[10,10,10,10],
+    filename:filename,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  }).from(el).save().then(function(){
+    document.body.removeChild(el);
+  });
 }
 
 function voltarUpload(){
