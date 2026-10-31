@@ -466,6 +466,12 @@
           <option value="12">Últimos 12 meses (1 ano)</option>
         </select>
       </div>
+      <div style="margin-bottom:0.75rem;padding:0.75rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13.5px;color:#334155;line-height:1.4">
+          <input type="checkbox" id="consent-cb" onchange="document.getElementById('process-btn').disabled=!(spedData.length&&xmlData.length&&this.checked)" style="margin-top:2px;flex-shrink:0;accent-color:#2563eb">
+          <span>Declaro que sou responsável por estes arquivos e autorizo o processamento dos dados para fins de auditoria fiscal, em conformidade com a LGPD.</span>
+        </label>
+      </div>
       <button class="btn-p" id="process-btn" onclick="processar()" disabled>
         <i class="ti ti-arrows-exchange-2"></i> Iniciar Confronto
       </button>
@@ -1968,7 +1974,7 @@ document.getElementById('xml-input').addEventListener('change', async function(e
   checkReady();
 });
 
-function checkReady(){ document.getElementById('process-btn').disabled=!(spedData.length&&xmlData.length); }
+function checkReady(){ var cb=document.getElementById('consent-cb'); document.getElementById('process-btn').disabled=!(spedData.length&&xmlData.length&&cb&&cb.checked); }
 
 [['sped-drop','sped-input'],['xml-drop','xml-input']].forEach(([zid,iid])=>{
   const z=document.getElementById(zid), inp=document.getElementById(iid);
