@@ -17,7 +17,7 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
 .badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.15);color:#00D4AA;border:1px solid rgba(0,212,170,.3)}
 .btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
 .btn-back{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);color:#00D4AA;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none}
-.content{max-width:1000px;margin:40px auto;padding:0 24px}
+.content{max-width:1100px;margin:40px auto;padding:0 24px}
 
 .trial-banner{background:linear-gradient(90deg,#0B1E3D 0%,#1a3558 100%);border-bottom:2px solid #00D4AA;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:44px}
 .trial-banner-left{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.85)}
@@ -26,38 +26,86 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
 .trial-banner-cta{background:#00D4AA;color:#0B1E3D;font-weight:700;font-size:12px;padding:6px 16px;border-radius:6px;text-decoration:none;white-space:nowrap}
 
 :root{--teal:#00D4AA;--navy:#0B1E3D;--card-bg:#fff;--border:#E8EDF5;--text:#1E293B;--muted:#64748B;--low:#16A34A;--med:#D97706;--high:#DC2626;}
-.agenda-header{margin-bottom:28px}
-.agenda-header h1{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px}
-.agenda-header p{font-size:14px;color:var(--muted)}
+
+/* ── Header ── */
+.agenda-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.agenda-header-left h1{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.agenda-header-left p{font-size:14px;color:var(--muted)}
+.data-hoje{font-size:13px;font-weight:600;color:var(--navy);background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:7px 14px}
+
+/* ── Próximos vencimentos ── */
+.proximos-section{margin-bottom:28px}
+.proximos-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.proximos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.prox-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;border-left:4px solid transparent;transition:.15s}
+.prox-card.urgente{border-left-color:var(--high);background:#FFF5F5}
+.prox-card.atencao{border-left-color:var(--med);background:#FFFBEB}
+.prox-card.ok{border-left-color:var(--low);background:#F0FDF4}
+.prox-card.passado{border-left-color:#94A3B8;background:#F8FAFC;opacity:.6}
+.prox-nome{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.prox-data{font-size:12px;color:var(--muted);margin-bottom:8px}
+.prox-dias{font-size:20px;font-weight:800;line-height:1}
+.prox-dias-label{font-size:10px;font-weight:600;color:var(--muted);margin-top:2px}
+.dias-urgente{color:var(--high)}
+.dias-atencao{color:var(--med)}
+.dias-ok{color:var(--low)}
+.dias-passado{color:#94A3B8}
+.dias-hoje{color:#7C3AED;font-size:14px}
+
+/* ── Filtros de regime ── */
+.filtros-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filtros-label{font-size:12px;font-weight:600;color:var(--muted)}
+.filtro-chip{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.filtro-chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.filtro-chip:hover:not(.active){background:#F1F5F9}
+
+/* ── Tabs ── */
 .agenda-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
 .tab-btn{padding:7px 18px;border-radius:20px;border:1px solid var(--border);background:var(--card-bg);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
 .tab-btn.active{background:var(--teal);color:#0B1E3D;border-color:var(--teal)}
 .agenda-section{display:none}
 .agenda-section.visible{display:block}
+
+/* ── Obrigações ── */
 .obrig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:32px}
-.obrig-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.obrig-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:.15s}
+.obrig-card[data-hidden="true"]{display:none}
 .obrig-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
 .obrig-card.baixo::before{background:var(--low)}
 .obrig-card.medio::before{background:var(--med)}
 .obrig-card.alto::before{background:var(--high)}
 .obrig-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
 .obrig-nome{font-size:14px;font-weight:700;color:var(--text)}
+.obrig-badges{display:flex;gap:4px;flex-wrap:wrap}
 .obrig-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px}
 .badge-federal{background:#EFF6FF;color:#1D4ED8}
 .badge-estadual{background:#FEF9C3;color:#854D0E}
 .badge-simples{background:#F0FDF4;color:#15803D}
+.badge-presumido{background:#EDE9FE;color:#6D28D9}
+.badge-real{background:#FEF3C7;color:#92400E}
 .obrig-desc{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5}
 .obrig-venc{font-size:12px;font-weight:600;color:var(--text)}
 .obrig-venc span{color:var(--teal)}
+
+/* ── Calendário ── */
 .cal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.mes-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:16px}
-.mes-nome{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px}
-.mes-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.mes-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:16px;transition:.15s}
+.mes-card.mes-atual{border-color:var(--teal);box-shadow:0 0 0 2px rgba(0,212,170,.15)}
+.mes-card[data-hidden="true"]{display:none}
+.mes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.mes-nome{font-size:13px;font-weight:700;color:var(--text)}
+.mes-atual-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(0,212,170,.15);color:#00D4AA}
+.mes-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;transition:.1s}
 .mes-item:last-child{border-bottom:none}
+.mes-item[data-hidden="true"]{display:none}
 .mes-dia{min-width:32px;font-weight:700;color:var(--teal)}
 .mes-nome-obr{color:var(--text);flex:1}
 .mes-tipo{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600}
-.info-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;font-size:13px;color:var(--muted);line-height:1.7}
+.mes-item.venceu .mes-dia{color:#94A3B8}
+.mes-item.vence-hoje .mes-dia{color:#7C3AED;font-weight:800}
+.mes-item.vence-hoje .mes-nome-obr{font-weight:700;color:#7C3AED}
+
+.info-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:var(--muted);line-height:1.7}
 .info-box strong{color:var(--text)}
 </style>
 </head>
@@ -67,7 +115,7 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
   <div class="topbar-right">
     <span class="badge">{{ usuario.get_plano_display }}</span>
     <div class="user-info"><strong>{{ usuario.get_full_name|default:usuario.username }}</strong>{{ usuario.empresa|default:usuario.email }}</div>
-    {% if usuario.is_staff %}<a href="{% url 'accounts:admin_dashboard' %}" class="btn-back" style="background:rgba(0,212,170,.12);border-color:rgba(0,212,170,.3);color:#00D4AA">Admin</a>{% endif %}
+    {% if usuario.is_staff %}<a href="{% url 'accounts:admin_dashboard' %}" class="btn-back">Admin</a>{% endif %}
     <a href="{% url 'sistema:dashboard' %}" class="btn-back">← Dashboard</a>
     <a href="{% url 'accounts:logout' %}" class="btn-logout">Sair</a>
   </div>
@@ -77,36 +125,44 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
 <div class="trial-banner">
   <div class="trial-banner-left">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Período de teste — seu acesso expira em
-    <span class="trial-clock" id="trial-clock">--:--:--</span>
+    Período de teste — seu acesso expira em <span class="trial-clock" id="trial-clock">--:--:--</span>
   </div>
   <a href="https://wa.me/5583999924562" target="_blank" class="trial-banner-cta">Assinar agora →</a>
 </div>
 <script>
-(function(){
-  var secs={{ trial_segundos }};
-  function tick(){
-    if(secs<=0){document.getElementById('trial-clock').textContent='00:00:00';return;}
-    var h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60;
-    document.getElementById('trial-clock').textContent=
-      String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-    secs--;setTimeout(tick,1000);
-  }
-  tick();
-})();
+(function(){var s={{ trial_segundos }};function t(){if(s<=0){document.getElementById('trial-clock').textContent='00:00:00';return;}var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;document.getElementById('trial-clock').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0');s--;setTimeout(t,1000);}t();})();
 </script>
 {% endif %}
 
 <div class="content">
   <div class="agenda-header">
-    <h1>📅 Agenda Fiscal</h1>
-    <p>Principais obrigações acessórias e vencimentos fiscais para empresas do Lucro Presumido e Simples Nacional.</p>
+    <div class="agenda-header-left">
+      <h1>📅 Agenda Fiscal</h1>
+      <p>Obrigações acessórias, vencimentos e calendário fiscal para Simples Nacional, Lucro Presumido e Lucro Real.</p>
+    </div>
+    <div class="data-hoje" id="data-hoje-label">—</div>
+  </div>
+
+  <!-- PRÓXIMOS VENCIMENTOS (dinâmico) -->
+  <div class="proximos-section">
+    <div class="proximos-title">📌 Próximos vencimentos</div>
+    <div class="proximos-grid" id="proximos-grid"><!-- preenchido por JS --></div>
   </div>
 
   <div class="info-box">
-    <strong>⚠️ Atenção:</strong> Os vencimentos abaixo são as datas padrão. Verifique sempre no portal da Receita Federal e no SEFAZ do seu estado, pois podem ocorrer prorrogações por portaria. Datas que caem em finais de semana ou feriados são geralmente prorrogadas para o próximo dia útil.
+    <strong>⚠️ Atenção:</strong> As datas abaixo são os vencimentos padrão. Verifique sempre no portal da Receita Federal e no SEFAZ do seu estado — prorrogações podem ocorrer por portaria. Datas em fins de semana ou feriados são geralmente prorrogadas para o próximo dia útil.
   </div>
 
+  <!-- FILTROS -->
+  <div class="filtros-bar">
+    <span class="filtros-label">Regime:</span>
+    <button class="filtro-chip active" onclick="filtrarRegime('todos',this)">Todos</button>
+    <button class="filtro-chip" onclick="filtrarRegime('simples',this)">Simples Nacional</button>
+    <button class="filtro-chip" onclick="filtrarRegime('presumido',this)">Lucro Presumido</button>
+    <button class="filtro-chip" onclick="filtrarRegime('real',this)">Lucro Real</button>
+  </div>
+
+  <!-- ABAS -->
   <div class="agenda-tabs">
     <button class="tab-btn active" onclick="showTab('obrigacoes',this)">Obrigações</button>
     <button class="tab-btn" onclick="showTab('calendario',this)">Calendário Mensal</button>
@@ -115,40 +171,342 @@ body{font-family:'Inter',sans-serif;background:#F0F4FF;min-height:100vh}
   <!-- ABA: OBRIGAÇÕES -->
   <div id="tab-obrigacoes" class="agenda-section visible">
     <div class="obrig-grid">
-      <div class="obrig-card medio"><div class="obrig-top"><div class="obrig-nome">SPED EFD-ICMS/IPI</div><span class="obrig-badge badge-estadual">Estadual</span></div><div class="obrig-desc">Escrituração Fiscal Digital do ICMS e IPI. Registro eletrônico de todas as operações de entrada e saída de mercadorias.</div><div class="obrig-venc">Vencimento: <span>dia 15 do mês seguinte</span></div></div>
-      <div class="obrig-card medio"><div class="obrig-top"><div class="obrig-nome">EFD-Contribuições</div><span class="obrig-badge badge-federal">Federal</span></div><div class="obrig-desc">Escrituração das contribuições ao PIS/Pasep e COFINS. Obrigatória para empresas do Lucro Real e Presumido.</div><div class="obrig-venc">Vencimento: <span>dia 10 do 2º mês seguinte</span></div></div>
-      <div class="obrig-card alto"><div class="obrig-top"><div class="obrig-nome">DCTF Mensal</div><span class="obrig-badge badge-federal">Federal</span></div><div class="obrig-desc">Declaração de Débitos e Créditos Tributários Federais. IRPJ, CSLL, PIS, COFINS, IPI retidos na fonte.</div><div class="obrig-venc">Vencimento: <span>dia 15 do 2º mês seguinte</span></div></div>
-      <div class="obrig-card medio"><div class="obrig-top"><div class="obrig-nome">DeSTDA</div><span class="obrig-badge badge-estadual">Estadual</span></div><div class="obrig-desc">Declaração de Substituição Tributária, Diferencial de Alíquota e Antecipação. Para empresas do Simples Nacional com recolhimento de ICMS-ST.</div><div class="obrig-venc">Vencimento: <span>dia 20 do mês seguinte</span></div></div>
-      <div class="obrig-card baixo"><div class="obrig-top"><div class="obrig-nome">GIA Estadual</div><span class="obrig-badge badge-estadual">Estadual</span></div><div class="obrig-desc">Guia de Informação e Apuração do ICMS. Varia por estado — consulte o SEFAZ do seu estado para a data exata.</div><div class="obrig-venc">Vencimento: <span>varia por UF (dia 15–20)</span></div></div>
-      <div class="obrig-card baixo"><div class="obrig-top"><div class="obrig-nome">PGDAS-D</div><span class="obrig-badge badge-federal">Federal</span></div><div class="obrig-desc">Programa Gerador do Documento de Arrecadação do Simples Nacional. Apuração e pagamento mensal dos tributos unificados.</div><div class="obrig-venc">Vencimento: <span>dia 20 do mês seguinte</span></div></div>
-      <div class="obrig-card alto"><div class="obrig-top"><div class="obrig-nome">ECF (Anual)</div><span class="obrig-badge badge-federal">Federal</span></div><div class="obrig-desc">Escrituração Contábil Fiscal. Obrigações de IR e CSLL das pessoas jurídicas tributadas pelo Lucro Real ou Presumido.</div><div class="obrig-venc">Vencimento: <span>último dia útil de julho</span></div></div>
-      <div class="obrig-card alto"><div class="obrig-top"><div class="obrig-nome">ECD (Anual)</div><span class="obrig-badge badge-federal">Federal</span></div><div class="obrig-desc">Escrituração Contábil Digital. Livros Diário, Razão, Balancetes e Balanço Patrimonial transmitidos via SPED.</div><div class="obrig-venc">Vencimento: <span>último dia útil de maio</span></div></div>
+
+      <div class="obrig-card medio" data-regimes="simples,presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">SPED EFD-ICMS/IPI</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-estadual">Estadual</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Escrituração Fiscal Digital do ICMS e IPI. Registro eletrônico de todas as operações de entrada e saída de mercadorias.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 15 do mês seguinte</span></div>
+      </div>
+
+      <div class="obrig-card medio" data-regimes="presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">EFD-Contribuições (PIS/COFINS)</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Escrituração das contribuições ao PIS/Pasep e COFINS. Obrigatória para empresas do Lucro Real e Presumido.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 10 do 2º mês seguinte</span></div>
+      </div>
+
+      <div class="obrig-card alto" data-regimes="presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">DCTF Mensal</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Declaração de Débitos e Créditos Tributários Federais. IRPJ, CSLL, PIS, COFINS, IPI retidos na fonte.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 15 do 2º mês seguinte</span></div>
+      </div>
+
+      <div class="obrig-card medio" data-regimes="simples">
+        <div class="obrig-top"><div class="obrig-nome">DeSTDA</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-estadual">Estadual</span><span class="obrig-badge badge-simples">Simples</span></div></div>
+        <div class="obrig-desc">Declaração de Substituição Tributária, Diferencial de Alíquota e Antecipação. Para empresas do Simples Nacional com recolhimento de ICMS-ST.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 20 do mês seguinte</span></div>
+      </div>
+
+      <div class="obrig-card baixo" data-regimes="presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">GIA Estadual</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-estadual">Estadual</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Guia de Informação e Apuração do ICMS. Varia por estado — consulte o SEFAZ do seu estado para a data exata.</div>
+        <div class="obrig-venc">Vencimento: <span>varia por UF (dia 15–20)</span></div>
+      </div>
+
+      <div class="obrig-card baixo" data-regimes="simples">
+        <div class="obrig-top"><div class="obrig-nome">PGDAS-D</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span><span class="obrig-badge badge-simples">Simples</span></div></div>
+        <div class="obrig-desc">Programa Gerador do Documento de Arrecadação do Simples Nacional. Apuração e pagamento mensal dos tributos unificados.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 20 do mês seguinte</span></div>
+      </div>
+
+      <div class="obrig-card alto" data-regimes="presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">ECF (Anual)</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Escrituração Contábil Fiscal. Obrigações de IR e CSLL das pessoas jurídicas tributadas pelo Lucro Real ou Presumido.</div>
+        <div class="obrig-venc">Vencimento: <span>último dia útil de julho</span></div>
+      </div>
+
+      <div class="obrig-card alto" data-regimes="presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">ECD (Anual)</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Escrituração Contábil Digital. Livros Diário, Razão, Balancetes e Balanço Patrimonial transmitidos via SPED.</div>
+        <div class="obrig-venc">Vencimento: <span>último dia útil de maio</span></div>
+      </div>
+
+      <div class="obrig-card medio" data-regimes="presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">SPED Fiscal (EFD-REINF)</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span><span class="obrig-badge badge-presumido">Presumido</span><span class="obrig-badge badge-real">Lucro Real</span></div></div>
+        <div class="obrig-desc">Escrituração Fiscal Digital de Retenções e Outras Informações Fiscais. Retenções de IR, CSLL, PIS e COFINS na fonte.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 15 do mês seguinte</span></div>
+      </div>
+
+      <div class="obrig-card baixo" data-regimes="simples,presumido,real">
+        <div class="obrig-top"><div class="obrig-nome">eSocial (Mensal)</div>
+        <div class="obrig-badges"><span class="obrig-badge badge-federal">Federal</span></div></div>
+        <div class="obrig-desc">Declaração de eventos trabalhistas e previdenciários. Substituiu GFIP/SEFIP, CAGED, RAIS e outras obrigações.</div>
+        <div class="obrig-venc">Vencimento: <span>dia 7 do mês seguinte</span></div>
+      </div>
+
     </div>
   </div>
 
   <!-- ABA: CALENDÁRIO MENSAL -->
   <div id="tab-calendario" class="agenda-section">
-    <div class="cal-grid">
-      <div class="mes-card"><div class="mes-nome">Janeiro</div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (nov)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (nov)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (dez)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Fevereiro</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (dez)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (dez)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (dez)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (jan)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Março</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (jan)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (jan)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (jan)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (fev)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Abril</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (fev)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (fev)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (fev)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (mar)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Maio</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (mar)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (mar)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (mar)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (abr)</span><span class="mes-tipo badge-simples">Simples</span></div><div class="mes-item"><span class="mes-dia">31</span><span class="mes-nome-obr">ECD (ano anterior)</span><span class="mes-tipo badge-federal">Federal</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Junho</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (abr)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (abr)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (abr)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (mai)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Julho</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (mai)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (mai)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (mai)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (jun)</span><span class="mes-tipo badge-simples">Simples</span></div><div class="mes-item"><span class="mes-dia">31</span><span class="mes-nome-obr">ECF (ano anterior)</span><span class="mes-tipo badge-federal">Federal</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Agosto</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (jun)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (jun)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (jun)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (jul)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Setembro</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (jul)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (jul)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (jul)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (ago)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Outubro</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (ago)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (ago)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (ago)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (set)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Novembro</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (set)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (set)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (set)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (out)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-      <div class="mes-card"><div class="mes-nome">Dezembro</div><div class="mes-item"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (out)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (out)</span><span class="mes-tipo badge-estadual">Estadual</span></div><div class="mes-item"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (out)</span><span class="mes-tipo badge-federal">Federal</span></div><div class="mes-item"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (nov)</span><span class="mes-tipo badge-simples">Simples</span></div></div>
-    </div>
+    <div class="cal-grid" id="cal-grid">
+
+      <div class="mes-card" data-mes="1">
+        <div class="mes-header"><span class="mes-nome">Janeiro</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (dez)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (nov)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (nov)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (nov)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (dez)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="2">
+        <div class="mes-header"><span class="mes-nome">Fevereiro</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (jan)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (dez)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (dez)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (dez)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (jan)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="3">
+        <div class="mes-header"><span class="mes-nome">Março</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (fev)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (jan)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (jan)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (jan)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (fev)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="4">
+        <div class="mes-header"><span class="mes-nome">Abril</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (mar)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (fev)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (fev)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (fev)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (mar)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="5">
+        <div class="mes-header"><span class="mes-nome">Maio</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (abr)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (mar)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (mar)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (mar)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (abr)</span><span class="mes-tipo badge-simples">Simples</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">31</span><span class="mes-nome-obr">ECD (ano anterior)</span><span class="mes-tipo badge-federal">Federal</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="6">
+        <div class="mes-header"><span class="mes-nome">Junho</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (mai)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (abr)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (abr)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (abr)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (mai)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="7">
+        <div class="mes-header"><span class="mes-nome">Julho</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (jun)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (mai)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (mai)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (mai)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (jun)</span><span class="mes-tipo badge-simples">Simples</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">31</span><span class="mes-nome-obr">ECF (ano anterior)</span><span class="mes-tipo badge-federal">Federal</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="8">
+        <div class="mes-header"><span class="mes-nome">Agosto</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (jul)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (jun)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (jun)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (jun)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (jul)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="9">
+        <div class="mes-header"><span class="mes-nome">Setembro</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (ago)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (jul)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (jul)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (jul)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (ago)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="10">
+        <div class="mes-header"><span class="mes-nome">Outubro</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (set)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (ago)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (ago)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (ago)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (set)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="11">
+        <div class="mes-header"><span class="mes-nome">Novembro</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (out)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (set)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (set)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (set)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (out)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+      <div class="mes-card" data-mes="12">
+        <div class="mes-header"><span class="mes-nome">Dezembro</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">7</span><span class="mes-nome-obr">eSocial (nov)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">10</span><span class="mes-nome-obr">EFD-Contrib. (out)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">EFD-ICMS/IPI (out)</span><span class="mes-tipo badge-estadual">Estadual</span></div>
+        <div class="mes-item" data-regimes="presumido,real"><span class="mes-dia">15</span><span class="mes-nome-obr">DCTF (out)</span><span class="mes-tipo badge-federal">Federal</span></div>
+        <div class="mes-item" data-regimes="simples"><span class="mes-dia">20</span><span class="mes-nome-obr">PGDAS-D / DeSTDA (nov)</span><span class="mes-tipo badge-simples">Simples</span></div>
+      </div>
+
+    </div><!-- /cal-grid -->
   </div>
-</div>
+
+</div><!-- /content -->
 
 <script>
+// ── Utilitários de data ──────────────────────────────────────────────────────
+var MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var MESES_ABREV = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+function hoje(){var d=new Date();d.setHours(0,0,0,0);return d;}
+function diffDias(d){var h=hoje();var t=new Date(d);t.setHours(0,0,0,0);return Math.round((t-h)/86400000);}
+
+// Label de data no header
+(function(){
+  var d=new Date();
+  var dias=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  document.getElementById('data-hoje-label').textContent=
+    dias[d.getDay()]+', '+d.getDate()+' de '+MESES_PT[d.getMonth()]+' de '+d.getFullYear();
+})();
+
+// ── Destaque do mês atual no calendário ─────────────────────────────────────
+(function(){
+  var mesAtual=new Date().getMonth()+1;
+  var mesCard=document.querySelector('.mes-card[data-mes="'+mesAtual+'"]');
+  if(mesCard){
+    mesCard.classList.add('mes-atual');
+    var hdr=mesCard.querySelector('.mes-header');
+    if(hdr){
+      var badge=document.createElement('span');
+      badge.className='mes-atual-badge';badge.textContent='Mês atual';
+      hdr.appendChild(badge);
+    }
+  }
+  // Destacar itens que vencem hoje ou já venceram (apenas no mês atual)
+  if(mesCard){
+    var hoje_d=new Date().getDate();
+    mesCard.querySelectorAll('.mes-item').forEach(function(item){
+      var dia=parseInt(item.querySelector('.mes-dia').textContent,10);
+      if(dia===hoje_d) item.classList.add('vence-hoje');
+      else if(dia<hoje_d) item.classList.add('venceu');
+    });
+  }
+})();
+
+// ── Próximos vencimentos (dinâmico) ─────────────────────────────────────────
+var OBRIGACOES = [
+  {nome:'eSocial',               dia:7,  ref:-1, regimes:['presumido','real']},
+  {nome:'EFD-Contribuições',     dia:10, ref:-2, regimes:['presumido','real']},
+  {nome:'EFD-ICMS/IPI',         dia:15, ref:-1, regimes:['presumido','real']},
+  {nome:'DCTF Mensal',          dia:15, ref:-2, regimes:['presumido','real']},
+  {nome:'PGDAS-D / DeSTDA',     dia:20, ref:-1, regimes:['simples']},
+];
+
+function gerarProximos(){
+  var agora=hoje();
+  var eventos=[];
+  // Gera próximas 3 ocorrências de cada obrigação
+  for(var i=0;i<OBRIGACOES.length;i++){
+    var o=OBRIGACOES[i];
+    for(var delta=-1;delta<=2;delta++){
+      var d=new Date(agora.getFullYear(), agora.getMonth()+delta, o.dia);
+      d.setHours(0,0,0,0);
+      var diff=diffDias(d);
+      if(diff>=-3 && diff<=45){
+        var refMes=new Date(d.getFullYear(), d.getMonth()+o.ref, 1);
+        eventos.push({nome:o.nome, data:d, diff:diff, refLabel:MESES_ABREV[refMes.getMonth()]+'/'+refMes.getFullYear(), regimes:o.regimes});
+      }
+    }
+  }
+  eventos.sort(function(a,b){return a.data-b.data;});
+  // Remove duplicatas por nome+data
+  var vistos={};
+  eventos=eventos.filter(function(e){var k=e.nome+'|'+e.data.toISOString();if(vistos[k])return false;vistos[k]=true;return true;});
+  // Pega os próximos 6
+  return eventos.slice(0,6);
+}
+
+function renderProximos(){
+  var grid=document.getElementById('proximos-grid');
+  var eventos=gerarProximos();
+  grid.innerHTML='';
+  eventos.forEach(function(e){
+    var cls='ok', diaEl='', diasLabel='dias restantes';
+    if(e.diff<0){cls='passado'; diasLabel='venceu há '+Math.abs(e.diff)+' dia'+(Math.abs(e.diff)===1?'':'s');}
+    else if(e.diff===0){cls='urgente'; diasLabel='VENCE HOJE';}
+    else if(e.diff<=5){cls='urgente'; diasLabel='dias restantes';}
+    else if(e.diff<=10){cls='atencao'; diasLabel='dias restantes';}
+
+    var diasCor='dias-'+cls;
+    var diasNumero=e.diff<0?'':e.diff===0?'HOJE':e.diff;
+
+    var dataFmt=e.data.getDate()+'/'+String(e.data.getMonth()+1).padStart(2,'0')+'/'+e.data.getFullYear();
+    var card=document.createElement('div');
+    card.className='prox-card '+cls;
+    card.innerHTML='<div class="prox-nome">'+e.nome+'</div>'+
+      '<div class="prox-data">'+dataFmt+' &nbsp;·&nbsp; ref. '+e.refLabel+'</div>'+
+      '<div class="prox-dias '+diasCor+'">'+diasNumero+'</div>'+
+      '<div class="prox-dias-label">'+diasLabel+'</div>';
+    grid.appendChild(card);
+  });
+  if(eventos.length===0){
+    grid.innerHTML='<div style="color:var(--muted);font-size:13px;padding:16px 0">Nenhum vencimento nos próximos 45 dias.</div>';
+  }
+}
+renderProximos();
+
+// ── Filtro por regime ────────────────────────────────────────────────────────
+var regimeAtivo='todos';
+
+function filtrarRegime(regime, btn){
+  regimeAtivo=regime;
+  document.querySelectorAll('.filtro-chip').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  aplicarFiltro();
+}
+
+function aplicarFiltro(){
+  // Obrigações
+  document.querySelectorAll('.obrig-card[data-regimes]').forEach(function(card){
+    if(regimeAtivo==='todos'){card.removeAttribute('data-hidden');}
+    else{
+      var regimes=card.getAttribute('data-regimes').split(',');
+      if(regimes.indexOf(regimeAtivo)>=0){card.removeAttribute('data-hidden');}
+      else{card.setAttribute('data-hidden','true');}
+    }
+  });
+  // Calendário — itens dentro dos meses
+  document.querySelectorAll('.mes-item[data-regimes]').forEach(function(item){
+    if(regimeAtivo==='todos'){item.removeAttribute('data-hidden');}
+    else{
+      var regimes=item.getAttribute('data-regimes').split(',');
+      if(regimes.indexOf(regimeAtivo)>=0){item.removeAttribute('data-hidden');}
+      else{item.setAttribute('data-hidden','true');}
+    }
+  });
+  // Meses sem nenhum item visível ficam ocultos
+  document.querySelectorAll('.mes-card').forEach(function(mc){
+    var itens=mc.querySelectorAll('.mes-item:not([data-hidden="true"])');
+    if(itens.length===0){mc.setAttribute('data-hidden','true');}
+    else{mc.removeAttribute('data-hidden');}
+  });
+}
+
+// ── Abas ────────────────────────────────────────────────────────────────────
 function showTab(id,btn){
-  document.querySelectorAll('.agenda-section').forEach(s=>s.classList.remove('visible'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.agenda-section').forEach(function(s){s.classList.remove('visible');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById('tab-'+id).classList.add('visible');
   btn.classList.add('active');
 }
