@@ -4,10 +4,17 @@
     {
       "src": "malha_fiscal/wsgi.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb", "runtime": "python3.12" }
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.12"
+      }
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "malha_fiscal/wsgi.py" }
-  ]
+    {
+      "src": "/(.*)",
+      "dest": "malha_fiscal/wsgi.py"
+    }
+  ],
+  "buildCommand": "bash build_files.sh"
 }
