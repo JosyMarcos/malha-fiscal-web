@@ -85,10 +85,7 @@ def calendario_fiscal(request):
 
 # ── Gestão de Empresas ──────────────────────────────────────────────────────
 from .models import Empresa, RegimeTributario, UF_CHOICES
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
 
 
 @login_required
