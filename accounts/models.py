@@ -18,6 +18,7 @@ class Usuario(AbstractUser):
     empresa          = models.CharField(max_length=200, blank=True, verbose_name='Empresa / Escritório')
     telefone         = models.CharField(max_length=20, blank=True, verbose_name='Telefone/WhatsApp')
     observacoes      = models.TextField(blank=True, verbose_name='Observações')
+    termos_aceitos_em = models.DateTimeField(null=True, blank=True, verbose_name="Termos aceitos em")
     criado_em        = models.DateTimeField(auto_now_add=True)
     ultimo_acesso_em = models.DateTimeField(null=True, blank=True)
 

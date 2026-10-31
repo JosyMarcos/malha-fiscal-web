@@ -172,8 +172,11 @@ def registro(request):
         senha    = request.POST.get('senha', '').strip()
         confirma = request.POST.get('confirma', '').strip()
 
+        aceita_termos = request.POST.get('aceita_termos')
         if not all([nome, empresa, email, senha]):
             error = 'Preencha todos os campos obrigatórios.'
+        elif not aceita_termos:
+            error = 'Você precisa aceitar os Termos de Uso para continuar.'
         elif senha != confirma:
             error = 'As senhas não coincidem.'
         elif len(senha) < 6:
@@ -203,6 +206,7 @@ def registro(request):
                 plano='trial',
                 ativo=True,
                 data_expiracao=(timezone.now() + timedelta(hours=48)).date(),
+                termos_aceitos_em=timezone.now(),
             )
             from django.contrib.auth import authenticate, login as auth_login
             # Notificação ao admin

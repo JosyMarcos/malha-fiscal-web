@@ -4,7 +4,7 @@ from .models import Usuario
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
-    list_display = ['username', 'email', 'empresa', 'plano', 'ativo', 'data_expiracao', 'criado_em']
+    list_display = ['username', 'email', 'empresa', 'plano', 'ativo', 'data_expiracao', 'termos_aceitos_em', 'criado_em']
     list_filter  = ['ativo', 'plano', 'is_staff']
     search_fields = ['username', 'email', 'empresa', 'first_name', 'last_name']
     list_editable = ['ativo', 'plano']
