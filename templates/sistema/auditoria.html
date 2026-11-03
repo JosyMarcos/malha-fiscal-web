@@ -123,8 +123,13 @@
   .search-in:focus { border-color:var(--blue); }
   .page-title { font-size:22px; font-weight:700; letter-spacing:-.03em; color:var(--navy); margin-bottom:2px; }
   .page-sub { font-size:13px; color:var(--text-2); margin-bottom:1.5rem; }
-  .dz-st { margin-top:8px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .dz-st { margin-top:10px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
   .dz-st.ok { color:var(--success); } .dz-st.err { color:var(--danger); }
+  .dz-chips { display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:center; }
+  .chip-count { background:rgba(0,212,170,.12); color:#065F46; border-radius:20px; padding:2px 10px; font-weight:700; font-size:12px; }
+  .chip-dim   { background:rgba(0,0,0,.06); color:var(--text-2); border-radius:20px; padding:2px 9px; font-size:11px; }
+  .chip-meta  { color:var(--text-3); font-size:11px; margin-left:2px; }
+  .chip-danger{ background:rgba(185,28,28,.10); color:#B91C1C; border-radius:20px; padding:2px 9px; font-size:11px; font-weight:600; }
   .info-note { background:rgba(0,212,170,.08); border:1px solid rgba(0,212,170,.25); border-radius:var(--radius-sm); padding:10px 14px; font-size:12px; color:#065F46; display:flex; align-items:flex-start; gap:8px; margin-top:1rem; }
   #toast { position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:10px 18px; border-radius:var(--radius); font-size:13px; font-weight:500; display:none; align-items:center; gap:8px; box-shadow:var(--shadow-md); z-index:9998; }
   input[type="file"] { display:none; }
@@ -947,9 +952,15 @@ function adicionarMaisArquivos(tipo){
       const saiC=spedData.filter(r=>r.oper==='1').length;
       const entC=spedData.filter(r=>r.oper==='0').length;
       const cteC=spedData.filter(r=>r.tipo==='cte').length;
-      document.getElementById('sped-status').innerHTML=
-        '<div class="dz-st ok"><i class="ti ti-circle-check"></i> '+
-        spedData.length.toLocaleString('pt-BR')+' registros ('+saiC+' saídas, '+entC+' entradas) · '+_spedFileList.length+' arquivo(s)</div>';
+      {
+        const chps=['<span class="chip-count">'+spedData.length.toLocaleString('pt-BR')+' registros</span>'];
+        if(saiC>0) chps.push('<span class="chip-dim">↑ '+saiC.toLocaleString('pt-BR')+' saídas</span>');
+        if(entC>0) chps.push('<span class="chip-dim">↓ '+entC.toLocaleString('pt-BR')+' entradas</span>');
+        if(cteC>0) chps.push('<span class="chip-dim">CT-e '+cteC+'</span>');
+        document.getElementById('sped-status').innerHTML=
+          '<div class="dz-st ok"><i class="ti ti-check"></i><div class="dz-chips">'+chps.join('')+'</div>'
+          +'<span class="chip-meta">'+_spedFileList.length+' SPED</span></div>';
+      }
       checkReady();
     } else {
       // XML
@@ -970,9 +981,19 @@ function adicionarMaisArquivos(tipo){
         }
         _xmlFileList.push(file.name);
       }
-      document.getElementById('xml-status').innerHTML=
-        '<div class="dz-st ok"><i class="ti ti-circle-check"></i> '+
-        xmlData.length.toLocaleString('pt-BR')+' documentos XML · '+_xmlFileList.length+' arquivo(s)</div>';
+      {
+        const xnfe2 =xmlData.filter(x=>x.mod!=='65'&&x.tipo!=='cte').length;
+        const xnfce2=xmlData.filter(x=>x.mod==='65').length;
+        const xcte2 =xmlData.filter(x=>x.tipo==='cte').length;
+        const xcanc2=xmlData.filter(x=>x.sit==='02').length;
+        const xchps=['<span class="chip-count">'+xmlData.length.toLocaleString('pt-BR')+' docs</span>'];
+        if(xnfe2>0)  xchps.push('<span class="chip-dim">NF-e '+xnfe2.toLocaleString('pt-BR')+'</span>');
+        if(xnfce2>0) xchps.push('<span class="chip-dim">NFC-e '+xnfce2.toLocaleString('pt-BR')+'</span>');
+        if(xcte2>0)  xchps.push('<span class="chip-dim">CT-e '+xcte2+'</span>');
+        if(xcanc2>0) xchps.push('<span class="chip-danger">✕ '+xcanc2+' canceladas</span>');
+        document.getElementById('xml-status').innerHTML=
+          '<div class="dz-st ok"><i class="ti ti-check"></i><div class="dz-chips">'+xchps.join('')+'</div></div>';
+      }
       const lba=document.getElementById('limpar-btn');if(lba)lba.style.display='inline-flex';
       checkReady();
     }
@@ -1898,10 +1919,15 @@ document.getElementById('sped-input').addEventListener('change', async function(
   const d100=spedData.filter(n=>n.tipo==='cte').length;
   const entrada=spedData.filter(n=>n.oper==='0').length;
   const saida=spedData.filter(n=>n.oper==='1').length;
-  let info=`<strong>${files.length}</strong> SPED(s) carregado(s) · <strong>${spedData.length}</strong> registros`;
-  if(entrada>0||saida>0) info+=` (${saida} saída(s), ${entrada} entrada(s))`;
-  if(d100>0) info+=` · ${d100} CT-e`;
-  document.getElementById('sped-status').innerHTML=`<div class="dz-st ok"><i class="ti ti-check"></i> ${info}</div>`;
+  {
+    const schps=['<span class="chip-count">'+spedData.length.toLocaleString('pt-BR')+' registros</span>'];
+    if(saida>0)   schps.push('<span class="chip-dim">↑ '+saida.toLocaleString('pt-BR')+' saídas</span>');
+    if(entrada>0) schps.push('<span class="chip-dim">↓ '+entrada.toLocaleString('pt-BR')+' entradas</span>');
+    if(d100>0)    schps.push('<span class="chip-dim">CT-e '+d100+'</span>');
+    document.getElementById('sped-status').innerHTML=
+      `<div class="dz-st ok"><i class="ti ti-check"></i><div class="dz-chips">${schps.join('')}</div>`
+      +`<span class="chip-meta">${files.length} SPED</span></div>`;
+  }
   checkReady();
 });
 
@@ -1967,13 +1993,17 @@ document.getElementById('xml-input').addEventListener('change', async function(e
   if(nfe>0)  partes.push(`${nfe} NF-e`);
   if(nfce>0) partes.push(`${nfce} NFC-e`);
   if(cte>0)  partes.push(`${cte} CT-e`);
-  let info=`<strong>${xmlData.length}</strong> documentos (${partes.join(' + ')})`;
-  if(canc>0)         info+=` · <span style="color:var(--err)"><i class="ti ti-ban"></i> ${canc} cancelada(s)</span>`;
-  if(totalEventos>0) info+=` · <span style="color:var(--text-3)"><i class="ti ti-info-circle"></i> ${totalEventos} evento(s) ignorado(s)</span>`;
-  const xmlFileNames=_xmlFileList.length>1?' · '+_xmlFileList.length+' arquivos':'';
-        const lb2=document.getElementById('limpar-btn');if(lb2)lb2.style.display='inline-flex';
-        document.getElementById('xml-status').innerHTML=`<div class="dz-st ok"><i class="ti ti-check"></i> ${info}</div>
-          <button onclick="adicionarMaisArquivos('xml')" class="btn-s" style="margin-left:8px;padding:3px 10px;font-size:11px">+ Adicionar XMLs</button>`;
+  {
+    const xchps2=['<span class="chip-count">'+xmlData.length.toLocaleString('pt-BR')+' docs</span>'];
+    if(nfe>0)  xchps2.push('<span class="chip-dim">NF-e '+nfe.toLocaleString('pt-BR')+'</span>');
+    if(nfce>0) xchps2.push('<span class="chip-dim">NFC-e '+nfce.toLocaleString('pt-BR')+'</span>');
+    if(cte>0)  xchps2.push('<span class="chip-dim">CT-e '+cte+'</span>');
+    if(canc>0) xchps2.push('<span class="chip-danger">✕ '+canc+' canceladas</span>');
+    const lb2=document.getElementById('limpar-btn');if(lb2)lb2.style.display='inline-flex';
+    document.getElementById('xml-status').innerHTML=
+      `<div class="dz-st ok"><i class="ti ti-check"></i><div class="dz-chips">${xchps2.join('')}</div></div>`
+      +`<button onclick="adicionarMaisArquivos('xml')" class="btn-s" style="margin-top:6px;padding:3px 10px;font-size:11px">+ Adicionar XMLs</button>`;
+  }
   checkReady();
 });
 
