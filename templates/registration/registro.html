@@ -30,6 +30,12 @@ input:focus{border-color:#0B1E3D;box-shadow:0 0 0 3px rgba(11,30,61,.08)}
 .restrictions{background:#F8FAFF;border-radius:8px;padding:12px 14px;font-size:12px;color:#64748B;margin-top:16px}
 .restrictions strong{color:#374151;display:block;margin-bottom:6px}
 .restrictions ul{padding-left:16px;line-height:1.8}
+.terms{display:flex;align-items:flex-start;gap:10px;margin:6px 0 18px;padding:12px 14px;background:#F8FAFF;border:1px solid #E2E8F0;border-radius:9px;cursor:pointer;font-size:13px;font-weight:400;color:#475569;line-height:1.55;transition:border-color .15s,background .15s}
+.terms:hover{border-color:#CBD5E1}
+.terms:has(input:checked){border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.06)}
+.terms input[type=checkbox]{width:18px;height:18px;min-width:18px;padding:0;margin:1px 0 0;accent-color:#0B1E3D;cursor:pointer;box-shadow:none}
+.terms a{color:#0B1E3D;font-weight:600;text-decoration:underline;text-decoration-color:#00D4AA;text-underline-offset:3px}
+.terms a:hover{color:#059669}
 </style>
 </head>
 <body>
@@ -75,12 +81,10 @@ input:focus{border-color:#0B1E3D;box-shadow:0 0 0 3px rgba(11,30,61,.08)}
         <input type="password" name="confirma" placeholder="Repita a senha" required>
       </div>
     </div>
-    <div class="form-group" style="margin-top:4px">
-      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;color:#334155">
-        <input type="checkbox" name="aceita_termos" required style="margin-top:3px;flex-shrink:0">
-        <span>Li e aceito os <a href="/termos/" target="_blank" style="color:#2563eb">Termos de Uso</a> e a <a href="/privacidade/" target="_blank" style="color:#2563eb">Política de Privacidade</a>.</span>
-      </label>
-    </div>
+    <label class="terms">
+      <input type="checkbox" name="aceita_termos" required>
+      <span>Li e aceito os <a href="/termos/" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="/privacidade/" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
+    </label>
     <button type="submit" class="btn">Criar conta e começar →</button>
   </form>
 
