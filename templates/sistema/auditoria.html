@@ -2370,6 +2370,7 @@ function parseXML(txt, filename){
       cfopXml:qs('det:first-child prod CFOP')||qs('CFOP'),
       cstXml:qs('det:first-child imposto ICMS CST')||qs('det:first-child imposto ICMS CSOSN'),
       ncmXml:qs('det:first-child prod NCM'),
+      finNFe:qs('ide finNFe')||'1',
     };
   }catch(e){return null}
 }
@@ -2926,7 +2927,16 @@ function getFilteredRows(f){
   if(f==='numgap')     return allResults.filter(r=>r.hasNumGap===true);
   if(f==='dvinv')      return allResults.filter(r=>r.dvInvalido===true);
   if(f==='icmsst')     return allResults.filter(r=>r.stOk===false);
-  if(f==='vldiv')      return allResults.filter(r=>r.vlOk===false);
+  if(f==='vldiv'){
+    const CFOPS_EX_VL=[1407,2407,1556,2556,1949,2949];
+    return allResults.filter(r=>{
+      if(r.vlOk!==false) return false;
+      if((r.finNFe||'1')==='2') return false; // NF-e complementar
+      const cfop=parseInt((r.cfopXml||r.cfopsSped||'').split(',')[0])||0;
+      if(CFOPS_EX_VL.includes(cfop)) return false; // uso/consumo, ativo, outras entradas
+      return true;
+    });
+  }
   if(f==='cfopuf')     return allResults.filter(r=>r.cfopUFOk===false);
   if(f==='csticms')    return allResults.filter(r=>r.cstIcmsOk===false);
   if(f==='dategap')    return allResults.filter(r=>r.dateOk===false);
